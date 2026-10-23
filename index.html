@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alif Cards</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
+<link rel="icon" href="data:,">
+<style>
+  /* One card at a time, controls under the thumb. */
+  :root { --bg:#f3efe6; --card:#fff; --card-ink:#6b665c; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --accent:#2f7d4f; --on-accent:#fff; --line:#e2dccf; --scrim:rgba(0,0,0,.85); --miss:#b3261e; --miss-bg:#fbe9e7; --q-green:#3f8f3a; --q-red:#e0302a; --q-name:#d6301f; --glyph:#1d1d1b; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --accent:#4fa673; --line:#343a3f; --miss:#f2a49c; --miss-bg:#3a2321; --on-accent:#0d1f14; color-scheme:dark; } }
+  :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --accent:#4fa673; --line:#343a3f; --miss:#f2a49c; --miss-bg:#3a2321; --on-accent:#0d1f14; color-scheme:dark; }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+         min-height:100vh; display:flex; flex-direction:column; align-items:center; padding-block:16px;
+         padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
+  header { width:100%; max-width:440px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  h1 { font-size:18px; margin:0; }
+  .seg { display:flex; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:3px; }
+  .seg button { border:0; background:none; padding:6px 12px; border-radius:999px; font:inherit; font-size:14px; color:var(--muted); cursor:pointer; }
+  .seg button.on { background:var(--accent); color:var(--on-accent); }
+  main { width:100%; max-width:440px; flex:1; padding-top:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+  .count { color:var(--muted); font-size:14px; display:flex; gap:12px; align-items:center; }
+  .link { border:0; background:none; padding:4px 0; font:inherit; color:var(--accent); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
+  #intro { width:100%; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; }
+  .ar { font-family:Amiri, "Noto Naskh Arabic", "Geeza Pro", serif; }
+  .qhead { width:100%; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .bism { font-family:Amiri, serif; font-weight:700; font-size:clamp(28px, 9vw, 40px); line-height:1.6; color:var(--ink); }
+  .ribbons { width:100%; display:flex; gap:6px; font-family:Amiri, serif; font-weight:700; font-size:clamp(18px, 5.5vw, 24px); }
+  .ribbons span { padding:8px 14px 6px; color:#fff; line-height:1.7; }
+  .rg { background:var(--q-green); flex:0 0 auto; border-radius:4px 12px 12px 4px; }
+  .rr { background:var(--q-red); flex:1; text-align:center; border-radius:12px 4px 4px 12px; }
+  .tr { font-size:13px; color:var(--muted); }
+  .glyph { font-family:Amiri, serif; font-weight:700; font-size:clamp(110px, 38vw, 170px); line-height:1; color:var(--glyph); padding-bottom:.15em; }
+  .ar-name { position:absolute; top:10px; left:16px; font-family:Amiri, serif; font-weight:700; font-size:clamp(22px, 7vw, 30px); color:var(--q-name); }
+  .mini { aspect-ratio:363/321; position:relative; display:flex; align-items:center; justify-content:center; }
+  .mini .g { font-family:Amiri, serif; font-weight:700; font-size:clamp(28px, 9vw, 40px); color:var(--glyph); line-height:1; }
+  .mini .n { position:absolute; top:2px; left:4px; font-family:Amiri, serif; font-size:clamp(9px, 2.8vw, 12px); color:var(--q-name); }
+  .sheet { width:100%; max-width:520px; max-height:100%; overflow:auto; background:var(--card); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .sheet .qhead .bism, .sheet .qhead .tr { color:var(--glyph); }
+  .sheet .grid { direction:rtl; gap:0; border:1px solid #333; }
+  .sheet .grid .mini { border:1px solid #333; }
+  #intro p { margin:0; color:var(--muted); max-width:34ch; }
+  .start { width:100%; padding:16px; font:inherit; font-size:18px; font-weight:700; border-radius:14px; border:0; background:var(--accent); color:var(--on-accent); cursor:pointer; }
+  .card { width:100%; aspect-ratio:363/321; background:var(--card); border-radius:20px; border:1px solid var(--line);
+          box-shadow:0 6px 24px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; cursor:pointer;
+          position:relative; overflow:hidden; user-select:none; }
+  .card img { width:100%; height:100%; object-fit:contain; }
+  .name.hint { font-size:15px; font-weight:400; color:var(--muted); }
+  .name { min-height:30px; display:flex; align-items:center; font-size:22px; font-weight:600; }
+  .row { display:flex; gap:10px; width:100%; }
+  .row button, .wide { flex:1; padding:14px; font:inherit; font-weight:600; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; }
+  .row button.primary { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
+  button:disabled { opacity:.4; cursor:default; }
+  #play, #stats { width:100%; display:flex; flex-direction:column; align-items:center; gap:16px; }
+  .miss { width:100%; padding:12px; font:inherit; font-weight:600; border-radius:14px; border:1px dashed var(--miss); background:transparent; color:var(--miss); cursor:pointer; }
+  .miss.on { background:var(--miss-bg); border-style:solid; }
+  .score { font-size:56px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; }
+  .score small { font-size:24px; color:var(--muted); font-weight:600; }
+  .sub { color:var(--muted); text-align:center; }
+  .grid { width:100%; display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; }
+  .grid figure { margin:0; background:var(--card); border-radius:10px; border:1px solid var(--line); overflow:hidden; }
+  .grid img { display:block; width:100%; }
+  .grid figcaption { overflow-wrap:anywhere; font-size:11px; text-align:center; padding:2px 2px 4px; color:var(--card-ink); }
+  footer { width:100%; max-width:440px; display:flex; gap:10px; margin-top:16px; }
+  footer button { flex:1; padding:12px; font:inherit; border-radius:14px; border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer; }
+  .done { text-align:center; }
+  .page { position:fixed; inset:0; background:var(--scrim); display:none; align-items:center; justify-content:center; padding:16px; z-index:9; }
+  .page.open { display:flex; }
+  .page img { max-width:100%; max-height:100%; border-radius:8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Alif Cards</h1>
+  <div class="seg" role="group" aria-label="Ordre">
+    <button id="mOrder" class="on">Dans l’ordre</button>
+    <button id="mRandom">Au hasard</button>
+  </div>
+</header>
+
+<main>
+  <section id="intro">
+    <div class="qhead">
+      <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+      <div class="ribbons" lang="ar" dir="rtl">
+        <span class="rg">الدَّرْسُ الْأَوَّلُ</span>
+        <span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>
+      </div>
+      <div class="tr">Leçon 1 · Les lettres de l’alphabet, une par une</div>
+    </div>
+    <p>Les 30 lettres passent une par une. Dis le nom de chaque lettre, touche la carte pour vérifier. Si tu ne savais pas, appuie sur « Je ne sais pas ».</p>
+    <button id="go" class="start">Commencer</button>
+  </section>
+
+  <div id="play" hidden>
+  <div class="count"><span id="count"></span><button id="stop" class="link">Arrêter et voir les stats</button></div>
+  <div class="card" id="card" title="Touche pour voir le nom" role="button" tabindex="0">
+    <span class="ar-name" id="arName" lang="ar"></span>
+    <span class="glyph" id="glyph" lang="ar"></span>
+  </div>
+  <div class="name" id="name"></div>
+  <button id="miss" class="miss">Je ne sais pas</button>
+  <div class="row">
+    <button id="prev">‹ Retour</button>
+    <button id="next" class="primary">Suivant ›</button>
+  </div>
+  </div>
+
+  <section id="stats" hidden>
+    <div class="sub" id="seen"></div>
+    <div class="score" id="score"></div>
+    <div class="sub" id="scoreText"></div>
+    <div class="grid" id="missed"></div>
+    <div class="row">
+      <button id="again">Tout recommencer</button>
+      <button id="review" class="primary"></button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <button id="reset" hidden>Recommencer</button>
+  <button id="showPage">Voir toute la page</button>
+</footer>
+
+<div class="page" id="page"><div class="sheet"><div class="qhead">
+      <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+      <div class="ribbons" lang="ar" dir="rtl">
+        <span class="rg">الدَّرْسُ الْأَوَّلُ</span>
+        <span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>
+      </div>
+      <div class="tr">Touche pour fermer</div>
+    </div><div class="grid" id="sheetGrid"></div></div></div>
+
+<script>
+// Lu de droite à gauche sur la page, ligne par ligne (Qaida Nourania, leçon 1).
+const NAMES = ["Alif","Ba","Ta","Tha","Jim","Ha","Kha","Dal","Dhal","Ra",
+  "Zay","Sin","Chin","Sad","Dad","Ta (emphatique)","Za (emphatique)","Ayn","Ghayn","Fa",
+  "Qaf","Kaf","Lam","Mim","Noun","Waw","Ha (léger)","Hamza","Ya","Ya (long)"];
+const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
+  "ق","ك","ل","م","ن","و","ه","ء","ی","ے"];
+// Red names as written above each letter in the book.
+const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
+  "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
+const LETTERS = NAMES.map((name, i) => ({ name, g: GLYPHS[i], ar: AR_NAMES[i] }));
+const mini = l => `<div class="mini"><span class="n" lang="ar">${l.ar}</span><span class="g" lang="ar">${l.g}</span></div>`;
+
+let mode = "order", deck = [], pos = 0, shown = false, missed = new Set();
+
+const $ = id => document.getElementById(id);
+
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function start(cards = LETTERS) {
+  deck = mode === "random" ? shuffle(cards) : cards.slice();
+  pos = 0;
+  missed = new Set();
+  show("play");
+  render(false);
+}
+
+function render(reveal) {
+  shown = reveal;
+  const l = deck[pos];
+  $("glyph").textContent = l.g;
+  $("arName").textContent = l.ar;
+  $("name").textContent = reveal ? l.name : "Dis son nom, puis touche la carte";
+  $("name").classList.toggle("hint", !reveal);
+  $("count").textContent = `${pos + 1} / ${deck.length}`;
+  $("prev").disabled = pos === 0;
+  $("next").textContent = pos === deck.length - 1 ? "Voir mes stats ›" : "Suivant ›";
+  const m = missed.has(l);
+  $("miss").classList.toggle("on", m);
+  $("miss").textContent = m ? "À revoir ✓" : "Je ne sais pas";
+}
+
+// Marks the card to review and shows its name; tap again to undo.
+function toggleMiss() {
+  const l = deck[pos];
+  missed.has(l) ? missed.delete(l) : missed.add(l);
+  render(true);
+}
+
+function show(id) {
+  ["intro", "play", "stats"].forEach(s => $(s).hidden = s !== id);
+  $("reset").hidden = id !== "play";
+}
+
+// Stats count only the cards seen so far, so a round can stop early.
+function showStats() {
+  const seen = deck.slice(0, pos + 1);
+  const known = seen.length - missed.size;
+  show("stats");
+  $("seen").textContent = seen.length < deck.length
+    ? `Tour arrêté après ${seen.length} lettres sur ${deck.length}`
+    : `Tour terminé : ${deck.length} lettres`;
+  $("score").innerHTML = `${known}<small> / ${seen.length}</small>`;
+  $("scoreText").textContent = missed.size
+    ? `Tu connaissais ${Math.round(known / seen.length * 100)} % des lettres. À revoir :`
+    : "Toutes les lettres sont sues. Bravo !";
+  const toReview = seen.filter(l => missed.has(l));
+  $("missed").innerHTML = toReview.map(l =>
+    `<figure>${mini(l)}<figcaption>${l.name}</figcaption></figure>`).join("");
+  $("review").hidden = !missed.size;
+  $("review").textContent = `Revoir les ${missed.size} ›`;
+  $("review").onclick = () => start(toReview);
+}
+
+function next() { if (pos === deck.length - 1) return showStats(); pos++; render(false); }
+function prev() { if (pos > 0) { pos--; render(false); } }
+
+function setMode(m) {
+  mode = m;
+  $("mOrder").classList.toggle("on", m === "order");
+  $("mRandom").classList.toggle("on", m === "random");
+  if (!$("play").hidden) start();
+}
+
+$("card").onclick = () => render(!shown);
+$("next").onclick = next;
+$("prev").onclick = prev;
+$("reset").onclick = () => show("intro");
+$("go").onclick = () => start();
+$("stop").onclick = showStats;
+$("again").onclick = () => start();
+$("miss").onclick = toggleMiss;
+$("mOrder").onclick = () => setMode("order");
+$("mRandom").onclick = () => setMode("random");
+$("showPage").onclick = () => $("page").classList.add("open");
+$("page").onclick = () => $("page").classList.remove("open");
+
+document.addEventListener("keydown", e => {
+  if ($("page").classList.contains("open")) { if (e.key === "Escape") $("page").classList.remove("open"); return; }
+  if ($("play").hidden) return;
+  if (e.key === "ArrowLeft") next();       // Arabic reads right to left
+  else if (e.key === "ArrowRight") prev();
+  else if (e.key === " " || e.key === "Enter") { e.preventDefault(); render(!shown); }
+});
+
+$("sheetGrid").innerHTML = LETTERS.map(mini).join("");
+</script>
+</body>
+</html>
