@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
 <link rel="icon" href="data:,">
 <style>
-  /* Study screen like flashcard apps: progress on top, one card to swipe, answer buttons under the thumb, settings behind the gear. */
+  /* Study screen like flashcard apps: progress on top, one card to swipe, answer buttons under the thumb, every option a visible button. */
   :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf;
           --accent:#2f7d4f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
           --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#d6301f; --q-green:#3f8f3a; --q-red:#e0302a; }
@@ -28,13 +28,13 @@
   .app { width:100%; max-width:440px; height:100%; display:flex; flex-direction:column; gap:12px; }
 
   /* Top bar */
-  .top { display:grid; grid-template-columns:44px 1fr 44px; align-items:center; }
-  .top h1 { grid-column:2; margin:0; text-align:center; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
-  .icon { width:44px; height:44px; border-radius:50%; border:0; background:transparent; display:grid; place-items:center; color:var(--ink); }
-  .icon svg { width:24px; height:24px; }
+  .top { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; min-height:44px; }
+  .tb { grid-row:1; justify-self:start; border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:8px 12px; font-size:14px; font-weight:600; }
+  .tb.end { grid-column:3; justify-self:end; }
+  .top h1 { grid-column:2; grid-row:1; margin:0; text-align:center; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
   .bar { height:6px; border-radius:3px; background:var(--line); overflow:hidden; }
   .bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s; }
-  .tally { display:flex; justify-content:space-between; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .tally { display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
   .pill { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; }
   .pill.m { color:var(--miss); background:var(--miss-bg); }
   .pill.k { color:var(--ok); background:var(--ok-bg); }
@@ -90,10 +90,6 @@
   .ribbons span { padding:8px 14px 6px; color:#fff; line-height:1.7; }
   .rg { background:var(--q-green); flex:0 0 auto; border-radius:4px 12px 12px 4px; }
   .rr { background:var(--q-red); flex:1; border-radius:12px 4px 4px 12px; }
-  .how { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; font-size:14px; }
-  .how div { padding:10px; border-radius:14px; font-weight:600; }
-  .how .m { background:var(--miss-bg); color:var(--miss); }
-  .how .k { background:var(--ok-bg); color:var(--ok); }
   .muted { color:var(--muted); margin:0; font-size:14px; }
   .primary { width:100%; padding:16px; font-size:18px; font-weight:700; border-radius:14px; border:0; background:var(--accent); color:var(--on-accent); }
   .secondary { width:100%; padding:14px; font-weight:600; border-radius:14px; border:1px solid var(--line); background:var(--surface); }
@@ -105,15 +101,11 @@
   .mini .n { position:absolute; top:2px; left:5px; font-family:Amiri, serif; font-size:11px; color:var(--q-name); }
   .grid figure { margin:0; display:flex; flex-direction:column; gap:3px; font-size:10px; line-height:1.2; color:var(--muted); }
 
-  /* Settings sheet and full page */
+  /* Full page */
   .scrim { position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:flex-end; justify-content:center; }
-  .sheet { width:100%; max-width:440px; background:var(--surface); border-radius:20px 20px 0 0; display:flex; flex-direction:column; gap:10px;
-           padding:18px max(16px, env(safe-area-inset-right, 0px)) max(18px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
-  .sheet h2 { margin:0 0 4px; font-size:18px; }
   .seg { display:grid; grid-template-columns:1fr 1fr; background:var(--bg); border-radius:12px; padding:4px; }
   .seg button { border:0; background:none; padding:10px; border-radius:9px; color:var(--muted); font-weight:600; }
   .seg button.on { background:var(--accent); color:var(--on-accent); }
-  .row { text-align:left; width:100%; padding:14px; border-radius:12px; border:1px solid var(--line); background:transparent; font-weight:600; }
   .scrim.center { align-items:center; padding:16px; }
   .paper { width:100%; max-width:520px; max-height:100%; overflow:auto; background:#fff; color:#1d1d1b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
   .paper .grid { gap:0; border:1px solid #333; }
@@ -125,10 +117,9 @@
 <body>
 <div class="app">
   <div class="top">
+    <button class="tb" id="tReset" hidden>↺ Recommencer</button>
     <h1 id="title">Alif Cards</h1>
-    <button class="icon" id="gear" aria-label="Réglages">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
-    </button>
+    <button class="tb end" id="tStop" hidden>Terminer</button>
   </div>
 
   <!-- Start -->
@@ -141,16 +132,20 @@
       </div>
       <p class="muted">Leçon 1 · Les 30 lettres de l’alphabet</p>
     </div>
-    <p class="muted">Dis le nom de la lettre, touche la carte pour vérifier, puis glisse.</p>
-    <div class="how"><div class="m">← À revoir</div><div class="k">Je sais →</div></div>
+    <p class="muted">Dis le nom de la lettre, touche la carte pour vérifier.<br>Glisse à droite si tu sais, à gauche si c’est à revoir.</p>
+    <div class="seg" style="width:100%; background:var(--surface); border:1px solid var(--line)">
+      <button id="mOrder" class="on">Dans l’ordre</button>
+      <button id="mRandom">Au hasard</button>
+    </div>
     <label class="switch"><input type="checkbox" id="famOn"><span><b>Quiz des familles</b>Pour chaque lettre, dis si elle est emphatique ou de prolongation</span></label>
     <button class="primary" id="go">Commencer</button>
+    <button class="secondary" id="iPage">Voir toute la page</button>
   </section>
 
   <!-- Study -->
   <section id="play" hidden style="flex:1; min-height:0; display:flex; flex-direction:column; gap:12px;">
     <div class="bar"><i id="barFill"></i></div>
-    <div class="tally"><span class="pill m" id="nMiss">0 à revoir</span><span class="pill k" id="nOk">0 je sais</span></div>
+    <div class="tally"><span class="pill m" id="nMiss">0 à revoir</span><button class="tb" id="pPage" style="padding:4px 12px">Voir la page</button><span class="pill k" id="nOk">0 je sais</span></div>
     <div class="stage" id="stage"></div>
     <div class="fams" id="fams" hidden>
       <button class="fam" data-f="emph">Emphatique</button>
@@ -171,23 +166,8 @@
     <p class="muted" id="famText" hidden></p>
     <div class="grid" id="missed"></div>
     <button class="primary" id="review"></button>
-    <button class="secondary" id="again">Tout recommencer</button>
+    <button class="secondary" id="again">Changer les options et recommencer</button>
   </section>
-</div>
-
-<!-- Settings -->
-<div class="scrim" id="settings" hidden>
-  <div class="sheet" role="dialog" aria-label="Réglages">
-    <h2>Réglages</h2>
-    <div class="seg">
-      <button id="mOrder" class="on">Dans l’ordre</button>
-      <button id="mRandom">Au hasard</button>
-    </div>
-    <button class="row" id="sPage">Voir toute la page</button>
-    <button class="row" id="sStats">Arrêter et voir les stats</button>
-    <button class="row" id="sReset">Recommencer le tour</button>
-    <button class="secondary" id="sClose">Fermer</button>
-  </div>
 </div>
 
 <!-- Full page -->
@@ -233,7 +213,11 @@ function shuffle(a) {
   return a;
 }
 
-function show(id) { ["intro", "play", "stats"].forEach(s => $(s).hidden = s !== id); }
+function show(id) {
+  ["intro", "play", "stats"].forEach(s => $(s).hidden = s !== id);
+  $("tReset").hidden = $("tStop").hidden = id !== "play";
+  if (id === "intro") $("title").textContent = "Alif Cards";
+}
 
 function start(cards = LETTERS) {
   deck = mode === "random" ? shuffle(cards) : cards.slice();
@@ -336,7 +320,7 @@ function showStats() {
   const toReview = answers.filter(a => !a.ok || (famQuiz && !a.famOk)).map(a => a.l);
   show("stats");
   $("title").textContent = "Résultat";
-  $("seen").textContent = done < deck.length ? `Tour arrêté après ${done} lettres sur ${deck.length}` : `Tour terminé : ${deck.length} lettres`;
+  $("seen").textContent = done < deck.length ? `Tour arrêté après ${done} lettre${done > 1 ? "s" : ""} sur ${deck.length}` : `Tour terminé : ${deck.length} lettres`;
   $("score").innerHTML = `${ok}<small> / ${done}</small>`;
   $("scoreText").textContent = !done ? "Aucune lettre répondue." : toReview.length
     ? `Tu reconnais ${Math.round(ok / done * 100)} % des lettres.${toReview.length ? " À revoir :" : ""}`
@@ -355,15 +339,12 @@ function setMode(m) {
   $("mRandom").classList.toggle("on", m === "random");
 }
 
-const closeSettings = () => $("settings").hidden = true;
-$("gear").onclick = () => { $("sStats").hidden = $("sReset").hidden = $("play").hidden; $("settings").hidden = false; };
-$("settings").onclick = e => { if (e.target === $("settings")) closeSettings(); };
-$("sClose").onclick = closeSettings;
-$("mOrder").onclick = () => { setMode("order"); if (!$("play").hidden) start(); };
-$("mRandom").onclick = () => { setMode("random"); if (!$("play").hidden) start(); };
-$("sReset").onclick = () => { closeSettings(); start(); };
-$("sStats").onclick = () => { closeSettings(); showStats(); };
-$("sPage").onclick = () => { closeSettings(); $("page").hidden = false; };
+const openPage = () => $("page").hidden = false;
+$("mOrder").onclick = () => setMode("order");
+$("mRandom").onclick = () => setMode("random");
+$("iPage").onclick = $("pPage").onclick = openPage;
+$("tReset").onclick = () => start();
+$("tStop").onclick = showStats;
 $("page").onclick = () => $("page").hidden = true;
 $("go").onclick = () => { famQuiz = $("famOn").checked; start(); };
 document.querySelectorAll(".fam").forEach(b => b.onclick = () => {
@@ -371,14 +352,14 @@ document.querySelectorAll(".fam").forEach(b => b.onclick = () => {
   guess = guess === b.dataset.f ? "none" : b.dataset.f;
   paintFams();
 });
-$("again").onclick = () => start();
+$("again").onclick = () => show("intro");
 $("bOk").onclick = () => answer(true);
 $("bMiss").onclick = () => answer(false);
 $("bUndo").onclick = undo;
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { closeSettings(); $("page").hidden = true; return; }
-  if ($("play").hidden || !$("settings").hidden || !$("page").hidden) return;
+  if (e.key === "Escape") { $("page").hidden = true; return; }
+  if ($("play").hidden || !$("page").hidden) return;
   if (e.key === "ArrowRight") answer(true);
   else if (e.key === "ArrowLeft") answer(false);
   else if (e.key === "Backspace") undo();
