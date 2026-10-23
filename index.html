@@ -300,7 +300,9 @@ const RIGHT_ONLY = "اأإآدذرزوؤءةے";   // letters that never join th
 const joinsNext = c => !RIGHT_ONLY.includes(c);
 const joinsPrev = c => c !== "ء";
 const POS = { iso:"seule", ini:"au début", med:"au milieu", fin:"à la fin" };
-const formOf = (g, p) => p === "iso" ? g : p === "ini" ? g + T : p === "med" ? T + g + T : T + g;
+// The book writes ya without dots when it stands alone or ends a word (ى), with dots elsewhere.
+const endForm = g => g === "ي" ? "ى" : g;
+const formOf = (g, p) => p === "iso" ? endForm(g) : p === "ini" ? g + T : p === "med" ? T + g + T : T + endForm(g);
 const FORM_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","و","ه","ي"];
 const positions = g => joinsNext(g) ? ["iso","ini","med","fin"] : ["iso","fin"];
 // Letters that look alike, used as wrong choices so the question is not too easy.
@@ -311,9 +313,11 @@ FORM_LETTERS.forEach(g => positions(g).filter(p => p !== "iso").forEach(p => FOR
   mini: `<div class="mini ar"><span class="g" lang="ar">${formOf(g, p)}</span></div>` })));
 
 // Joined combinations from the book, in its order.
-const WORDS = ["بلب","كب","كا","بكت","تكث","نا","تا","يا","ثا","بس","يس","نس","تس","تش","ثج","تح","نخ","يح","بج","يم","بم","نم","تم","ثم",
-  "نبل","تنل","بيل","يتل","ثل","بنن","تين","يتن","حث","خب","جت","تحت","يجب","بخت","به","يه","ته","نه","يهب","بها","بهم",
-  "جد","خذ","جر","خز","ير","تر","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ","قو","فو","فقل","قفل","يف","حم","لم","تمت"];
+const WORDS = ["بلب","كب","كا","بكت","تكث","با","نا","تا","يا","ثا","بس","يس","نس","تس","ثس","ثج","تح","نخ","يح","بج","يم","بم","نم","تم",
+  "ثم","بى","يى","نى","تى","ثى","نبل","تنل","بيل","يتل","ثثل","نبن",
+  "بنن","تين","يتن","ثثن","حث","خب","جت","تحت","يجب","بخت","به","يه","ته","نه","يهب","بها","بهم","جد","خذ","جر",
+  "خز","ير","تز","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ",
+  "قو","فو","فقل","قفل","يف","حم","لم","تمت"];
 const INKS = ["#e0302a", "#2f8f3a", "#1d8fd1", "#1d1d1b"];
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 function coloured(w) {
