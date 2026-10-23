@@ -8,133 +8,185 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
 <link rel="icon" href="data:,">
 <style>
-  /* One card at a time, controls under the thumb. */
-  :root { --bg:#f3efe6; --card:#fff; --card-ink:#6b665c; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --accent:#2f7d4f; --on-accent:#fff; --line:#e2dccf; --scrim:rgba(0,0,0,.85); --miss:#b3261e; --miss-bg:#fbe9e7; --q-green:#3f8f3a; --q-red:#e0302a; --q-name:#d6301f; --glyph:#1d1d1b; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --accent:#4fa673; --line:#343a3f; --miss:#f2a49c; --miss-bg:#3a2321; --on-accent:#0d1f14; color-scheme:dark; } }
-  :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --accent:#4fa673; --line:#343a3f; --miss:#f2a49c; --miss-bg:#3a2321; --on-accent:#0d1f14; color-scheme:dark; }
+  /* Study screen like flashcard apps: progress on top, one card to swipe, answer buttons under the thumb, settings behind the gear. */
+  :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf;
+          --accent:#2f7d4f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
+          --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#d6301f; --q-green:#3f8f3a; --q-red:#e0302a; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f;
+          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; color-scheme:dark; } }
+  :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f;
+          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; color-scheme:dark; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
+  html, body { height:100%; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-         min-height:100vh; display:flex; flex-direction:column; align-items:center; padding-block:16px;
+         display:flex; flex-direction:column; align-items:center; overflow:hidden;
+         padding-block:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
          padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
-  header { width:100%; max-width:440px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
-  h1 { font-size:18px; margin:0; }
-  .seg { display:flex; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:3px; }
-  .seg button { border:0; background:none; padding:6px 12px; border-radius:999px; font:inherit; font-size:14px; color:var(--muted); cursor:pointer; }
-  .seg button.on { background:var(--accent); color:var(--on-accent); }
-  main { width:100%; max-width:440px; flex:1; padding-top:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
-  .count { color:var(--muted); font-size:14px; display:flex; gap:12px; align-items:center; }
-  .link { border:0; background:none; padding:4px 0; font:inherit; color:var(--accent); text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
-  #intro { width:100%; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; }
-  .ar { font-family:Amiri, "Noto Naskh Arabic", "Geeza Pro", serif; }
+  button { font:inherit; color:inherit; cursor:pointer; }
+  button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .app { width:100%; max-width:440px; height:100%; display:flex; flex-direction:column; gap:12px; }
+
+  /* Top bar */
+  .top { display:grid; grid-template-columns:44px 1fr 44px; align-items:center; }
+  .top h1 { grid-column:2; margin:0; text-align:center; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .icon { width:44px; height:44px; border-radius:50%; border:0; background:transparent; display:grid; place-items:center; color:var(--ink); }
+  .icon svg { width:24px; height:24px; }
+  .bar { height:6px; border-radius:3px; background:var(--line); overflow:hidden; }
+  .bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s; }
+  .tally { display:flex; justify-content:space-between; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; }
+  .pill.m { color:var(--miss); background:var(--miss-bg); }
+  .pill.k { color:var(--ok); background:var(--ok-bg); }
+
+  /* Card */
+  .stage { flex:1; min-height:0; position:relative; display:flex; align-items:center; justify-content:center; }
+  .card { position:absolute; inset:0; margin:auto; width:100%; max-height:100%; aspect-ratio:3/4; background:var(--card); border-radius:24px;
+          box-shadow:0 10px 30px rgba(0,0,0,.12); display:flex; flex-direction:column; align-items:center; justify-content:center;
+          touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab; border:3px solid transparent; }
+  .card.under { transform:scale(.95) translateY(10px); box-shadow:0 4px 12px rgba(0,0,0,.08); }
+  .card.anim { transition:transform .25s ease, opacity .25s ease; }
+  .ar-name { position:absolute; top:16px; left:20px; font-family:Amiri, serif; font-weight:700; font-size:30px; color:var(--q-name); line-height:1.4; }
+  .glyph { font-family:Amiri, serif; font-weight:700; font-size:min(170px, 40vw); line-height:1.3; color:var(--glyph); position:relative; }
+  .answer { position:absolute; bottom:22px; font-size:24px; font-weight:700; color:#1d1d1b; }
+  .tap { position:absolute; bottom:24px; font-size:14px; color:#6b665c; }
+  .stamp { position:absolute; top:22px; padding:4px 12px; border:3px solid; border-radius:10px; font-weight:800; font-size:20px; opacity:0; text-transform:uppercase; letter-spacing:.04em; }
+  .stamp.k { left:50%; color:#2f7d4f; transform:translateX(-50%) rotate(-10deg); }
+  .stamp.m { left:50%; color:#c2410c; transform:translateX(-50%) rotate(10deg); }
+
+  /* The book draws the long ya with two dots below; no Unicode letter has them, so they are drawn. */
+  .yb { position:relative; display:inline-block; }
+  .yb::before, .yb::after { content:""; position:absolute; width:.1em; height:.1em; background:currentColor; transform:rotate(45deg); bottom:.06em; }
+  .yb::before { left:.36em; }
+  .yb::after { left:.52em; }
+
+  /* Answer buttons */
+  .actions { display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center; }
+  .act { display:flex; flex-direction:column; align-items:center; gap:4px; border:0; background:none; font-size:13px; font-weight:600; }
+  .act span { width:64px; height:64px; border-radius:50%; display:grid; place-items:center; border:2px solid; }
+  .act svg { width:28px; height:28px; }
+  .act.m { color:var(--miss); } .act.m span { background:var(--miss-bg); }
+  .act.k { color:var(--ok); } .act.k span { background:var(--ok-bg); }
+  .act.u { color:var(--muted); } .act.u span { width:48px; height:48px; border-color:var(--line); background:var(--surface); }
+  .act.u svg { width:22px; height:22px; }
+  .act:disabled { opacity:.35; cursor:default; }
+
+  /* Intro and stats */
+  .screen { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center; }
   .qhead { width:100%; display:flex; flex-direction:column; align-items:center; gap:10px; }
-  .bism { font-family:Amiri, serif; font-weight:700; font-size:clamp(28px, 9vw, 40px); line-height:1.6; color:var(--ink); }
+  .bism { font-family:Amiri, serif; font-weight:700; font-size:clamp(28px, 9vw, 40px); line-height:1.6; }
   .ribbons { width:100%; display:flex; gap:6px; font-family:Amiri, serif; font-weight:700; font-size:clamp(18px, 5.5vw, 24px); }
   .ribbons span { padding:8px 14px 6px; color:#fff; line-height:1.7; }
   .rg { background:var(--q-green); flex:0 0 auto; border-radius:4px 12px 12px 4px; }
-  .rr { background:var(--q-red); flex:1; text-align:center; border-radius:12px 4px 4px 12px; }
-  .tr { font-size:13px; color:var(--muted); }
-  .glyph { font-family:Amiri, serif; font-weight:700; font-size:clamp(110px, 38vw, 170px); line-height:1; color:var(--glyph); padding-bottom:.15em; }
-  .ar-name { position:absolute; top:10px; left:16px; font-family:Amiri, serif; font-weight:700; font-size:clamp(22px, 7vw, 30px); color:var(--q-name); }
-  .mini { aspect-ratio:363/321; position:relative; display:flex; align-items:center; justify-content:center; }
-  .mini .g { font-family:Amiri, serif; font-weight:700; font-size:clamp(28px, 9vw, 40px); color:var(--glyph); line-height:1; }
-  .mini .n { position:absolute; top:2px; left:4px; font-family:Amiri, serif; font-size:clamp(9px, 2.8vw, 12px); color:var(--q-name); }
-  .sheet { width:100%; max-width:520px; max-height:100%; overflow:auto; background:var(--card); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
-  .sheet .qhead .bism, .sheet .qhead .tr { color:var(--glyph); }
-  .sheet .grid { direction:rtl; gap:0; border:1px solid #333; }
-  .sheet .grid .mini { border:1px solid #333; }
-  #intro p { margin:0; color:var(--muted); max-width:34ch; }
-  .start { width:100%; padding:16px; font:inherit; font-size:18px; font-weight:700; border-radius:14px; border:0; background:var(--accent); color:var(--on-accent); cursor:pointer; }
-  .card { width:100%; aspect-ratio:363/321; background:var(--card); border-radius:20px; border:1px solid var(--line);
-          box-shadow:0 6px 24px rgba(0,0,0,.08); display:flex; align-items:center; justify-content:center; cursor:pointer;
-          position:relative; overflow:hidden; user-select:none; }
-  .card img { width:100%; height:100%; object-fit:contain; }
-  .name.hint { font-size:15px; font-weight:400; color:var(--muted); }
-  .name { min-height:30px; display:flex; align-items:center; font-size:22px; font-weight:600; }
-  .row { display:flex; gap:10px; width:100%; }
-  .row button, .wide { flex:1; padding:14px; font:inherit; font-weight:600; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); cursor:pointer; }
-  .row button.primary { background:var(--accent); color:var(--on-accent); border-color:var(--accent); }
-  button:disabled { opacity:.4; cursor:default; }
-  #play, #stats { width:100%; display:flex; flex-direction:column; align-items:center; gap:16px; }
-  .miss { width:100%; padding:12px; font:inherit; font-weight:600; border-radius:14px; border:1px dashed var(--miss); background:transparent; color:var(--miss); cursor:pointer; }
-  .miss.on { background:var(--miss-bg); border-style:solid; }
-  .score { font-size:56px; font-weight:700; line-height:1; font-variant-numeric:tabular-nums; }
-  .score small { font-size:24px; color:var(--muted); font-weight:600; }
-  .sub { color:var(--muted); text-align:center; }
-  .grid { width:100%; display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; }
-  .grid figure { margin:0; background:var(--card); border-radius:10px; border:1px solid var(--line); overflow:hidden; }
-  .grid img { display:block; width:100%; }
-  .grid figcaption { overflow-wrap:anywhere; font-size:11px; text-align:center; padding:2px 2px 4px; color:var(--card-ink); }
-  footer { width:100%; max-width:440px; display:flex; gap:10px; margin-top:16px; }
-  footer button { flex:1; padding:12px; font:inherit; border-radius:14px; border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer; }
-  .done { text-align:center; }
-  .page { position:fixed; inset:0; background:var(--scrim); display:none; align-items:center; justify-content:center; padding:16px; z-index:9; }
-  .page.open { display:flex; }
-  .page img { max-width:100%; max-height:100%; border-radius:8px; }
+  .rr { background:var(--q-red); flex:1; border-radius:12px 4px 4px 12px; }
+  .how { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; font-size:14px; }
+  .how div { padding:10px; border-radius:14px; font-weight:600; }
+  .how .m { background:var(--miss-bg); color:var(--miss); }
+  .how .k { background:var(--ok-bg); color:var(--ok); }
+  .muted { color:var(--muted); margin:0; font-size:14px; }
+  .primary { width:100%; padding:16px; font-size:18px; font-weight:700; border-radius:14px; border:0; background:var(--accent); color:var(--on-accent); }
+  .secondary { width:100%; padding:14px; font-weight:600; border-radius:14px; border:1px solid var(--line); background:var(--surface); }
+  .score { font-size:64px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  .score small { font-size:26px; color:var(--muted); font-weight:600; }
+  .grid { width:100%; display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; direction:rtl; }
+  .mini { background:var(--card); border-radius:10px; border:1px solid var(--line); aspect-ratio:1; position:relative; display:flex; align-items:center; justify-content:center; }
+  .mini .g { font-family:Amiri, serif; font-weight:700; font-size:clamp(26px, 8vw, 36px); color:var(--glyph); line-height:1; }
+  .mini .n { position:absolute; top:2px; left:5px; font-family:Amiri, serif; font-size:11px; color:var(--q-name); }
+  .grid figure { margin:0; display:flex; flex-direction:column; gap:3px; font-size:10px; line-height:1.2; color:var(--muted); }
+
+  /* Settings sheet and full page */
+  .scrim { position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:flex-end; justify-content:center; }
+  .sheet { width:100%; max-width:440px; background:var(--surface); border-radius:20px 20px 0 0; display:flex; flex-direction:column; gap:10px;
+           padding:18px max(16px, env(safe-area-inset-right, 0px)) max(18px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+  .sheet h2 { margin:0 0 4px; font-size:18px; }
+  .seg { display:grid; grid-template-columns:1fr 1fr; background:var(--bg); border-radius:12px; padding:4px; }
+  .seg button { border:0; background:none; padding:10px; border-radius:9px; color:var(--muted); font-weight:600; }
+  .seg button.on { background:var(--accent); color:var(--on-accent); }
+  .row { text-align:left; width:100%; padding:14px; border-radius:12px; border:1px solid var(--line); background:transparent; font-weight:600; }
+  .scrim.center { align-items:center; padding:16px; }
+  .paper { width:100%; max-width:520px; max-height:100%; overflow:auto; background:#fff; color:#1d1d1b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .paper .grid { gap:0; border:1px solid #333; }
+  .paper .mini { border:1px solid #333; border-radius:0; background:#fff; }
+  .paper .muted { color:#6b665c; text-align:center; }
+  @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } }
 </style>
 </head>
 <body>
-<header>
-  <h1>Alif Cards</h1>
-  <div class="seg" role="group" aria-label="Ordre">
-    <button id="mOrder" class="on">Dans l’ordre</button>
-    <button id="mRandom">Au hasard</button>
+<div class="app">
+  <div class="top">
+    <h1 id="title">Alif Cards</h1>
+    <button class="icon" id="gear" aria-label="Réglages">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
   </div>
-</header>
 
-<main>
-  <section id="intro">
+  <!-- Start -->
+  <section class="screen" id="intro">
     <div class="qhead">
       <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
       <div class="ribbons" lang="ar" dir="rtl">
         <span class="rg">الدَّرْسُ الْأَوَّلُ</span>
         <span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>
       </div>
-      <div class="tr">Leçon 1 · Les lettres de l’alphabet, une par une</div>
+      <p class="muted">Leçon 1 · Les 30 lettres de l’alphabet</p>
     </div>
-    <p>Les 30 lettres passent une par une. Dis le nom de chaque lettre, touche la carte pour vérifier. Si tu ne savais pas, appuie sur « Je ne sais pas ».</p>
-    <button id="go" class="start">Commencer</button>
+    <p class="muted">Dis le nom de la lettre, touche la carte pour vérifier, puis glisse.</p>
+    <div class="how"><div class="m">← Pas su</div><div class="k">Je savais →</div></div>
+    <button class="primary" id="go">Commencer</button>
   </section>
 
-  <div id="play" hidden>
-  <div class="count"><span id="count"></span><button id="stop" class="link">Arrêter et voir les stats</button></div>
-  <div class="card" id="card" title="Touche pour voir le nom" role="button" tabindex="0">
-    <span class="ar-name" id="arName" lang="ar"></span>
-    <span class="glyph" id="glyph" lang="ar"></span>
-  </div>
-  <div class="name" id="name"></div>
-  <button id="miss" class="miss">Je ne sais pas</button>
-  <div class="row">
-    <button id="prev">‹ Retour</button>
-    <button id="next" class="primary">Suivant ›</button>
-  </div>
-  </div>
+  <!-- Study -->
+  <section id="play" hidden style="flex:1; min-height:0; display:flex; flex-direction:column; gap:12px;">
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="tally"><span class="pill m" id="nMiss">0 pas su</span><span class="pill k" id="nOk">0 su</span></div>
+    <div class="stage" id="stage"></div>
+    <div class="actions">
+      <button class="act m" id="bMiss"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Pas su</button>
+      <button class="act u" id="bUndo"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></span>Retour</button>
+      <button class="act k" id="bOk"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Je savais</button>
+    </div>
+  </section>
 
-  <section id="stats" hidden>
-    <div class="sub" id="seen"></div>
+  <!-- Stats -->
+  <section class="screen" id="stats" hidden>
+    <p class="muted" id="seen"></p>
     <div class="score" id="score"></div>
-    <div class="sub" id="scoreText"></div>
+    <p class="muted" id="scoreText"></p>
     <div class="grid" id="missed"></div>
-    <div class="row">
-      <button id="again">Tout recommencer</button>
-      <button id="review" class="primary"></button>
-    </div>
+    <button class="primary" id="review"></button>
+    <button class="secondary" id="again">Tout recommencer</button>
   </section>
-</main>
+</div>
 
-<footer>
-  <button id="reset" hidden>Recommencer</button>
-  <button id="showPage">Voir toute la page</button>
-</footer>
+<!-- Settings -->
+<div class="scrim" id="settings" hidden>
+  <div class="sheet" role="dialog" aria-label="Réglages">
+    <h2>Réglages</h2>
+    <div class="seg">
+      <button id="mOrder" class="on">Dans l’ordre</button>
+      <button id="mRandom">Au hasard</button>
+    </div>
+    <button class="row" id="sPage">Voir toute la page</button>
+    <button class="row" id="sStats">Arrêter et voir les stats</button>
+    <button class="row" id="sReset">Recommencer le tour</button>
+    <button class="secondary" id="sClose">Fermer</button>
+  </div>
+</div>
 
-<div class="page" id="page"><div class="sheet"><div class="qhead">
+<!-- Full page -->
+<div class="scrim center" id="page" hidden>
+  <div class="paper">
+    <div class="qhead">
       <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
       <div class="ribbons" lang="ar" dir="rtl">
         <span class="rg">الدَّرْسُ الْأَوَّلُ</span>
         <span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>
       </div>
-      <div class="tr">Touche pour fermer</div>
-    </div><div class="grid" id="sheetGrid"></div></div></div>
+    </div>
+    <div class="grid" id="sheetGrid"></div>
+    <p class="muted">Touche pour fermer</p>
+  </div>
+</div>
 
 <script>
 // Lu de droite à gauche sur la page, ligne par ligne (Qaida Nourania, leçon 1).
@@ -147,11 +199,12 @@ const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش"
 const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
   "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
 const LETTERS = NAMES.map((name, i) => ({ name, g: GLYPHS[i], ar: AR_NAMES[i] }));
-const mini = l => `<div class="mini"><span class="n" lang="ar">${l.ar}</span><span class="g" lang="ar">${l.g}</span></div>`;
-
-let mode = "order", deck = [], pos = 0, shown = false, missed = new Set();
 
 const $ = id => document.getElementById(id);
+const glyph = l => l.g === "ے" ? `<span class="yb">ے</span>` : l.g;
+const mini = l => `<div class="mini"><span class="n" lang="ar">${l.ar}</span><span class="g" lang="ar">${glyph(l)}</span></div>`;
+
+let mode = "order", deck = [], answers = [], shown = false;
 
 function shuffle(a) {
   a = a.slice();
@@ -159,90 +212,133 @@ function shuffle(a) {
   return a;
 }
 
+function show(id) { ["intro", "play", "stats"].forEach(s => $(s).hidden = s !== id); }
+
 function start(cards = LETTERS) {
   deck = mode === "random" ? shuffle(cards) : cards.slice();
-  pos = 0;
-  missed = new Set();
+  answers = [];
   show("play");
-  render(false);
+  render();
 }
 
-function render(reveal) {
-  shown = reveal;
-  const l = deck[pos];
-  $("glyph").textContent = l.g;
-  $("arName").textContent = l.ar;
-  $("name").textContent = reveal ? l.name : "Dis son nom, puis touche la carte";
-  $("name").classList.toggle("hint", !reveal);
-  $("count").textContent = `${pos + 1} / ${deck.length}`;
-  $("prev").disabled = pos === 0;
-  $("next").textContent = pos === deck.length - 1 ? "Voir mes stats ›" : "Suivant ›";
-  const m = missed.has(l);
-  $("miss").classList.toggle("on", m);
-  $("miss").textContent = m ? "À revoir ✓" : "Je ne sais pas";
+function cardHTML(l, id, cls) {
+  return `<div class="card ${cls}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Lettre, touche pour voir le nom">
+    <span class="ar-name" lang="ar">${l.ar}</span>
+    <span class="glyph" lang="ar">${glyph(l)}</span>
+    <span class="tap">Touche pour voir le nom</span>
+    <span class="answer" hidden>${l.name}</span>
+    <span class="stamp k">Su</span><span class="stamp m">Pas su</span>
+  </div>`;
 }
 
-// Marks the card to review and shows its name; tap again to undo.
-function toggleMiss() {
-  const l = deck[pos];
-  missed.has(l) ? missed.delete(l) : missed.add(l);
-  render(true);
+function render() {
+  const pos = answers.length;
+  if (pos >= deck.length) return showStats();
+  shown = false;
+  const ok = answers.filter(a => a.ok).length;
+  $("title").textContent = `${pos + 1} / ${deck.length}`;
+  $("barFill").style.width = `${pos / deck.length * 100}%`;
+  $("nOk").textContent = `${ok} su`;
+  $("nMiss").textContent = `${pos - ok} pas su`;
+  $("bUndo").disabled = pos === 0;
+  const nextCard = deck[pos + 1];
+  $("stage").innerHTML = (nextCard ? cardHTML(nextCard, "", "under") : "") + cardHTML(deck[pos], "card", "");
+  bindCard($("card"));
 }
 
-function show(id) {
-  ["intro", "play", "stats"].forEach(s => $(s).hidden = s !== id);
-  $("reset").hidden = id !== "play";
+function flip() {
+  shown = !shown;
+  const c = $("card");
+  c.querySelector(".answer").hidden = !shown;
+  c.querySelector(".tap").hidden = shown;
 }
 
-// Stats count only the cards seen so far, so a round can stop early.
+// Throws the card off screen, then records the answer.
+function answer(ok) {
+  const c = $("card");
+  if (!c || c.dataset.gone) return;
+  c.dataset.gone = 1;
+  c.classList.add("anim");
+  c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`;
+  c.style.opacity = 0;
+  setTimeout(() => { answers.push({ l: deck[answers.length], ok }); render(); }, 220);
+}
+
+function undo() { if (answers.length) { answers.pop(); render(); } }
+
+function bindCard(c) {
+  let x0 = null, y0 = 0, dx = 0;
+  const stampK = c.querySelector(".stamp.k"), stampM = c.querySelector(".stamp.m");
+  c.addEventListener("pointerdown", e => { x0 = e.clientX; y0 = e.clientY; dx = 0; c.setPointerCapture(e.pointerId); c.classList.remove("anim"); });
+  c.addEventListener("pointermove", e => {
+    if (x0 === null) return;
+    dx = e.clientX - x0;
+    c.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`;
+    stampK.style.opacity = Math.max(0, Math.min(1, dx / 90));
+    stampM.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+    c.style.borderColor = dx > 40 ? "var(--ok)" : dx < -40 ? "var(--miss)" : "transparent";
+  });
+  const end = e => {
+    if (x0 === null) return;
+    const moved = Math.abs(dx) > 8 || Math.abs(e.clientY - y0) > 8;
+    x0 = null;
+    if (Math.abs(dx) > 90) return answer(dx > 0);
+    c.classList.add("anim");
+    c.style.transform = ""; c.style.borderColor = "transparent";
+    stampK.style.opacity = stampM.style.opacity = 0;
+    if (!moved) flip();
+  };
+  c.addEventListener("pointerup", end);
+  c.addEventListener("pointercancel", end);
+}
+
+// Stats count only the cards answered, so a round can stop early.
 function showStats() {
-  const seen = deck.slice(0, pos + 1);
-  const known = seen.length - missed.size;
+  const done = answers.length;
+  const ok = answers.filter(a => a.ok).length;
+  const toReview = answers.filter(a => !a.ok).map(a => a.l);
   show("stats");
-  $("seen").textContent = seen.length < deck.length
-    ? `Tour arrêté après ${seen.length} lettres sur ${deck.length}`
-    : `Tour terminé : ${deck.length} lettres`;
-  $("score").innerHTML = `${known}<small> / ${seen.length}</small>`;
-  $("scoreText").textContent = missed.size
-    ? `Tu connaissais ${Math.round(known / seen.length * 100)} % des lettres. À revoir :`
+  $("title").textContent = "Résultat";
+  $("seen").textContent = done < deck.length ? `Tour arrêté après ${done} lettres sur ${deck.length}` : `Tour terminé : ${deck.length} lettres`;
+  $("score").innerHTML = `${ok}<small> / ${done}</small>`;
+  $("scoreText").textContent = !done ? "Aucune lettre répondue." : toReview.length
+    ? `Tu connaissais ${Math.round(ok / done * 100)} % des lettres. À revoir :`
     : "Toutes les lettres sont sues. Bravo !";
-  const toReview = seen.filter(l => missed.has(l));
-  $("missed").innerHTML = toReview.map(l =>
-    `<figure>${mini(l)}<figcaption>${l.name}</figcaption></figure>`).join("");
-  $("review").hidden = !missed.size;
-  $("review").textContent = `Revoir les ${missed.size} ›`;
+  $("missed").innerHTML = toReview.map(l => `<figure>${mini(l)}${l.name}</figure>`).join("");
+  $("review").hidden = !toReview.length;
+  $("review").textContent = `Revoir les ${toReview.length} lettres`;
   $("review").onclick = () => start(toReview);
 }
-
-function next() { if (pos === deck.length - 1) return showStats(); pos++; render(false); }
-function prev() { if (pos > 0) { pos--; render(false); } }
 
 function setMode(m) {
   mode = m;
   $("mOrder").classList.toggle("on", m === "order");
   $("mRandom").classList.toggle("on", m === "random");
-  if (!$("play").hidden) start();
 }
 
-$("card").onclick = () => render(!shown);
-$("next").onclick = next;
-$("prev").onclick = prev;
-$("reset").onclick = () => show("intro");
+const closeSettings = () => $("settings").hidden = true;
+$("gear").onclick = () => { $("sStats").hidden = $("sReset").hidden = $("play").hidden; $("settings").hidden = false; };
+$("settings").onclick = e => { if (e.target === $("settings")) closeSettings(); };
+$("sClose").onclick = closeSettings;
+$("mOrder").onclick = () => { setMode("order"); if (!$("play").hidden) start(); };
+$("mRandom").onclick = () => { setMode("random"); if (!$("play").hidden) start(); };
+$("sReset").onclick = () => { closeSettings(); start(); };
+$("sStats").onclick = () => { closeSettings(); showStats(); };
+$("sPage").onclick = () => { closeSettings(); $("page").hidden = false; };
+$("page").onclick = () => $("page").hidden = true;
 $("go").onclick = () => start();
-$("stop").onclick = showStats;
 $("again").onclick = () => start();
-$("miss").onclick = toggleMiss;
-$("mOrder").onclick = () => setMode("order");
-$("mRandom").onclick = () => setMode("random");
-$("showPage").onclick = () => $("page").classList.add("open");
-$("page").onclick = () => $("page").classList.remove("open");
+$("bOk").onclick = () => answer(true);
+$("bMiss").onclick = () => answer(false);
+$("bUndo").onclick = undo;
 
 document.addEventListener("keydown", e => {
-  if ($("page").classList.contains("open")) { if (e.key === "Escape") $("page").classList.remove("open"); return; }
-  if ($("play").hidden) return;
-  if (e.key === "ArrowLeft") next();       // Arabic reads right to left
-  else if (e.key === "ArrowRight") prev();
-  else if (e.key === " " || e.key === "Enter") { e.preventDefault(); render(!shown); }
+  if (e.key === "Escape") { closeSettings(); $("page").hidden = true; return; }
+  if ($("play").hidden || !$("settings").hidden || !$("page").hidden) return;
+  if (e.key === "ArrowRight") answer(true);
+  else if (e.key === "ArrowLeft") answer(false);
+  else if (e.key === "Backspace") undo();
+  else if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
 });
 
 $("sheetGrid").innerHTML = LETTERS.map(mini).join("");
