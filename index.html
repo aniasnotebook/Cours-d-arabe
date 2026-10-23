@@ -176,14 +176,33 @@
   .words { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); direction:rtl; border:1px solid #333; }
   .words div { border:1px solid #333; text-align:center; font-size:24px; line-height:1.7; }
   @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } }
+  /* The logo: three cards. In the top-right corner (Arabic reads from the right), hidden during a round. */
+  .app { position:relative; }
+  .corner { position:absolute; top:0; right:0; width:40px; height:40px; pointer-events:none; z-index:2; }
+  .mark > g { transform-box:view-box; transform-origin:55px 104px; }
+  /* Loader: the cards fan open and closed while the Arabic font downloads (first visit only). */
+  #loader { position:fixed; inset:0; background:var(--bg); display:grid; place-items:center; z-index:50; }
+  #loader .r { animation:fanR 1.4s ease-in-out infinite; } #loader .g { animation:fanG 1.4s ease-in-out infinite; }
+  @keyframes fanR { 0%,100% { transform:rotate(0); } 50% { transform:rotate(-14deg); } }
+  @keyframes fanG { 0%,100% { transform:rotate(0); } 50% { transform:rotate(-6deg); } }
+  /* Round passed: the logo jumps once and confetti bursts behind it. */
+  .party { position:relative; width:96px; height:96px; margin:0 auto; }
+  .party .mark { position:relative; z-index:1; animation:jump 1.2s cubic-bezier(.3,.6,.4,1) 2; transform-origin:50% 100%; }
+  .party .r { animation:tilt 1.2s ease-out 2; }
+  @keyframes jump { 0% { transform:translateY(0) scale(1.08,.9); } 25% { transform:translateY(-30px) scale(.96,1.05); } 50% { transform:translateY(0) scale(1.1,.88); } 62%,100% { transform:none; } }
+  @keyframes tilt { 0%,10% { transform:rotate(0); } 30% { transform:rotate(-14deg); } 60%,100% { transform:rotate(0); } }
+  .party i { position:absolute; left:50%; top:50%; width:8px; height:12px; border-radius:2px; opacity:0; animation:boom 1.6s ease-out var(--d) 1 both; }
+  @keyframes boom { 0% { opacity:0; transform:rotate(var(--a)) translateY(0); } 15% { opacity:1; } 60% { opacity:1; transform:rotate(var(--a)) translateY(-80px) rotate(200deg); } 100% { opacity:0; transform:rotate(var(--a)) translateY(-90px) rotate(260deg); } }
+  @media (prefers-reduced-motion: reduce) { #loader g, .party .mark, .party g { animation:none; } .party i { display:none; } }
 </style>
 </head>
 <body>
+<div id="loader" hidden></div>
 <div class="app">
+  <div class="corner" id="corner" aria-hidden="true"></div>
 
   <!-- Code to enter -->
   <section class="screen" id="gate" style="justify-content:center">
-    <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <form id="gateForm" style="display:flex; flex-direction:column; gap:12px">
       <label for="code" style="font-weight:700; text-align:center">Code de la classe</label>
       <div style="position:relative">
@@ -255,6 +274,7 @@
   <!-- End of a round -->
   <section class="screen" id="stats" hidden style="justify-content:center">
     <p class="muted center" id="seen"></p>
+    <div class="party" id="party" hidden></div>
     <div class="score" id="score"></div>
     <p class="muted center" id="scoreText"></p>
     <p class="center" id="famText" style="margin:0; font-size:14px; font-weight:600" hidden></p>
@@ -363,7 +383,17 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = "none", pick = {}, checked = false;
 
-function show(id) { ["gate","home","l1","l2","play","stats"].forEach(s => $(s).hidden = s !== id); }
+function show(id) { ["gate","home","l1","l2","play","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play"; }
+
+// ---------- The logo: a red card, a green card and the ba card, drawn so each card can move.
+const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
+  <g class="r"><rect x="12" y="22" width="56" height="78" rx="13" transform="rotate(-18 40 61)" fill="#d6301f" stroke="#0b0b0b" stroke-width="4"/></g>
+  <g class="g"><rect x="24" y="18" width="58" height="82" rx="14" transform="rotate(-6 53 59)" fill="#2f7d4f" stroke="#0b0b0b" stroke-width="4"/></g>
+  <g class="f"><rect x="40" y="20" width="62" height="84" rx="14" transform="rotate(8 71 62)" fill="#fbfaf2" stroke="#0b0b0b" stroke-width="4"/><g transform="rotate(8 71 62)"><path d="M50 36 q0 -7 6 -10" fill="none" stroke="#b9b2a3" stroke-width="4.5" stroke-linecap="round"/><path d="M52 56 v6 q0 12 12 12 h14 q12 0 12 -12 v-6" fill="none" stroke="#0b0b0b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><rect x="65" y="82" width="9" height="9" transform="rotate(45 69.5 86.5)" fill="#0b0b0b"/></g></g></svg>`;
+const CONFETTI = [0,40,80,120,160,200,240,280,320].map((a, i) =>
+  `<i style="--a:${a}deg; --d:${(i % 4) * .05}s; background:${["#d6301f","#2f7d4f","#e2b33c"][i % 3]}"></i>`).join("");
+// A round counts as passed from 80 % of right answers.
+const PASSED = 0.8;
 
 function start(cards) {
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
@@ -604,6 +634,8 @@ function showStats() {
   show("stats");
   $("seen").textContent = done < deck.length ? `Tour arrêté après ${n(done)} sur ${deck.length}` : `Tour terminé : ${n(deck.length)}`;
   $("score").innerHTML = `${good}<small> / ${done}</small>`;
+  $("party").hidden = !(done && good / done >= PASSED);
+  $("party").innerHTML = $("party").hidden ? "" : CONFETTI + MARK;
   $("scoreText").textContent = !done ? "Aucune carte répondue." : mode === "letters"
     ? `Tu reconnais ${Math.round(good / done * 100)} % des lettres.` : `${Math.round(good / done * 100)} % de bonnes réponses.`;
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
@@ -657,7 +689,13 @@ $("eye").onclick = () => {
   $("eye").setAttribute("aria-label", visible ? "Masquer le code" : "Afficher le code");
   $("code").focus();
 };
+$("corner").innerHTML = MARK;
 show(remembered() ? "home" : "gate");
+// The loader only shows if the Arabic font is still downloading after a moment (in practice, the first visit).
+{ let ready = false;
+  const done = () => { ready = true; $("loader").hidden = true; };
+  setTimeout(() => { if (!ready) { $("loader").innerHTML = `<div style="width:96px;height:96px">${MARK}</div>`; $("loader").hidden = false; } }, 250);
+  Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 4000))]).then(done); }
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 
 // ---------- Wiring
