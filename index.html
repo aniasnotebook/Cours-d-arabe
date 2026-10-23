@@ -76,12 +76,12 @@
   .pill.m { color:var(--miss); background:var(--miss-bg); } .pill.k { color:var(--ok); background:var(--ok-bg); }
   .tally .pillbtn { height:auto; padding:4px 12px; }
   .stage { flex:1; min-height:200px; position:relative; }
-  .card { position:absolute; inset:0; background:var(--card); border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,.12);
+  .card { position:absolute; inset:0; background:var(--card); border-radius:24px; box-shadow:0 2px 6px rgba(0,0,0,.08);
           display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#1d1d1b;
           user-select:none; -webkit-user-select:none; border:3px solid transparent; overflow:hidden; }
   .card.swipe { touch-action:none; cursor:grab; }
-  .card.under { transform:scale(.95) translateY(10px); box-shadow:0 4px 12px rgba(0,0,0,.08); }
-  .card.anim { transition:transform .25s ease, opacity .25s ease; }
+  .card.under { transform:scale(.95) translateY(10px); }
+  .card.anim { transition:transform .22s ease .06s, opacity .22s ease .06s; }
   .card.good { border-color:#2f7d4f; } .card.bad { border-color:#c2410c; }
   .glyph { font-size:min(150px, 34vw, 18vh); line-height:1.25; position:relative; }
   .card.has-fams { padding:12px 12px 14px; }
@@ -323,7 +323,9 @@ function choicesFor(letters, n) {
   const want = new Set(letters);
   const near = shuffle(LOOKALIKE.filter(grp => grp.some(c => want.has(c))).flat().filter(c => !want.has(c)));
   const rest = shuffle(FORM_LETTERS.filter(c => !want.has(c) && !near.includes(c)));
-  return shuffle([...want, ...[...new Set([...near, ...rest])].slice(0, n - want.size)]);
+  // A couple of look-alikes keep it hard; the rest is drawn at random so each round shows a new set.
+  const k = n - want.size, nearCount = Math.min(near.length, Math.ceil(k / 2));
+  return shuffle([...want, ...near.slice(0, nearCount), ...rest.slice(0, k - nearCount)]);
 }
 
 // ---------- State
@@ -374,7 +376,7 @@ function letterCard(l, id, cls) {
 function renderLetter() {
   const next = deck[pos + 1];
   $("stage").innerHTML = (next ? letterCard(next, "", "under") : "") + letterCard(deck[pos], "card", "");
-  $("below").innerHTML = `<p class="hint" id="hint">${famQuiz ? "Choisis la famille, puis touche la carte pour vérifier" : SWIPE_HINT}</p>
+  $("below").innerHTML = `<p class="hint" id="hint">${SWIPE_HINT}</p>
     <div class="actions">
       <button class="act m" id="bMiss"><span>${ICONS.x}</span>À revoir</button>
       <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
@@ -418,7 +420,6 @@ const SWIPE_HINT = "Glisse à droite si tu la reconnais, à gauche si c’est à
 function flip() {
   if (!famQuiz) return;
   shown = !shown;
-  $("hint").textContent = shown ? SWIPE_HINT : "Choisis la famille, puis touche la carte pour vérifier";
   paintFams();
 }
 
@@ -426,11 +427,16 @@ function answer(ok) {
   const c = $("card");
   if (!c || c.dataset.gone) return;
   c.dataset.gone = 1;
+  // Show the same stamp and colour as a swipe, also when a button or the trackpad answers.
+  c.querySelector(ok ? ".stamp.k" : ".stamp.m").style.opacity = 1;
+  c.style.borderColor = ok ? "var(--ok)" : "var(--miss)";
   c.classList.add("anim");
-  c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`;
-  c.style.opacity = 0;
+  requestAnimationFrame(() => {
+    c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`;
+    c.style.opacity = 0;
+  });
   const l = deck[pos];
-  setTimeout(() => { answers.push({ item: l, ok, famOk: guess === l.fam }); render(); }, 220);
+  setTimeout(() => { answers.push({ item: l, ok, famOk: guess === l.fam }); render(); }, 300);
 }
 function undo() { if (answers.length) { answers.pop(); render(); } }
 
