@@ -7,3 +7,5 @@ Un jeu pour apprendre l'alphabet avec la Qaida Nourania. Sans IA, rien à instal
 - À la fin du tour : le score et les cartes à revoir. Par défaut les cartes arrivent au hasard ; une case permet de suivre l'ordre du livre.
 
 Lettres dans la police libre [Amiri](https://github.com/aliftype/amiri) (licence OFL), chargée depuis Google Fonts.
+
+**Installer comme une app** : ouvre le lien, puis « Partager › Sur l’écran d’accueil » sur iPhone (Safari) ou « Installer l’application » sur Android (Chrome). Une fois ouverte, elle marche aussi hors connexion.

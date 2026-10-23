@@ -6,7 +6,12 @@
 <title>Cours d’arabe</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@700&display=swap">
-<link rel="icon" href="data:,">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#2f7d4f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cours d’arabe">
 <style>
   /* Flashcard app layout: pick a lesson, set the round, then one card at a time with answers under the thumb. */
   :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
@@ -28,6 +33,8 @@
   .app { width:100%; max-width:440px; height:100%; display:flex; flex-direction:column; }
   .screen { flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; overflow:auto; }
   .screen > .ico { align-self:flex-start; }
+  /* Home and lesson screens sit in the middle of the screen; auto margins still let them scroll when tall. */
+  .mid > :first-child:not(.ico) { margin-top:auto; } .mid > .ico + * { margin-top:auto; } .mid > :last-child { margin-bottom:auto; }
   .ar { font-family:Amiri, "Noto Naskh Arabic", serif; font-weight:700; }
 
   /* Round icon buttons and the top bar */
@@ -179,14 +186,17 @@
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <form id="gateForm" style="display:flex; flex-direction:column; gap:12px">
       <label for="code" style="font-weight:700; text-align:center">Code de la classe</label>
-      <input id="code" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" style="height:52px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:0 14px; font:inherit; font-size:18px; text-align:center">
+      <div style="position:relative">
+        <input id="code" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" style="width:100%; height:52px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:0 52px; font:inherit; font-size:18px; text-align:center">
+        <button type="button" id="eye" aria-label="Afficher le code" aria-pressed="false" style="position:absolute; right:6px; top:6px; width:40px; height:40px; border:0; border-radius:10px; background:none; color:var(--muted); display:grid; place-items:center; padding:0"></button>
+      </div>
       <p class="muted center" id="gateMsg" aria-live="polite"></p>
       <button class="primary" type="submit">Entrer</button>
     </form>
   </section>
 
   <!-- Home -->
-  <section class="screen" id="home" hidden>
+  <section class="screen mid" id="home" hidden>
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <button class="lesson" data-open="1">
       <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span></span>
@@ -201,7 +211,7 @@
   </section>
 
   <!-- Lesson 1 -->
-  <section class="screen" id="l1" hidden>
+  <section class="screen mid" id="l1" hidden>
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span></div>
@@ -215,7 +225,7 @@
   </section>
 
   <!-- Lesson 2 -->
-  <section class="screen" id="l2" hidden>
+  <section class="screen mid" id="l2" hidden>
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الثَّانِي</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ</span></div>
@@ -280,12 +290,12 @@ const ICONS = {
 
 // ---------- Lesson 1: the letters on their own (book page 6), right to left, row by row.
 const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
-  "ق","ك","ل","م","ن","و","ه","ء","ی","ے"];
+  "ق","ك","ل","م","ن","و","ه","ء","ى","ے"];
 // The names written in red above each letter in the book.
 const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
   "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
 // Emphatic letters: kha, sad, dad, ghayn, ta, za, qaf. Prolongation letters: alif, waw, both ya.
-const EMPH = ["خ","ص","ض","غ","ط","ظ","ق"], MADD = ["ا","و","ی","ے"];
+const EMPH = ["خ","ص","ض","غ","ط","ظ","ق"], MADD = ["ا","و","ى","ے"];
 const FAM = { emph:"Emphatique", madd:"Prolongation" };
 const glyph = g => g === "ے" ? `<span class="yb">ے</span>` : g;
 
@@ -302,6 +312,9 @@ const joinsPrev = c => c !== "ء";
 const POS = { iso:"seule", ini:"au début", med:"au milieu", fin:"à la fin" };
 // The book writes ya without dots when it stands alone or ends a word (ى), with dots elsewhere.
 const endForm = g => g === "ي" ? "ى" : g;
+// Ya is one letter whatever its dots: words store the book's ى, answers and choices use ي, shown dotless when alone.
+const letterOf = c => c === "ى" ? "ي" : c;
+const showLetter = c => endForm(letterOf(c));
 const formOf = (g, p) => p === "iso" ? endForm(g) : p === "ini" ? g + T : p === "med" ? T + g + T : T + endForm(g);
 const FORM_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","و","ه","ي"];
 const positions = g => joinsNext(g) ? ["iso","ini","med","fin"] : ["iso","fin"];
@@ -514,16 +527,16 @@ function renderQuiz() {
     it.choices = it.choices || choicesFor([it.g], 4);
     $("stage").innerHTML = `<div class="card" id="card"><span class="glyph ar" lang="ar">${formOf(it.g, it.p)}</span></div>`;
     $("below").innerHTML = `<div class="q2">Quelle lettre ?</div>
-      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${c}</button>`).join("")}</div>
+      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <div class="q2">Où dans le mot ?</div>
       <div class="opts c3">${["ini","med","fin"].map(p => `<button class="opt" data-k="pos" data-v="${p}">${POS[p][0].toUpperCase() + POS[p].slice(1)}</button>`).join("")}</div>
       <button class="primary" id="check" disabled>Vérifier</button>`;
   } else {
-    const letters = [...new Set(it.w)];
+    const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
     $("stage").innerHTML = `<div class="card" id="card"><span class="word ar" lang="ar"${wf(it.w)}>${it.w}</span></div>`;
     $("below").innerHTML = `<div class="q2">Touche chaque lettre présente dans le mot</div>
-      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${c}</button>`).join("")}</div>
+      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <p class="hint" style="text-align:left">Une lettre présente deux fois se touche une seule fois.</p>
       <button class="primary" id="check" disabled>Vérifier</button>`;
     pick.multi = new Set();
@@ -556,12 +569,12 @@ function check() {
       o.className = "opt" + (o.dataset.k === "letter" ? " ar" : "") + (right ? " right" : chosen ? " wrong" : " dim");
     });
   } else {
-    const want = new Set(it.w), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
+    const want = new Set([...it.w].map(letterOf)), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste !" : `Presque : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
     card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "Faux" : verdict}</span>
       <span class="word ar" lang="ar"${wf(it.w)}>${coloured(it.w)}</span>
-      <span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${c}</span>`).join("")}</span>`;
+      <span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(c)}</span>`).join("")}</span>`;
     $("below").querySelectorAll(".opt").forEach(o => {
       const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
       o.className = "opt ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " dim");
@@ -633,7 +646,19 @@ $("gateForm").onsubmit = async e => {
   try { localStorage.setItem("classCode", h); } catch {}
   show("home");
 };
+const EYE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const EYE_OFF = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6C3.8 8.4 2 12 2 12s3.5 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+$("eye").innerHTML = EYE;
+$("eye").onclick = () => {
+  const visible = $("code").type === "password";
+  $("code").type = visible ? "text" : "password";
+  $("eye").innerHTML = visible ? EYE_OFF : EYE;
+  $("eye").setAttribute("aria-pressed", visible);
+  $("eye").setAttribute("aria-label", visible ? "Masquer le code" : "Afficher le code");
+  $("code").focus();
+};
 show(remembered() ? "home" : "gate");
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 
 // ---------- Wiring
 document.querySelectorAll(".ico.home").forEach(b => { b.innerHTML = ICONS.home; b.onclick = () => show("home"); });
