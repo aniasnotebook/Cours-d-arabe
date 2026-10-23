@@ -133,6 +133,8 @@
   .opt.missed { border:2px dashed var(--miss); color:var(--miss); }
   .opt.dim { color:var(--faint); }
   .opt .tag { position:absolute; top:-9px; left:50%; transform:translateX(-50%); padding:1px 6px; border-radius:999px; background:var(--miss); color:var(--on-accent); font:700 10px/1.4 system-ui, sans-serif; white-space:nowrap; }
+  .lessonlink { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; text-decoration:none; }
+  .lessonlink svg { width:16px; height:16px; }
   .primary { min-height:56px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:18px; font-weight:700; }
   .primary:disabled { opacity:.4; cursor:default; }
   .secondary { min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-weight:600; }
@@ -233,6 +235,7 @@
     <div class="score" id="score"></div>
     <p class="muted center" id="scoreText"></p>
     <p class="center" id="famText" style="margin:0; font-size:14px; font-weight:600" hidden></p>
+    <div id="lessonLinks" style="display:flex; gap:8px"></div>
     <p class="muted center" id="reviewLabel">À revoir :</p>
     <div class="grid" id="missed"></div>
     <button class="primary" id="review"></button>
@@ -565,12 +568,18 @@ function showStats() {
     ? `Tu reconnais ${Math.round(good / done * 100)} % des lettres.` : `${Math.round(good / done * 100)} % de bonnes réponses.`;
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
+  const links = LESSON_PAGES[mode === "letters" ? 1 : 2];
+  $("lessonLinks").innerHTML = links.map((u, i) => `<a class="lessonlink" href="${u}" target="_blank" rel="noopener">Revoir la leçon${links.length > 1 ? ` · ${i + 1}/${links.length}` : ""} ${EXT}</a>`).join("");
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
   $("review").textContent = `Revoir : ${n(toReview.length)}`;
   $("review").onclick = () => start(toReview);
 }
+
+// The lesson in the online Qaida (one page for lesson 1, two for lesson 2).
+const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95"] };
+const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
 
 // ---------- The book's page
 function openPage(n) {
