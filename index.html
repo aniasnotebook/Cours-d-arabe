@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cours d’arabe</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@700&display=swap">
 <link rel="icon" href="data:,">
 <style>
   /* Flashcard app layout: pick a lesson, set the round, then one card at a time with answers under the thumb. */
@@ -315,10 +315,13 @@ FORM_LETTERS.forEach(g => positions(g).filter(p => p !== "iso").forEach(p => FOR
 // Joined combinations from the book, in its order.
 const WORDS = ["بلب","كب","كا","بكت","تكث","با","نا","تا","يا","ثا","بس","يس","نس","تس","ثس","ثج","تح","نخ","يح","بج","يم","بم","نم","تم",
   "ثم","بى","يى","نى","تى","ثى","نبل","تنل","بيل","يتل","ثثل","نبن",
-  "بنن","تين","يتن","ثثن","حث","خب","جت","تحت","يجب","بخت","به","يه","ته","نه","يهب","بها","بهم","جد","خذ","جر",
+  "بنن","تين","يتن","ثثن","حث","خب","جت","تحت","يجب","بخت","بة","يه","ته","نة","يهب","بها","بهم","جد","خذ","جر",
   "خز","ير","تز","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ",
   "قو","فو","فقل","قفل","يف","حم","لم","تمت"];
 const INKS = ["#e0302a", "#2f8f3a", "#1d8fd1", "#1d1d1b"];
+// Amiri matches the book best, except for these words, which the book writes flat as Scheherazade does.
+const FLAT = new Set(["يم","يهب","بها","بهم","تمت"]);
+const wf = w => FLAT.has(w) ? ` style="font-family:'Scheherazade New', Amiri, serif"` : "";
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 function coloured(w) {
   const c = [...w];
@@ -328,7 +331,7 @@ function coloured(w) {
     return `<span style="color:${INKS[i % INKS.length]}">${before}${ch}${after}</span>`;
   }).join("");
 }
-const WORD_CARDS = WORDS.map(w => ({ w, mini: `<div class="mini ar"><span class="w" lang="ar">${coloured(w)}</span></div>` }));
+const WORD_CARDS = WORDS.map(w => ({ w, mini: `<div class="mini ar"><span class="w" lang="ar"${wf(w)}>${coloured(w)}</span></div>` }));
 
 // ---------- Helpers
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -518,7 +521,7 @@ function renderQuiz() {
   } else {
     const letters = [...new Set(it.w)];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
-    $("stage").innerHTML = `<div class="card" id="card"><span class="word ar" lang="ar">${it.w}</span></div>`;
+    $("stage").innerHTML = `<div class="card" id="card"><span class="word ar" lang="ar"${wf(it.w)}>${it.w}</span></div>`;
     $("below").innerHTML = `<div class="q2">Touche chaque lettre présente dans le mot</div>
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${c}</button>`).join("")}</div>
       <p class="hint" style="text-align:left">Une lettre présente deux fois se touche une seule fois.</p>
@@ -557,7 +560,7 @@ function check() {
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste !" : `Presque : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
     card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "Faux" : verdict}</span>
-      <span class="word ar" lang="ar">${coloured(it.w)}</span>
+      <span class="word ar" lang="ar"${wf(it.w)}>${coloured(it.w)}</span>
       <span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${c}</span>`).join("")}</span>`;
     $("below").querySelectorAll(".opt").forEach(o => {
       const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
@@ -615,7 +618,7 @@ function openPage(n) {
       ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
         `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
       <h3>Les lettres dans les mots</h3>
-      <div class="words ar">${WORDS.map(w => `<div lang="ar">${coloured(w)}</div>`).join("")}</div>`;
+      <div class="words ar">${WORDS.map(w => `<div lang="ar"${wf(w)}>${coloured(w)}</div>`).join("")}</div>`;
   $("page").hidden = false;
 }
 
