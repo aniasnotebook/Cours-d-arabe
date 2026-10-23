@@ -87,7 +87,7 @@
   .card.has-fams { padding:12px 12px 14px; }
   .card.has-fams .glyph { margin-top:auto; }
   .card.has-fams .fams { position:static; margin-top:auto; }
-  .arname { color:#d6301f; font-size:min(40px, 5vh); line-height:1.3; }
+  .arname { position:absolute; top:12px; left:18px; color:#d6301f; font-size:32px; line-height:1.4; }
   .verdict { font-size:15px; font-weight:800; } .verdict.good { color:#2f7d4f; } .verdict.bad { color:#c2410c; }
   .stamp { position:absolute; top:22px; left:50%; padding:4px 12px; border:3px solid; border-radius:10px; font-weight:800; font-size:20px; opacity:0; text-transform:uppercase; }
   .stamp.k { color:#2f7d4f; transform:translateX(-50%) rotate(-10deg); }
@@ -363,9 +363,9 @@ function letterCard(l, id, cls) {
       <span class="q">Cette lettre est :</span>
       <span class="chips">${["emph","madd"].map(f => `<button class="chip" data-f="${f}">${ICONS.plus}${FAM[f]}</button>`).join("")}</span>
       <span class="note">Rien de sélectionné = ni l’une ni l’autre</span></div>` : "";
-  return `<div class="card swipe ${cls} ${famQuiz ? "has-fams" : ""}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte, touche pour voir la réponse">
+  return `<div class="card swipe ${cls} ${famQuiz ? "has-fams" : ""}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
     <span class="glyph ar" lang="ar">${glyph(l.g)}</span>
-    <span class="arname ar" lang="ar" hidden>${l.ar}</span>
+    <span class="arname ar" lang="ar">${l.ar}</span>
     ${fams}
     <span class="stamp k">Reconnue</span><span class="stamp m">À revoir</span>
   </div>`;
@@ -374,7 +374,7 @@ function letterCard(l, id, cls) {
 function renderLetter() {
   const next = deck[pos + 1];
   $("stage").innerHTML = (next ? letterCard(next, "", "under") : "") + letterCard(deck[pos], "card", "");
-  $("below").innerHTML = `<p class="hint" id="hint">Touche la carte pour voir la réponse</p>
+  $("below").innerHTML = `<p class="hint" id="hint">${famQuiz ? "Choisis la famille, puis touche la carte pour vérifier" : SWIPE_HINT}</p>
     <div class="actions">
       <button class="act m" id="bMiss"><span>${ICONS.x}</span>À revoir</button>
       <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
@@ -413,11 +413,12 @@ function paintFams() {
   } else if (res) { res.remove(); box.querySelector(".note").hidden = false; }
 }
 
+// The red name is always shown, as in the book; turning the card only checks the family.
+const SWIPE_HINT = "Glisse à droite si tu la reconnais, à gauche si c’est à revoir";
 function flip() {
+  if (!famQuiz) return;
   shown = !shown;
-  const c = $("card");
-  c.querySelector(".arname").hidden = !shown;
-  $("hint").textContent = shown ? "Glisse à droite si tu la reconnais, à gauche si c’est à revoir" : "Touche la carte pour voir la réponse";
+  $("hint").textContent = shown ? SWIPE_HINT : "Choisis la famille, puis touche la carte pour vérifier";
   paintFams();
 }
 
