@@ -48,7 +48,7 @@
   .card.anim { transition:transform .25s ease, opacity .25s ease; }
   .ar-name { position:absolute; top:16px; left:20px; font-family:Amiri, serif; font-weight:700; font-size:30px; color:var(--q-name); line-height:1.4; }
   .glyph { font-family:Amiri, serif; font-weight:700; font-size:min(170px, 40vw); line-height:1.3; color:var(--glyph); position:relative; }
-  .answer { position:absolute; bottom:22px; font-size:24px; font-weight:700; color:#1d1d1b; }
+  .answer { position:absolute; bottom:18px; display:flex; flex-direction:column; align-items:center; font-size:24px; font-weight:700; color:#1d1d1b; }
   .tap { position:absolute; bottom:24px; font-size:14px; color:#6b665c; }
   .stamp { position:absolute; top:22px; padding:4px 12px; border:3px solid; border-radius:10px; font-weight:800; font-size:20px; opacity:0; text-transform:uppercase; letter-spacing:.04em; }
   .stamp.k { left:50%; color:#2f7d4f; transform:translateX(-50%) rotate(-10deg); }
@@ -70,6 +70,17 @@
   .act.u { color:var(--muted); } .act.u span { width:48px; height:48px; border-color:var(--line); background:var(--surface); }
   .act.u svg { width:22px; height:22px; }
   .act:disabled { opacity:.35; cursor:default; }
+
+  /* Family quiz: the guess is a chip under the card; the card tells if it was right once turned. */
+  .switch { width:100%; display:flex; gap:12px; align-items:center; text-align:left; padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:var(--surface); cursor:pointer; font-size:13px; color:var(--muted); }
+  .switch b { display:block; font-size:15px; color:var(--ink); }
+  .switch input { width:22px; height:22px; accent-color:var(--accent); flex:0 0 auto; }
+  .fams { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .fam { padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface); font-weight:600; font-size:14px; }
+  .fam.on { border:2px solid var(--accent); background:var(--ok-bg); color:var(--ok); }
+  .fam.right { border:2px solid var(--ok); background:var(--ok-bg); color:var(--ok); }
+  .fam.wrong { border:2px solid var(--miss); background:var(--miss-bg); color:var(--miss); }
+  .famtag { font-size:14px; font-weight:600; color:#6b665c; margin-top:2px; }
 
   /* Intro and stats */
   .screen { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center; }
@@ -131,19 +142,24 @@
       <p class="muted">Leçon 1 · Les 30 lettres de l’alphabet</p>
     </div>
     <p class="muted">Dis le nom de la lettre, touche la carte pour vérifier, puis glisse.</p>
-    <div class="how"><div class="m">← Pas su</div><div class="k">Je savais →</div></div>
+    <div class="how"><div class="m">← À revoir</div><div class="k">Je sais →</div></div>
+    <label class="switch"><input type="checkbox" id="famOn"><span><b>Quiz des familles</b>Pour chaque lettre, dis si elle est emphatique ou de prolongation</span></label>
     <button class="primary" id="go">Commencer</button>
   </section>
 
   <!-- Study -->
   <section id="play" hidden style="flex:1; min-height:0; display:flex; flex-direction:column; gap:12px;">
     <div class="bar"><i id="barFill"></i></div>
-    <div class="tally"><span class="pill m" id="nMiss">0 pas su</span><span class="pill k" id="nOk">0 su</span></div>
+    <div class="tally"><span class="pill m" id="nMiss">0 à revoir</span><span class="pill k" id="nOk">0 je sais</span></div>
     <div class="stage" id="stage"></div>
+    <div class="fams" id="fams" hidden>
+      <button class="fam" data-f="emph">Emphatique</button>
+      <button class="fam" data-f="madd">Prolongation</button>
+    </div>
     <div class="actions">
-      <button class="act m" id="bMiss"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>Pas su</button>
+      <button class="act m" id="bMiss"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>À revoir</button>
       <button class="act u" id="bUndo"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></span>Retour</button>
-      <button class="act k" id="bOk"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Je savais</button>
+      <button class="act k" id="bOk"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Je sais</button>
     </div>
   </section>
 
@@ -152,6 +168,7 @@
     <p class="muted" id="seen"></p>
     <div class="score" id="score"></div>
     <p class="muted" id="scoreText"></p>
+    <p class="muted" id="famText" hidden></p>
     <div class="grid" id="missed"></div>
     <button class="primary" id="review"></button>
     <button class="secondary" id="again">Tout recommencer</button>
@@ -190,21 +207,25 @@
 
 <script>
 // Lu de droite à gauche sur la page, ligne par ligne (Qaida Nourania, leçon 1).
-const NAMES = ["Alif","Ba","Ta","Tha","Jim","Ha","Kha","Dal","Dhal","Ra",
-  "Zay","Sin","Chin","Sad","Dad","Ta (emphatique)","Za (emphatique)","Ayn","Ghayn","Fa",
-  "Qaf","Kaf","Lam","Mim","Noun","Waw","Ha (léger)","Hamza","Ya","Ya (long)"];
+const NAMES = ["Alif","Ba","Ta","Tha","Jim","Ḥa","Kha","Dal","Dhal","Ra",
+  "Zay","Sin","Chin","Ṣad","Ḍad","Ṭa","Ẓa","Ayn","Ghayn","Fa",
+  "Qaf","Kaf","Lam","Mim","Noun","Waw","Ha","Hamza","Ya","Ya (long)"];
 const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
   "ق","ك","ل","م","ن","و","ه","ء","ی","ے"];
 // Red names as written above each letter in the book.
 const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
   "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
-const LETTERS = NAMES.map((name, i) => ({ name, g: GLYPHS[i], ar: AR_NAMES[i] }));
+// Emphatic (heavy) letters: خُصَّ ضَغْطٍ قِظْ. Prolongation letters: alif, waw, ya (both forms of ya).
+const EMPH = ["خ","ص","ض","غ","ط","ق","ظ"], MADD = ["ا","و","ی","ے"];
+const FAM_NAMES = { emph:"Emphatique", madd:"Prolongation", none:"Ni l’une ni l’autre" };
+const LETTERS = NAMES.map((name, i) => ({ name, g: GLYPHS[i], ar: AR_NAMES[i],
+  fam: EMPH.includes(GLYPHS[i]) ? "emph" : MADD.includes(GLYPHS[i]) ? "madd" : "none" }));
 
 const $ = id => document.getElementById(id);
 const glyph = l => l.g === "ے" ? `<span class="yb">ے</span>` : l.g;
 const mini = l => `<div class="mini"><span class="n" lang="ar">${l.ar}</span><span class="g" lang="ar">${glyph(l)}</span></div>`;
 
-let mode = "order", deck = [], answers = [], shown = false;
+let mode = "order", deck = [], answers = [], shown = false, famQuiz = false, guess = "none";
 
 function shuffle(a) {
   a = a.slice();
@@ -226,8 +247,8 @@ function cardHTML(l, id, cls) {
     <span class="ar-name" lang="ar">${l.ar}</span>
     <span class="glyph" lang="ar">${glyph(l)}</span>
     <span class="tap">Touche pour voir le nom</span>
-    <span class="answer" hidden>${l.name}</span>
-    <span class="stamp k">Su</span><span class="stamp m">Pas su</span>
+    <span class="answer" hidden>${l.name}${famQuiz ? `<span class="famtag">${FAM_NAMES[l.fam]}</span>` : ""}</span>
+    <span class="stamp k">Je sais</span><span class="stamp m">À revoir</span>
   </div>`;
 }
 
@@ -235,19 +256,33 @@ function render() {
   const pos = answers.length;
   if (pos >= deck.length) return showStats();
   shown = false;
+  guess = "none";
+  $("fams").hidden = !famQuiz;
+  paintFams();
   const ok = answers.filter(a => a.ok).length;
   $("title").textContent = `${pos + 1} / ${deck.length}`;
   $("barFill").style.width = `${pos / deck.length * 100}%`;
-  $("nOk").textContent = `${ok} su`;
-  $("nMiss").textContent = `${pos - ok} pas su`;
+  $("nOk").textContent = `${ok} je sais`;
+  $("nMiss").textContent = `${pos - ok} à revoir`;
   $("bUndo").disabled = pos === 0;
   const nextCard = deck[pos + 1];
   $("stage").innerHTML = (nextCard ? cardHTML(nextCard, "", "under") : "") + cardHTML(deck[pos], "card", "");
   bindCard($("card"));
 }
 
+// Before the card is turned the chips show the guess; after, whether it was right.
+function paintFams() {
+  const l = deck[answers.length];
+  document.querySelectorAll(".fam").forEach(b => {
+    const f = b.dataset.f;
+    b.className = "fam" + (!shown ? (guess === f ? " on" : "")
+      : f === l.fam ? " right" : guess === f ? " wrong" : "");
+  });
+}
+
 function flip() {
   shown = !shown;
+  paintFams();
   const c = $("card");
   c.querySelector(".answer").hidden = !shown;
   c.querySelector(".tap").hidden = shown;
@@ -261,7 +296,8 @@ function answer(ok) {
   c.classList.add("anim");
   c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`;
   c.style.opacity = 0;
-  setTimeout(() => { answers.push({ l: deck[answers.length], ok }); render(); }, 220);
+  const l = deck[answers.length];
+  setTimeout(() => { answers.push({ l, ok, famOk: guess === l.fam, guess }); render(); }, 220);
 }
 
 function undo() { if (answers.length) { answers.pop(); render(); } }
@@ -296,15 +332,18 @@ function bindCard(c) {
 function showStats() {
   const done = answers.length;
   const ok = answers.filter(a => a.ok).length;
-  const toReview = answers.filter(a => !a.ok).map(a => a.l);
+  const famWrong = famQuiz ? answers.filter(a => !a.famOk) : [];
+  const toReview = answers.filter(a => !a.ok || (famQuiz && !a.famOk)).map(a => a.l);
   show("stats");
   $("title").textContent = "Résultat";
   $("seen").textContent = done < deck.length ? `Tour arrêté après ${done} lettres sur ${deck.length}` : `Tour terminé : ${deck.length} lettres`;
   $("score").innerHTML = `${ok}<small> / ${done}</small>`;
   $("scoreText").textContent = !done ? "Aucune lettre répondue." : toReview.length
-    ? `Tu connaissais ${Math.round(ok / done * 100)} % des lettres. À revoir :`
-    : "Toutes les lettres sont sues. Bravo !";
-  $("missed").innerHTML = toReview.map(l => `<figure>${mini(l)}${l.name}</figure>`).join("");
+    ? `Tu reconnais ${Math.round(ok / done * 100)} % des lettres.${toReview.length ? " À revoir :" : ""}`
+    : "Tu reconnais toutes les lettres. Bravo !";
+  $("famText").hidden = !famQuiz || !done;
+  $("famText").textContent = `Familles : ${done - famWrong.length} / ${done} justes`;
+  $("missed").innerHTML = toReview.map(l => `<figure>${mini(l)}${l.name}${famQuiz && l.fam !== "none" ? `<br>${FAM_NAMES[l.fam]}` : ""}</figure>`).join("");
   $("review").hidden = !toReview.length;
   $("review").textContent = `Revoir les ${toReview.length} lettres`;
   $("review").onclick = () => start(toReview);
@@ -326,7 +365,12 @@ $("sReset").onclick = () => { closeSettings(); start(); };
 $("sStats").onclick = () => { closeSettings(); showStats(); };
 $("sPage").onclick = () => { closeSettings(); $("page").hidden = false; };
 $("page").onclick = () => $("page").hidden = true;
-$("go").onclick = () => start();
+$("go").onclick = () => { famQuiz = $("famOn").checked; start(); };
+document.querySelectorAll(".fam").forEach(b => b.onclick = () => {
+  if (shown) return;
+  guess = guess === b.dataset.f ? "none" : b.dataset.f;
+  paintFams();
+});
 $("again").onclick = () => start();
 $("bOk").onclick = () => answer(true);
 $("bMiss").onclick = () => answer(false);
