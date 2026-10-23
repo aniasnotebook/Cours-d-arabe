@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Alif Cards</title>
+<title>Qaida Nourania</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
 <link rel="icon" href="data:,">
 <style>
-  /* Study screen like flashcard apps: progress on top, one card to swipe, answer buttons under the thumb, every option a visible button. */
-  :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf;
+  /* Flashcard app layout: pick a lesson, set the round, then one card at a time with answers under the thumb. */
+  :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
           --accent:#2f7d4f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
-          --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#d6301f; --q-green:#3f8f3a; --q-red:#e0302a; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f;
-          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; color-scheme:dark; } }
-  :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f;
-          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; color-scheme:dark; }
+          --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#d6301f; --q-green:#3f8f3a; --q-red:#e0302a; --pick:#1d1d1b; --on-pick:#fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
+          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; } }
+  :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
+          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   html, body { height:100%; overscroll-behavior:none; }
@@ -24,43 +24,92 @@
          padding-block:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
          padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
   button { font:inherit; color:inherit; cursor:pointer; }
-  button:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
-  .app { width:100%; max-width:440px; height:100%; display:flex; flex-direction:column; gap:12px; }
+  button:focus-visible, a:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
+  .app { width:100%; max-width:440px; height:100%; display:flex; flex-direction:column; }
+  .screen { flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; overflow:auto; }
+  .screen > .ico { align-self:flex-start; }
+  .ar { font-family:Amiri, "Noto Naskh Arabic", serif; font-weight:700; }
 
-  /* Top bar */
-  .top { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; min-height:44px; }
-  .tb { grid-row:1; justify-self:start; border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:8px 12px; font-size:14px; font-weight:600; }
-  .tb.end { grid-column:3; justify-self:end; }
-  .top h1 { grid-column:2; grid-row:1; margin:0; text-align:center; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+  /* Round icon buttons and the top bar */
+  .ico { width:40px; height:40px; flex:0 0 auto; border-radius:50%; border:1px solid var(--line); background:var(--surface); display:grid; place-items:center; padding:0; color:var(--ink); }
+  .ico svg { width:18px; height:18px; }
+  .top { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; }
+  .top .left { display:flex; gap:8px; }
+  .top h1 { margin:0; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .pillbtn { justify-self:end; height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--surface); font-size:14px; font-weight:600; }
+
+  /* Book header */
+  .bism { text-align:center; font-size:clamp(26px, 8vw, 32px); line-height:1.6; }
+  .ribbons { width:100%; display:flex; gap:6px; color:#fff; font-size:clamp(17px, 5vw, 20px); }
+  .ribbons span { padding:6px 12px 8px; line-height:1.6; }
+  .rg { background:var(--q-green); flex:0 0 auto; border-radius:4px 12px 12px 4px; }
+  .rr { background:var(--q-red); flex:1; text-align:center; border-radius:12px 4px 4px 12px; }
+  .muted { color:var(--muted); margin:0; font-size:14px; }
+  .center { text-align:center; }
+
+  /* Home */
+  .lesson { display:flex; flex-direction:column; gap:12px; padding:18px; border-radius:20px; background:var(--surface); border:1px solid var(--line); text-align:left; }
+  .lesson .sample { font-size:42px; line-height:1.4; text-align:center; direction:rtl; }
+  .lesson .row { display:flex; align-items:center; justify-content:space-between; }
+  .lesson b { font-size:18px; display:block; }
+  .chev { font-size:26px; color:var(--accent); }
+
+  /* Lesson screens */
+  .linkbtn { display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-size:15px; font-weight:600; }
+  .linkbtn svg { width:18px; height:18px; flex:0 0 auto; }
+  .label { font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
+  .settings { display:flex; flex-direction:column; border-radius:16px; border:1px solid var(--line); background:var(--surface); }
+  .settings label { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; }
+  .settings label + label { border-top:1px solid var(--line); }
+  .settings b { display:block; font-size:15px; }
+  .settings small { display:block; font-size:13px; color:var(--muted); }
+  .settings input { width:22px; height:22px; flex:0 0 auto; accent-color:var(--accent); margin-left:auto; }
+  .go { display:flex; align-items:center; justify-content:center; gap:10px; min-height:60px; padding:10px 16px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:18px; font-weight:700; text-align:left; }
+  .go .tile { width:48px; height:48px; border-radius:10px; background:#fff; color:#1d1d1b; display:grid; place-items:center; font-size:28px; flex:0 0 auto; }
+  .go span.t { flex:1; } .go small { display:block; font-size:13px; font-weight:400; opacity:.9; }
+
+  /* Play */
   .bar { height:6px; border-radius:3px; background:var(--line); overflow:hidden; }
   .bar i { display:block; height:100%; width:0; background:var(--accent); transition:width .25s; }
   .tally { display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:600; font-variant-numeric:tabular-nums; }
-  .pill { display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; }
-  .pill.m { color:var(--miss); background:var(--miss-bg); }
-  .pill.k { color:var(--ok); background:var(--ok-bg); }
-
-  /* Card */
-  .stage { flex:1; min-height:0; position:relative; display:flex; align-items:center; justify-content:center; }
-  .card { position:absolute; inset:0; margin:auto; width:100%; max-height:100%; aspect-ratio:3/4; background:var(--card); border-radius:24px;
-          box-shadow:0 10px 30px rgba(0,0,0,.12); display:flex; flex-direction:column; align-items:center; justify-content:center;
-          touch-action:none; user-select:none; -webkit-user-select:none; cursor:grab; border:3px solid transparent; }
+  .pill { padding:3px 10px; border-radius:999px; }
+  .pill.m { color:var(--miss); background:var(--miss-bg); } .pill.k { color:var(--ok); background:var(--ok-bg); }
+  .tally .pillbtn { height:auto; padding:4px 12px; }
+  .stage { flex:1; min-height:200px; position:relative; }
+  .card { position:absolute; inset:0; background:var(--card); border-radius:24px; box-shadow:0 10px 30px rgba(0,0,0,.12);
+          display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#1d1d1b;
+          user-select:none; -webkit-user-select:none; border:3px solid transparent; overflow:hidden; }
+  .card.swipe { touch-action:none; cursor:grab; }
   .card.under { transform:scale(.95) translateY(10px); box-shadow:0 4px 12px rgba(0,0,0,.08); }
   .card.anim { transition:transform .25s ease, opacity .25s ease; }
-  .ar-name { position:absolute; top:16px; left:20px; font-family:Amiri, serif; font-weight:700; font-size:30px; color:var(--q-name); line-height:1.4; }
-  .glyph { font-family:Amiri, serif; font-weight:700; font-size:min(170px, 40vw); line-height:1.3; color:var(--glyph); position:relative; }
-  .answer { position:absolute; bottom:18px; display:flex; flex-direction:column; align-items:center; font-size:24px; font-weight:700; color:#1d1d1b; }
-  .tap { position:absolute; bottom:24px; font-size:14px; color:#6b665c; }
-  .stamp { position:absolute; top:22px; padding:4px 12px; border:3px solid; border-radius:10px; font-weight:800; font-size:20px; opacity:0; text-transform:uppercase; letter-spacing:.04em; }
-  .stamp.k { left:50%; color:#2f7d4f; transform:translateX(-50%) rotate(-10deg); }
-  .stamp.m { left:50%; color:#c2410c; transform:translateX(-50%) rotate(10deg); }
+  .card.good { border-color:#2f7d4f; } .card.bad { border-color:#c2410c; }
+  .glyph { font-size:min(150px, 34vw); line-height:1.25; position:relative; }
+  .card.has-fams .glyph { margin-bottom:96px; }
+  .arname { color:#d6301f; font-size:40px; line-height:1.3; }
+  .verdict { font-size:15px; font-weight:800; } .verdict.good { color:#2f7d4f; } .verdict.bad { color:#c2410c; }
+  .stamp { position:absolute; top:22px; left:50%; padding:4px 12px; border:3px solid; border-radius:10px; font-weight:800; font-size:20px; opacity:0; text-transform:uppercase; }
+  .stamp.k { color:#2f7d4f; transform:translateX(-50%) rotate(-10deg); }
+  .stamp.m { color:#c2410c; transform:translateX(-50%) rotate(10deg); }
+  .hint { margin:0; text-align:center; font-size:13px; color:var(--muted); }
+
+  /* Family labels sit on the card: black when chosen, green or orange once the card is turned. */
+  .fams { position:absolute; left:12px; right:12px; bottom:14px; display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .fams .q { font-size:13px; font-weight:600; color:#6b665c; }
+  .fams .chips { display:flex; gap:8px; }
+  .chip { display:flex; align-items:center; gap:6px; height:40px; padding:0 14px; border-radius:999px; border:1px dashed #b9b2a3; background:#fff; color:#6b665c; font-size:14px; font-weight:600; }
+  .chip svg { width:16px; height:16px; }
+  .chip.on { border:2px solid #1d1d1b; background:#1d1d1b; color:#fff; font-weight:700; }
+  .chip.right { border:2px solid #2f7d4f; background:#e3f1e7; color:#2f7d4f; font-weight:700; }
+  .chip.wrong { border:2px solid #c2410c; background:#fdebe1; color:#c2410c; font-weight:700; }
+  .chip.off { border:1px solid #e2dccf; color:#b9b2a3; }
+  .fams .note { font-size:12px; color:#6b665c; }
+  .fams .res { font-size:13px; font-weight:700; } .fams .res.good { color:#2f7d4f; } .fams .res.bad { color:#c2410c; }
 
   /* The book draws the long ya with two dots below; no Unicode letter has them, so they are drawn. */
   .yb { position:relative; display:inline-block; }
   .yb::before, .yb::after { content:""; position:absolute; width:.1em; height:.1em; background:currentColor; transform:rotate(45deg); bottom:.06em; }
-  .yb::before { left:.36em; }
-  .yb::after { left:.52em; }
+  .yb::before { left:.36em; } .yb::after { left:.52em; }
 
-  /* Answer buttons */
   .actions { display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center; }
   .act { display:flex; flex-direction:column; align-items:center; gap:4px; border:0; background:none; font-size:13px; font-weight:600; }
   .act span { width:64px; height:64px; border-radius:50%; display:grid; place-items:center; border:2px solid; }
@@ -71,316 +120,302 @@
   .act.u svg { width:22px; height:22px; }
   .act:disabled { opacity:.35; cursor:default; }
 
-  /* Family quiz: the guess is a chip under the card; the card tells if it was right once turned. */
-  .switch { width:100%; display:flex; gap:12px; align-items:center; text-align:left; padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:var(--surface); cursor:pointer; font-size:13px; color:var(--muted); }
-  .switch b { display:block; font-size:15px; color:var(--ink); }
-  .switch input { width:22px; height:22px; accent-color:var(--accent); flex:0 0 auto; }
-  .fams { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .fam { padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface); font-weight:600; font-size:14px; }
-  .fam.on { border:2px solid var(--accent); background:var(--ok-bg); color:var(--ok); }
-  .fam.right { border:2px solid var(--ok); background:var(--ok-bg); color:var(--ok); }
-  .fam.wrong { border:2px solid var(--miss); background:var(--miss-bg); color:var(--miss); }
-  .famtag { font-size:14px; font-weight:600; color:#6b665c; margin-top:2px; }
+  /* Lesson 2 choices */
+  .q2 { font-size:14px; font-weight:700; }
+  .opts { display:grid; gap:8px; }
+  .opts.c4 { grid-template-columns:repeat(4, minmax(0, 1fr)); direction:rtl; }
+  .opts.c3 { grid-template-columns:repeat(3, minmax(0, 1fr)); }
+  .opt { position:relative; height:52px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); display:grid; place-items:center; font-size:15px; font-weight:600; }
+  .opt.ar { font-size:28px; }
+  .opt.on { border:2px solid var(--pick); background:var(--pick); color:var(--on-pick); }
+  .opt.right { border:2px solid var(--ok); background:var(--ok-bg); color:var(--ok); }
+  .opt.wrong { border:2px solid var(--miss); background:var(--miss-bg); color:var(--miss); }
+  .opt.missed { border:2px dashed var(--miss); color:var(--miss); }
+  .opt.dim { color:var(--faint); }
+  .opt .tag { position:absolute; top:-9px; left:50%; transform:translateX(-50%); padding:1px 6px; border-radius:999px; background:var(--miss); color:var(--on-accent); font:700 10px/1.4 system-ui, sans-serif; white-space:nowrap; }
+  .primary { min-height:56px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:18px; font-weight:700; }
+  .primary:disabled { opacity:.4; cursor:default; }
+  .secondary { min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-weight:600; }
+  .formrow { display:flex; gap:6px; direction:rtl; font-size:26px; }
+  .formrow span { min-width:50px; padding:0 4px; border-radius:8px; border:1px solid #e2dccf; text-align:center; color:#1d1d1b; }
+  .formrow span.on { border:2px solid #2f7d4f; background:#e3f1e7; }
+  .formrow small { display:block; font:600 10px/1.4 system-ui, sans-serif; color:#6b665c; }
+  .word { font-size:min(96px, 24vw); line-height:1.5; }
+  .parts { display:flex; gap:14px; direction:rtl; font-size:30px; }
 
-  /* Intro and stats */
-  .screen { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; text-align:center; }
-  .qhead { width:100%; display:flex; flex-direction:column; align-items:center; gap:10px; }
-  .bism { font-family:Amiri, serif; font-weight:700; font-size:clamp(28px, 9vw, 40px); line-height:1.6; }
-  .ribbons { width:100%; display:flex; gap:6px; font-family:Amiri, serif; font-weight:700; font-size:clamp(18px, 5.5vw, 24px); }
-  .ribbons span { padding:8px 14px 6px; color:#fff; line-height:1.7; }
-  .rg { background:var(--q-green); flex:0 0 auto; border-radius:4px 12px 12px 4px; }
-  .rr { background:var(--q-red); flex:1; border-radius:12px 4px 4px 12px; }
-  .muted { color:var(--muted); margin:0; font-size:14px; }
-  .primary { width:100%; padding:16px; font-size:18px; font-weight:700; border-radius:14px; border:0; background:var(--accent); color:var(--on-accent); }
-  .secondary { width:100%; padding:14px; font-weight:600; border-radius:14px; border:1px solid var(--line); background:var(--surface); }
-  .score { font-size:64px; font-weight:800; line-height:1; font-variant-numeric:tabular-nums; }
+  /* Stats */
+  .score { font-size:64px; font-weight:800; line-height:1; text-align:center; font-variant-numeric:tabular-nums; }
   .score small { font-size:26px; color:var(--muted); font-weight:600; }
-  .grid { width:100%; display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; direction:rtl; }
-  .mini { background:var(--card); border-radius:10px; border:1px solid var(--line); aspect-ratio:1; position:relative; display:flex; align-items:center; justify-content:center; }
-  .mini .g { font-family:Amiri, serif; font-weight:700; font-size:clamp(26px, 8vw, 36px); color:var(--glyph); line-height:1; }
-  .mini .n { position:absolute; top:2px; left:5px; font-family:Amiri, serif; font-size:11px; color:var(--q-name); }
-  .grid figure { margin:0; display:flex; flex-direction:column; gap:3px; font-size:10px; line-height:1.2; color:var(--muted); }
+  .grid { width:100%; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px; direction:rtl; }
+  .mini { background:var(--card); border-radius:10px; border:1px solid var(--line); aspect-ratio:1; position:relative; display:grid; place-items:center; color:#1d1d1b; }
+  .mini .g { font-size:clamp(24px, 8vw, 34px); line-height:1.3; }
+  .mini .n { position:absolute; top:2px; left:5px; font-size:11px; color:#d6301f; }
+  .mini .w { font-size:clamp(17px, 5vw, 24px); line-height:1.5; }
 
-  /* Full page */
-  .scrim { position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:flex-end; justify-content:center; }
-  .scrim.center { align-items:center; padding:16px; }
+  /* Full page of the book */
+  .scrim { position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:center; justify-content:center; padding:16px; }
   .paper { width:100%; max-width:520px; max-height:100%; overflow:auto; background:#fff; color:#1d1d1b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
   .paper .grid { gap:0; border:1px solid #333; }
-  .paper .mini { border:1px solid #333; border-radius:0; background:#fff; }
-  .paper .muted { color:#6b665c; text-align:center; }
-  @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } }
-  /* Lessons and exercise choice: big labelled options, one tap each. */
-  .tabs { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .tab { padding:10px 8px; border-radius:14px; border:1px solid var(--line); background:var(--surface); text-align:center; font-size:13px; color:var(--muted); }
-  .tab b { display:block; font-size:16px; color:var(--ink); }
-  .tab.on { border:2px solid var(--accent); background:var(--ok-bg); }
-  .tab.on b { color:var(--ok); }
-  .opts { width:100%; display:flex; flex-direction:column; gap:10px; }
-  .switch input[type=radio] { accent-color:var(--accent); }
-  .form-face { font-family:Amiri, serif; font-weight:700; font-size:min(150px, 36vw); line-height:1.3; color:var(--glyph); }
-  .word-face { font-family:Amiri, serif; font-weight:700; font-size:min(120px, 28vw); line-height:1.5; color:var(--glyph); }
-  .forms { display:flex; gap:6px; direction:rtl; font-family:Amiri, serif; font-weight:700; font-size:28px; }
-  .forms span { min-width:46px; padding:0 4px; border-radius:8px; border:1px solid #e2dccf; text-align:center; color:#1d1d1b; }
-  .forms span.on { border:2px solid #2f7d4f; background:#e3f1e7; }
-  .forms small { display:block; font:600 10px/1.2 system-ui, sans-serif; color:#6b665c; padding-bottom:3px; }
-  .parts { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; direction:rtl; font-size:15px; font-weight:600; }
-  .parts span b { font-family:Amiri, serif; font-size:24px; margin-left:4px; }
-  .answer .sub2 { font-size:15px; font-weight:600; color:#6b665c; }
-  .mini .w { font-family:Amiri, serif; font-weight:700; font-size:clamp(18px, 5.5vw, 26px); color:var(--glyph); line-height:1.4; }
-  .table { width:100%; border-collapse:collapse; direction:rtl; font-family:Amiri, serif; font-weight:700; font-size:24px; text-align:center; }
-  .table th { font:600 11px system-ui, sans-serif; color:#6b665c; padding:4px; }
-  .table td { border:1px solid #333; padding:0 2px; line-height:1.6; }
-  .table td.n { font:600 12px system-ui, sans-serif; }
-  .words { display:grid; grid-template-columns:repeat(5, 1fr); direction:rtl; border:1px solid #333; }
-  .words div { border:1px solid #333; text-align:center; font-family:Amiri, serif; font-weight:700; font-size:26px; line-height:1.7; }
+  .paper .mini { border:1px solid #333; border-radius:0; }
   .paper h3 { margin:6px 0 0; font-size:14px; text-align:center; }
+  .table { width:100%; border-collapse:collapse; direction:rtl; font-size:24px; text-align:center; }
+  .table th { font:600 11px system-ui, sans-serif; color:#6b665c; padding:4px; }
+  .table td { border:1px solid #333; line-height:1.6; }
+  .table td.n { color:#d6301f; font-size:18px; }
+  .words { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); direction:rtl; border:1px solid #333; }
+  .words div { border:1px solid #333; text-align:center; font-size:24px; line-height:1.7; }
+  @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="top">
-    <button class="tb" id="tReset" hidden>↺ Recommencer</button>
-    <h1 id="title">Alif Cards</h1>
-    <button class="tb end" id="tStop" hidden>Terminer</button>
-  </div>
 
-  <!-- Start -->
-  <section class="screen" id="intro">
-    <div class="qhead">
-      <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
-      <div class="ribbons" lang="ar" dir="rtl">
-        <span class="rg" id="hLesson"></span>
-        <span class="rr" id="hTitle"></span>
-      </div>
-    </div>
-    <div class="tabs">
-      <button class="tab" data-l="1"><b>Leçon 1</b>Les lettres seules</button>
-      <button class="tab" data-l="2"><b>Leçon 2</b>Les lettres liées</button>
-    </div>
-    <p class="muted" id="how"></p>
-    <div class="opts" id="opts1">
-      <label class="switch"><input type="checkbox" id="famOn"><span><b>En plus : classer chaque lettre</b>Deux boutons sous la carte : « Emphatique » (lettres lourdes : <bdi lang="ar">خ ص ض غ ط ق ظ</bdi>) ou « Prolongation » (<bdi lang="ar">ا و ي</bdi>). Touche celui qui correspond, ou aucun. Score à part à la fin.</span></label>
-    </div>
-    <div class="opts" id="opts2">
-      <label class="switch"><input type="radio" name="ex" value="forms" checked><span><b>Formes des lettres</b>Reconnais une lettre au début, au milieu ou à la fin d’un mot</span></label>
-      <label class="switch"><input type="radio" name="ex" value="words"><span><b>Lettres dans les mots</b>Retrouve les lettres de chaque mot du livre</span></label>
-    </div>
-    <label class="switch"><input type="checkbox" id="inOrder"><span><b>Suivre l’ordre du livre</b>Sinon les cartes arrivent au hasard</span></label>
-    <button class="primary" id="go">Commencer</button>
-    <button class="secondary" id="iPage">Voir toute la page</button>
+  <!-- Home -->
+  <section class="screen" id="home">
+    <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+    <button class="lesson" data-open="1">
+      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span></span>
+      <span class="sample ar" lang="ar">ا ب ت ث</span>
+      <span class="row"><span><b>Leçon 1 · Les lettres seules</b><span class="muted">Les 30 lettres de l’alphabet</span></span><span class="chev" aria-hidden="true">›</span></span>
+    </button>
+    <button class="lesson" data-open="2">
+      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الثَّانِي</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ</span></span>
+      <span class="sample ar" lang="ar"><span style="color:#1d8fd1">تحت</span> <span style="color:#e0302a">بلب</span></span>
+      <span class="row"><span><b>Leçon 2 · Les lettres liées</b><span class="muted">Les formes des lettres et les mots</span></span><span class="chev" aria-hidden="true">›</span></span>
+    </button>
   </section>
 
-  <!-- Study -->
-  <section id="play" hidden style="flex:1; min-height:0; display:flex; flex-direction:column; gap:12px;">
+  <!-- Lesson 1 -->
+  <section class="screen" id="l1" hidden>
+    <button class="ico home" aria-label="Accueil"></button>
+    <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span></div>
+    <button class="linkbtn" data-page="1"></button>
+    <div class="label">Réglages du tour</div>
+    <div class="settings">
+      <label><span><b>Lettres au hasard</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand1" checked></label>
+      <label><span><b>S’entraîner aussi aux familles</b><small>Indique aussi si la lettre est emphatique ou de prolongation</small></span><input type="checkbox" id="famOn"></label>
+    </div>
+    <button class="go" id="go1">Commencer les 30 lettres <span aria-hidden="true">›</span></button>
+  </section>
+
+  <!-- Lesson 2 -->
+  <section class="screen" id="l2" hidden>
+    <button class="ico home" aria-label="Accueil"></button>
+    <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الثَّانِي</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ</span></div>
+    <p class="muted center">Les lettres changent de forme quand elles sont liées.</p>
+    <button class="linkbtn" data-page="2"></button>
+    <div class="label">Réglages du tour</div>
+    <div class="settings">
+      <label><span><b>Cartes au hasard</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand2" checked></label>
+    </div>
+    <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Commencer les formes<small>Au début, au milieu, à la fin d’un mot</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Commencer les mots<small>Retrouve les lettres de chaque mot du livre</small></span><span aria-hidden="true">›</span></button>
+  </section>
+
+  <!-- A round -->
+  <section class="screen" id="play" hidden>
+    <div class="top">
+      <div class="left"><button class="ico home" aria-label="Accueil"></button><button class="ico" id="restart" aria-label="Recommencer le tour"></button></div>
+      <h1 id="count"></h1>
+      <button class="pillbtn" id="stop">Terminer</button>
+    </div>
     <div class="bar"><i id="barFill"></i></div>
-    <div class="tally"><span class="pill m" id="nMiss">0 à revoir</span><button class="tb" id="pPage" style="padding:4px 12px">Voir la page</button><span class="pill k" id="nOk">0 je sais</span></div>
+    <div class="tally"><span class="pill m" id="nBad"></span><button class="pillbtn" id="peek"></button><span class="pill k" id="nGood"></span></div>
     <div class="stage" id="stage"></div>
-    <div class="fams" id="fams" hidden>
-      <p class="muted" style="grid-column:1/-1; text-align:center">Cette lettre est… (rien si aucune)</p>
-      <button class="fam" data-f="emph">Emphatique</button>
-      <button class="fam" data-f="madd">Prolongation</button>
-    </div>
-    <div class="actions">
-      <button class="act m" id="bMiss"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></span>À revoir</button>
-      <button class="act u" id="bUndo"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></span>Retour</button>
-      <button class="act k" id="bOk"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>Je sais</button>
-    </div>
+    <div id="below" style="display:flex; flex-direction:column; gap:10px"></div>
   </section>
 
-  <!-- Stats -->
-  <section class="screen" id="stats" hidden>
-    <p class="muted" id="seen"></p>
+  <!-- End of a round -->
+  <section class="screen" id="stats" hidden style="justify-content:center">
+    <p class="muted center" id="seen"></p>
     <div class="score" id="score"></div>
-    <p class="muted" id="scoreText"></p>
-    <p class="muted" id="famText" hidden></p>
+    <p class="muted center" id="scoreText"></p>
+    <p class="center" id="famText" style="margin:0; font-size:14px; font-weight:600" hidden></p>
+    <p class="muted center" id="reviewLabel">À revoir :</p>
     <div class="grid" id="missed"></div>
     <button class="primary" id="review"></button>
-    <button class="secondary" id="again">Changer les options et recommencer</button>
+    <button class="secondary" id="again">Recommencer un tour</button>
+    <button class="secondary" id="toHome">Page d’accueil</button>
   </section>
 </div>
 
-<!-- Full page -->
-<div class="scrim center" id="page" hidden>
+<!-- The book's page -->
+<div class="scrim" id="page" hidden>
   <div class="paper">
-    <div class="qhead">
-      <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
-      <div class="ribbons" lang="ar" dir="rtl">
-        <span class="rg" id="pLesson"></span>
-        <span class="rr" id="pTitle"></span>
-      </div>
-    </div>
+    <div class="ribbons ar" lang="ar" dir="rtl" id="pageHead"></div>
     <div id="sheet"></div>
-    <p class="muted">Touche pour fermer</p>
+    <p class="muted center" style="color:#6b665c">Touche pour fermer</p>
   </div>
 </div>
 
 <script>
-// ---------- Lesson 1: the letters on their own (Noorani Qaida page 6), right to left, row by row.
-const NAMES = ["Alif","Ba","Ta","Tha","Jim","Ḥa","Kha","Dal","Dhal","Ra",
-  "Zay","Sin","Chin","Ṣad","Ḍad","Ṭa","Ẓa","Ayn","Ghayn","Fa",
-  "Qaf","Kaf","Lam","Mim","Noun","Waw","Ha","Hamza","Ya","Ya (long)"];
+const $ = id => document.getElementById(id);
+const ICONS = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  restart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+  undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+};
+
+// ---------- Lesson 1: the letters on their own (book page 6), right to left, row by row.
 const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
   "ق","ك","ل","م","ن","و","ه","ء","ی","ے"];
-// Red names as written above each letter in the book.
+// The names written in red above each letter in the book.
 const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
   "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
-// Emphatic (heavy) letters: خُصَّ ضَغْطٍ قِظْ. Prolongation letters: alif, waw, ya (both forms of ya).
-const EMPH = ["خ","ص","ض","غ","ط","ق","ظ"], MADD = ["ا","و","ی","ے"];
-const FAM_NAMES = { emph:"Emphatique", madd:"Prolongation", none:"Ni l’une ni l’autre" };
-
-const $ = id => document.getElementById(id);
+// Emphatic letters: kha, sad, dad, ghayn, ta, za, qaf. Prolongation letters: alif, waw, both ya.
+const EMPH = ["خ","ص","ض","غ","ط","ظ","ق"], MADD = ["ا","و","ی","ے"];
+const FAM = { emph:"Emphatique", madd:"Prolongation" };
 const glyph = g => g === "ے" ? `<span class="yb">ے</span>` : g;
 
-const LETTERS = NAMES.map((name, i) => {
-  const g = GLYPHS[i], ar = AR_NAMES[i];
-  return { name, ar, caption: name, unit: "lettre",
-    fam: EMPH.includes(g) ? "emph" : MADD.includes(g) ? "madd" : "none",
-    face: `<span class="glyph" lang="ar">${glyph(g)}</span>`,
-    answer: name,
-    mini: `<div class="mini"><span class="n" lang="ar">${ar}</span><span class="g" lang="ar">${glyph(g)}</span></div>` };
-});
+const LETTERS = GLYPHS.map((g, i) => ({ g, ar: AR_NAMES[i], fam: EMPH.includes(g) ? "emph" : MADD.includes(g) ? "madd" : "none",
+  mini: `<div class="mini ar"><span class="n" lang="ar">${AR_NAMES[i]}</span><span class="g" lang="ar">${glyph(g)}</span></div>` }));
 
-// ---------- Lesson 2: joined letters (pages 7 to 9).
-const NAME_OF = { "ي":"Ya", "ى":"Ya", "ة":"Ta marbuta", "أ":"Alif hamza", "ؤ":"Waw hamza", "ئ":"Ya hamza" };
-GLYPHS.forEach((g, i) => NAME_OF[g] = NAMES[i]);
-const T = "ـ";   // tatweel: shows where the letter joins
-// Letters that never join the next one: they only have an isolated and a final form.
-const RIGHT_ONLY = "اأإآدذرزوؤءةے";
+// ---------- Lesson 2: joined letters (book pages 7 to 9).
+const NAME_OF = { "ي":"يا", "ى":"يا", "ة":"تاء", "أ":"ألف", "ؤ":"واو", "ئ":"يا" };
+GLYPHS.forEach((g, i) => NAME_OF[g] = AR_NAMES[i]);
+const T = "ـ";   // tatweel shows where the letter joins
+const RIGHT_ONLY = "اأإآدذرزوؤءةے";   // letters that never join the next one
 const joinsNext = c => !RIGHT_ONLY.includes(c);
 const joinsPrev = c => c !== "ء";
 const POS = { iso:"seule", ini:"au début", med:"au milieu", fin:"à la fin" };
 const formOf = (g, p) => p === "iso" ? g : p === "ini" ? g + T : p === "med" ? T + g + T : T + g;
 const FORM_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","و","ه","ي"];
 const positions = g => joinsNext(g) ? ["iso","ini","med","fin"] : ["iso","fin"];
+// Letters that look alike, used as wrong choices so the question is not too easy.
+const LOOKALIKE = [["ب","ت","ث","ن","ي"],["ج","ح","خ"],["د","ذ"],["ر","ز"],["س","ش"],["ص","ض"],["ط","ظ"],["ع","غ"],["ف","ق"],["ك","ل"],["م","ه","و","ا"]];
 
 const FORMS = [];
-FORM_LETTERS.forEach(g => positions(g).filter(p => p !== "iso").forEach(p => {
-  const name = NAME_OF[g];
-  FORMS.push({ name, caption: `${name}, ${POS[p]}`, unit: "forme",
-    face: `<span class="form-face" lang="ar">${formOf(g, p)}</span>`,
-    answer: `${name}<span class="sub2">${POS[p]}</span><span class="forms" lang="ar">${positions(g).map(q =>
-      `<span class="${q === p ? "on" : ""}"><small>${POS[q]}</small>${formOf(g, q)}</span>`).join("")}</span>`,
-    mini: `<div class="mini"><span class="g" lang="ar">${formOf(g, p)}</span></div>` });
-}));
+FORM_LETTERS.forEach(g => positions(g).filter(p => p !== "iso").forEach(p => FORMS.push({ g, p,
+  mini: `<div class="mini ar"><span class="g" lang="ar">${formOf(g, p)}</span></div>` })));
 
 // Joined combinations from the book, in its order.
 const WORDS = ["بلب","كب","كا","بكت","تكث","نا","تا","يا","ثا","بس","يس","نس","تس","تش","ثج","تح","نخ","يح","بج","يم","بم","نم","تم","ثم",
   "نبل","تنل","بيل","يتل","ثل","بنن","تين","يتن","حث","خب","جت","تحت","يجب","بخت","به","يه","ته","نه","يهب","بها","بهم",
   "جد","خذ","جر","خز","ير","تر","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ","قو","فو","فقل","قفل","يف","حم","لم","تمت"];
-// Colours like the book, one per letter, so each letter stands out inside the word.
 const INKS = ["#e0302a", "#2f8f3a", "#1d8fd1", "#1d1d1b"];
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 function coloured(w) {
   const c = [...w];
   return c.map((ch, i) => {
-    const before = i > 0 && joinsNext(c[i - 1]) && joinsPrev(ch) ? "\u200d" : "";
-    const after = i < c.length - 1 && joinsNext(ch) && joinsPrev(c[i + 1]) ? "\u200d" : "";
+    const before = i > 0 && joinsNext(c[i - 1]) && joinsPrev(ch) ? "‍" : "";
+    const after = i < c.length - 1 && joinsNext(ch) && joinsPrev(c[i + 1]) ? "‍" : "";
     return `<span style="color:${INKS[i % INKS.length]}">${before}${ch}${after}</span>`;
   }).join("");
 }
-const WORD_CARDS = WORDS.map(w => {
-  const parts = [...w];
-  return { name: w, caption: parts.map(c => NAME_OF[c]).join(" + "), unit: "mot",
-    face: `<span class="word-face" lang="ar">${w}</span>`,
-    faceShown: `<span class="word-face" lang="ar">${coloured(w)}</span>`,
-    answer: `<span class="parts" lang="ar">${parts.map((c, i) => `<span style="color:${INKS[i % INKS.length]}"><b>${c}</b>${NAME_OF[c]}</span>`).join("")}</span>`,
-    mini: `<div class="mini"><span class="w" lang="ar">${coloured(w)}</span></div>` };
-});
+const WORD_CARDS = WORDS.map(w => ({ w, mini: `<div class="mini ar"><span class="w" lang="ar">${coloured(w)}</span></div>` }));
 
-const LESSONS = {
-  1: { head: "الدَّرْسُ الْأَوَّلُ", title: "حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ",
-       how: "Dis le nom de la lettre, touche la carte pour vérifier.<br>Glisse à droite si tu sais, à gauche si c’est à revoir." },
-  2: { head: "الدَّرْسُ الثَّانِي", title: "حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ",
-       how: "Les lettres changent de forme quand elles sont liées.<br>Dis ce que tu reconnais, touche la carte pour vérifier, puis glisse." },
-};
-const ROUND = 30;   // cards per round when shuffled; in book order the whole list is used
+// ---------- Helpers
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const ROUND = 30;   // cards per shuffled round in lesson 2
 
-let lesson = 1, deck = [], answers = [], shown = false, famQuiz = false, guess = "none";
-
-function shuffle(a) {
-  a = a.slice();
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
+function choicesFor(letters, n) {
+  const want = new Set(letters);
+  const near = shuffle(LOOKALIKE.filter(grp => grp.some(c => want.has(c))).flat().filter(c => !want.has(c)));
+  const rest = shuffle(FORM_LETTERS.filter(c => !want.has(c) && !near.includes(c)));
+  return shuffle([...want, ...[...new Set([...near, ...rest])].slice(0, n - want.size)]);
 }
 
-function setLesson(n) {
-  lesson = n;
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", +t.dataset.l === n));
-  $("hLesson").textContent = $("pLesson").textContent = LESSONS[n].head;
-  $("hTitle").textContent = $("pTitle").textContent = LESSONS[n].title;
-  $("how").innerHTML = LESSONS[n].how;
-  $("opts1").hidden = n !== 1;
-  $("opts2").hidden = n !== 2;
-  $("sheet").innerHTML = n === 1 ? sheet1() : sheet2();
-}
+// ---------- State
+let mode = "letters", deck = [], source = [], answers = [], pos = 0;
+let shown = false, famQuiz = false, guess = "none", pick = {}, checked = false;
 
-function show(id) {
-  ["intro", "play", "stats"].forEach(s => $(s).hidden = s !== id);
-  $("tReset").hidden = $("tStop").hidden = id !== "play";
-  if (id === "intro") $("title").textContent = "Alif Cards";
-}
-
-function lessonCards() {
-  if (lesson === 1) return LETTERS;
-  return document.querySelector("input[name=ex]:checked").value === "words" ? WORD_CARDS : FORMS;
-}
+function show(id) { ["home","l1","l2","play","stats"].forEach(s => $(s).hidden = s !== id); }
 
 function start(cards) {
-  const all = cards || lessonCards();
-  deck = $("inOrder").checked ? all.slice() : shuffle(all).slice(0, cards ? all.length : ROUND);
+  source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
+  const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
+  deck = random ? shuffle(source) : source.slice();
+  if (random && mode !== "letters") deck = deck.slice(0, ROUND);
+  deck.forEach(i => delete i.choices);
   answers = [];
+  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : "Voir les mots";
+  $("peek").dataset.page = mode === "letters" ? 1 : 2;
   show("play");
   render();
 }
 
-function cardHTML(c, id, cls) {
-  return `<div class="card ${cls}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte, touche pour voir la réponse">
-    ${c.ar ? `<span class="ar-name" lang="ar">${c.ar}</span>` : ""}
-    <span class="face">${c.face}</span>
-    <span class="tap">Touche pour voir la réponse</span>
-    <span class="answer" hidden>${c.answer}${famQuiz ? `<span class="famtag">${FAM_NAMES[c.fam]}</span>` : ""}</span>
-    <span class="stamp k">Je sais</span><span class="stamp m">À revoir</span>
+function render() {
+  pos = answers.length;
+  if (pos >= deck.length) return showStats();
+  shown = false; checked = false; guess = "none"; pick = {};
+  const good = answers.filter(a => a.ok).length, bad = pos - good;
+  $("count").textContent = `${pos + 1} / ${deck.length}`;
+  $("barFill").style.width = `${pos / deck.length * 100}%`;
+  $("nGood").textContent = mode === "letters" ? `${good} reconnue${good > 1 ? "s" : ""}` : `${good} juste${good > 1 ? "s" : ""}`;
+  $("nBad").textContent = mode === "letters" ? `${bad} à revoir` : `${bad} fausse${bad > 1 ? "s" : ""}`;
+  if (mode === "letters") renderLetter(); else renderQuiz();
+}
+
+// ---------- Lesson 1: swipe cards
+function letterCard(l, id, cls) {
+  const fams = famQuiz ? `<div class="fams" data-fams>
+      <span class="q">Cette lettre est :</span>
+      <span class="chips">${["emph","madd"].map(f => `<button class="chip" data-f="${f}">${ICONS.plus}${FAM[f]}</button>`).join("")}</span>
+      <span class="note">Rien de sélectionné = ni l’une ni l’autre</span></div>` : "";
+  return `<div class="card swipe ${cls} ${famQuiz ? "has-fams" : ""}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte, touche pour voir la réponse">
+    <span class="glyph ar" lang="ar">${glyph(l.g)}</span>
+    <span class="arname ar" lang="ar" hidden>${l.ar}</span>
+    ${fams}
+    <span class="stamp k">Reconnue</span><span class="stamp m">À revoir</span>
   </div>`;
 }
 
-function render() {
-  const pos = answers.length;
-  if (pos >= deck.length) return showStats();
-  shown = false;
-  guess = "none";
-  $("fams").hidden = !famQuiz;
-  if (famQuiz) paintFams();
-  const ok = answers.filter(a => a.ok).length;
-  $("title").textContent = `${pos + 1} / ${deck.length}`;
-  $("barFill").style.width = `${pos / deck.length * 100}%`;
-  $("nOk").textContent = `${ok} je sais`;
-  $("nMiss").textContent = `${pos - ok} à revoir`;
-  $("bUndo").disabled = pos === 0;
-  const nextCard = deck[pos + 1];
-  $("stage").innerHTML = (nextCard ? cardHTML(nextCard, "", "under") : "") + cardHTML(deck[pos], "card", "");
-  bindCard($("card"));
+function renderLetter() {
+  const next = deck[pos + 1];
+  $("stage").innerHTML = (next ? letterCard(next, "", "under") : "") + letterCard(deck[pos], "card", "");
+  $("below").innerHTML = `<p class="hint" id="hint">Touche la carte pour voir la réponse</p>
+    <div class="actions">
+      <button class="act m" id="bMiss"><span>${ICONS.x}</span>À revoir</button>
+      <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
+      <button class="act k" id="bOk"><span>${ICONS.check}</span>Je la reconnais</button>
+    </div>`;
+  $("bMiss").onclick = () => answer(false);
+  $("bOk").onclick = () => answer(true);
+  $("bUndo").onclick = undo;
+  const c = $("card");
+  c.querySelectorAll(".chip").forEach(b => b.addEventListener("click", e => {
+    e.stopPropagation();
+    if (shown) return;
+    guess = guess === b.dataset.f ? "none" : b.dataset.f;
+    paintFams();
+  }));
+  bindSwipe(c);
 }
 
-// Before the card is turned the chips show the guess; after, whether it was right.
 function paintFams() {
-  const l = deck[answers.length];
-  document.querySelectorAll(".fam").forEach(b => {
+  const c = $("card"), l = deck[pos];
+  if (!c || !famQuiz) return;
+  c.querySelectorAll(".chip").forEach(b => {
     const f = b.dataset.f;
-    b.className = "fam" + (!shown ? (guess === f ? " on" : "")
-      : f === l.fam ? " right" : guess === f ? " wrong" : "");
+    b.className = "chip " + (!shown ? (guess === f ? "on" : "")
+      : f === l.fam ? (guess === f ? "right" : "wrong") : guess === f ? "wrong" : "off");
+    b.innerHTML = (!shown && guess === f) || (shown && f === l.fam) ? ICONS.check + FAM[f] : (shown ? "" : ICONS.plus) + FAM[f];
   });
+  const box = c.querySelector("[data-fams]");
+  let res = box.querySelector(".res");
+  if (shown) {
+    const ok = guess === l.fam, what = l.fam === "none" ? "ni emphatique ni de prolongation" : l.fam === "emph" ? "lettre emphatique" : "lettre de prolongation";
+    if (!res) { res = document.createElement("span"); box.appendChild(res); }
+    res.className = "res " + (ok ? "good" : "bad");
+    res.textContent = `${ok ? "Juste" : "Faux"} : ${what}`;
+    box.querySelector(".note").hidden = true;
+  } else if (res) { res.remove(); box.querySelector(".note").hidden = false; }
 }
 
 function flip() {
   shown = !shown;
-  if (famQuiz) paintFams();
-  const c = $("card"), item = deck[answers.length];
-  c.querySelector(".answer").hidden = !shown;
-  c.querySelector(".tap").hidden = shown;
-  if (item.faceShown) c.querySelector(".face").innerHTML = shown ? item.faceShown : item.face;
+  const c = $("card");
+  c.querySelector(".arname").hidden = !shown;
+  $("hint").textContent = shown ? "Glisse à droite si tu la reconnais, à gauche si c’est à revoir" : "Touche la carte pour voir la réponse";
+  paintFams();
 }
 
-// Throws the card off screen, then records the answer.
 function answer(ok) {
   const c = $("card");
   if (!c || c.dataset.gone) return;
@@ -388,17 +423,16 @@ function answer(ok) {
   c.classList.add("anim");
   c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`;
   c.style.opacity = 0;
-  const l = deck[answers.length];
-  setTimeout(() => { answers.push({ l, ok, famOk: guess === l.fam }); render(); }, 220);
+  const l = deck[pos];
+  setTimeout(() => { answers.push({ item: l, ok, famOk: guess === l.fam }); render(); }, 220);
 }
-
 function undo() { if (answers.length) { answers.pop(); render(); } }
 
 // Swipe with a finger (touch events, which iPhone Safari handles best), a mouse, or two fingers on a trackpad.
-function bindCard(c) {
-  let x0 = null, y0 = 0, dx = 0, dy = 0;
+function bindSwipe(c) {
+  let x0 = null, y0 = 0, dx = 0, dy = 0, onChip = false;
   const stampK = c.querySelector(".stamp.k"), stampM = c.querySelector(".stamp.m");
-  const begin = (x, y) => { x0 = x; y0 = y; dx = dy = 0; c.classList.remove("anim"); };
+  const begin = (x, y, t) => { onChip = !!t.closest(".chip"); x0 = x; y0 = y; dx = dy = 0; c.classList.remove("anim"); };
   const move = (x, y) => {
     if (x0 === null) return;
     dx = x - x0; dy = y - y0;
@@ -414,97 +448,170 @@ function bindCard(c) {
     c.classList.add("anim");
     c.style.transform = ""; c.style.borderColor = "transparent";
     stampK.style.opacity = stampM.style.opacity = 0;
-    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) flip();
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8 && !onChip) flip();
   };
-  c.addEventListener("touchstart", e => { const t = e.touches[0]; begin(t.clientX, t.clientY); }, { passive: true });
+  c.addEventListener("touchstart", e => { const t = e.touches[0]; begin(t.clientX, t.clientY, e.target); }, { passive: true });
   c.addEventListener("touchmove", e => { e.preventDefault(); const t = e.touches[0]; move(t.clientX, t.clientY); }, { passive: false });
-  c.addEventListener("touchend", e => { e.preventDefault(); finish(); });
+  c.addEventListener("touchend", e => {
+    const tapChip = onChip && Math.abs(dx) < 8;
+    finish();
+    if (tapChip) return;   // let the chip receive its click
+    e.preventDefault();
+  });
   c.addEventListener("touchcancel", finish);
   c.addEventListener("mousedown", e => {
-    begin(e.clientX, e.clientY);
+    begin(e.clientX, e.clientY, e.target);
     const mm = ev => move(ev.clientX, ev.clientY);
     const mu = () => { removeEventListener("mousemove", mm); removeEventListener("mouseup", mu); finish(); };
     addEventListener("mousemove", mm); addEventListener("mouseup", mu);
   });
 }
 
-// Two-finger sideways swipe on a laptop trackpad.
 let wheelSum = 0, wheelTimer = null, wheelLock = false;
 document.addEventListener("wheel", e => {
-  if ($("play").hidden || wheelLock || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+  if ($("play").hidden || mode !== "letters" || wheelLock || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
   e.preventDefault();
   wheelSum -= e.deltaX;
   clearTimeout(wheelTimer);
   wheelTimer = setTimeout(() => wheelSum = 0, 200);
-  if (Math.abs(wheelSum) > 120) {
-    answer(wheelSum > 0);
-    wheelSum = 0; wheelLock = true;
-    setTimeout(() => wheelLock = false, 700);
-  }
+  if (Math.abs(wheelSum) > 120) { answer(wheelSum > 0); wheelSum = 0; wheelLock = true; setTimeout(() => wheelLock = false, 700); }
 }, { passive: false });
 
-// Stats count only the cards answered, so a round can stop early.
+// ---------- Lesson 2: choose, check, next
+function renderQuiz() {
+  const it = deck[pos];
+  if (mode === "forms") {
+    it.choices = it.choices || choicesFor([it.g], 4);
+    $("stage").innerHTML = `<div class="card" id="card"><span class="glyph ar" lang="ar">${formOf(it.g, it.p)}</span></div>`;
+    $("below").innerHTML = `<div class="q2">Quelle lettre ?</div>
+      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${c}</button>`).join("")}</div>
+      <div class="q2">Où dans le mot ?</div>
+      <div class="opts c3">${["ini","med","fin"].map(p => `<button class="opt" data-k="pos" data-v="${p}">${POS[p][0].toUpperCase() + POS[p].slice(1)}</button>`).join("")}</div>
+      <button class="primary" id="check" disabled>Vérifier</button>`;
+  } else {
+    const letters = [...new Set(it.w)];
+    it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
+    $("stage").innerHTML = `<div class="card" id="card"><span class="word ar" lang="ar">${it.w}</span></div>`;
+    $("below").innerHTML = `<div class="q2">Touche chaque lettre présente dans le mot</div>
+      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${c}</button>`).join("")}</div>
+      <p class="hint" style="text-align:left">Une lettre présente deux fois se touche une seule fois.</p>
+      <button class="primary" id="check" disabled>Vérifier</button>`;
+    pick.multi = new Set();
+  }
+  $("below").querySelectorAll(".opt").forEach(b => b.onclick = () => choose(b));
+  $("check").onclick = check;
+}
+
+function choose(b) {
+  if (checked) return;
+  const k = b.dataset.k, v = b.dataset.v;
+  if (k === "multi") { pick.multi.has(v) ? pick.multi.delete(v) : pick.multi.add(v); b.classList.toggle("on"); }
+  else { pick[k] = v; $("below").querySelectorAll(`.opt[data-k="${k}"]`).forEach(o => o.classList.toggle("on", o === b)); }
+  $("check").disabled = mode === "forms" ? !(pick.letter && pick.pos) : !pick.multi.size;
+}
+
+function check() {
+  checked = true;
+  const it = deck[pos], card = $("card");
+  let ok;
+  if (mode === "forms") {
+    ok = pick.letter === it.g && pick.pos === it.p;
+    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste !" : "Faux"}</span>
+      <span class="glyph ar" lang="ar" style="font-size:min(100px, 24vw)">${formOf(it.g, it.p)}</span>
+      <span style="font-weight:700"><span class="ar" lang="ar" style="color:#d6301f; font-size:26px">${NAME_OF[it.g]}</span> · ${POS[it.p]}</span>
+      <span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`;
+    $("below").querySelectorAll(".opt").forEach(o => {
+      const right = o.dataset.k === "letter" ? o.dataset.v === it.g : o.dataset.v === it.p;
+      const chosen = o.classList.contains("on");
+      o.className = "opt" + (o.dataset.k === "letter" ? " ar" : "") + (right ? " right" : chosen ? " wrong" : " dim");
+    });
+  } else {
+    const want = new Set(it.w), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
+    ok = !missed.length && !extra.length;
+    const verdict = ok ? "Juste !" : `Presque : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
+    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "Faux" : verdict}</span>
+      <span class="word ar" lang="ar">${coloured(it.w)}</span>
+      <span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${c}</span>`).join("")}</span>`;
+    $("below").querySelectorAll(".opt").forEach(o => {
+      const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
+      o.className = "opt ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " dim");
+      if (inWord && !chosen) o.innerHTML += `<span class="tag">oubliée</span>`;
+      if (!inWord && chosen) o.innerHTML += `<span class="tag">en trop</span>`;
+    });
+    $("below").querySelector(".hint").hidden = true;
+  }
+  card.classList.add(ok ? "good" : "bad");
+  answers.push({ item: it, ok });
+  const good = answers.filter(a => a.ok).length, bad = answers.length - good;
+  $("nGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
+  $("nBad").textContent = `${bad} fausse${bad > 1 ? "s" : ""}`;
+  $("barFill").style.width = `${answers.length / deck.length * 100}%`;
+  const btn = $("check");
+  btn.textContent = answers.length >= deck.length ? "Voir le résultat" : "Suivant";
+  btn.onclick = render;
+}
+
+// ---------- End of a round: only the cards answered count, so a round can stop early.
 function showStats() {
-  const done = answers.length, unit = deck[0] ? deck[0].unit : "carte";
-  const ok = answers.filter(a => a.ok).length;
-  const famWrong = famQuiz ? answers.filter(a => !a.famOk) : [];
-  const toReview = answers.filter(a => !a.ok || (famQuiz && !a.famOk)).map(a => a.l);
-  const plural = n => `${n} ${unit}${n > 1 ? "s" : ""}`;
+  const done = answers.length, good = answers.filter(a => a.ok).length;
+  const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
+  const toReview = answers.filter(a => !a.ok || (mode === "letters" && famQuiz && !a.famOk)).map(a => a.item);
+  const unit = mode === "letters" ? "lettre" : mode === "forms" ? "forme" : "mot";
+  const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`;
   show("stats");
-  $("title").textContent = "Résultat";
-  $("seen").textContent = done < deck.length ? `Tour arrêté après ${plural(done)} sur ${deck.length}` : `Tour terminé : ${plural(deck.length)}`;
-  $("score").innerHTML = `${ok}<small> / ${done}</small>`;
-  $("scoreText").textContent = !done ? "Aucune carte répondue." : toReview.length
-    ? `Tu reconnais ${Math.round(ok / done * 100)} % des ${unit}s. À revoir :`
-    : `Tu reconnais toutes les ${unit}s. Bravo !`;
-  $("famText").hidden = !famQuiz || !done;
-  $("famText").textContent = `Familles : ${done - famWrong.length} / ${done} justes`;
-  $("missed").innerHTML = toReview.map(l => `<figure>${l.mini}${l.caption}${famQuiz && l.fam !== "none" ? `<br>${FAM_NAMES[l.fam]}` : ""}</figure>`).join("");
+  $("seen").textContent = done < deck.length ? `Tour arrêté après ${n(done)} sur ${deck.length}` : `Tour terminé : ${n(deck.length)}`;
+  $("score").innerHTML = `${good}<small> / ${done}</small>`;
+  $("scoreText").textContent = !done ? "Aucune carte répondue." : mode === "letters"
+    ? `Tu reconnais ${Math.round(good / done * 100)} % des lettres.` : `${Math.round(good / done * 100)} % de bonnes réponses.`;
+  $("famText").hidden = !(mode === "letters" && famQuiz && done);
+  $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
+  $("reviewLabel").hidden = !toReview.length;
+  $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
-  $("review").textContent = `Revoir : ${plural(toReview.length)}`;
+  $("review").textContent = `Revoir : ${n(toReview.length)}`;
   $("review").onclick = () => start(toReview);
 }
 
-// What "Voir toute la page" shows for each lesson.
-function sheet1() {
-  return `<div class="grid" style="gap:0; border:1px solid #333">${LETTERS.map(l => l.mini).join("")}</div>`;
-}
-function sheet2() {
-  return `<h3>Les formes des lettres</h3>
-    <table class="table"><tr><th>Nom</th><th>${POS.iso}</th><th>${POS.ini}</th><th>${POS.med}</th><th>${POS.fin}</th></tr>
-    ${FORM_LETTERS.map(g => `<tr><td class="n">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
-      `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
-    <h3>Les lettres dans les mots</h3>
-    <div class="words">${WORDS.map(w => `<div lang="ar">${coloured(w)}</div>`).join("")}</div>`;
+// ---------- The book's page
+function openPage(n) {
+  $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>`
+    : `<span class="rg">الدَّرْسُ الثَّانِي</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ</span>`;
+  $("sheet").innerHTML = n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
+    : `<h3>Les formes des lettres</h3>
+      <table class="table ar"><tr><th></th>${["iso","ini","med","fin"].map(p => `<th>${POS[p]}</th>`).join("")}</tr>
+      ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
+        `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
+      <h3>Les lettres dans les mots</h3>
+      <div class="words ar">${WORDS.map(w => `<div lang="ar">${coloured(w)}</div>`).join("")}</div>`;
+  $("page").hidden = false;
 }
 
-const openPage = () => $("page").hidden = false;
-document.querySelectorAll(".tab").forEach(t => t.onclick = () => setLesson(+t.dataset.l));
-$("iPage").onclick = $("pPage").onclick = openPage;
-$("tReset").onclick = () => start();
-$("tStop").onclick = showStats;
-$("page").onclick = () => $("page").hidden = true;
-$("go").onclick = () => { famQuiz = lesson === 1 && $("famOn").checked; start(); };
-document.querySelectorAll(".fam").forEach(b => b.onclick = () => {
-  if (shown) return;
-  guess = guess === b.dataset.f ? "none" : b.dataset.f;
-  paintFams();
+// ---------- Wiring
+document.querySelectorAll(".ico.home").forEach(b => { b.innerHTML = ICONS.home; b.onclick = () => show("home"); });
+$("restart").innerHTML = ICONS.restart;
+document.querySelectorAll(".linkbtn").forEach(b => {
+  b.innerHTML = ICONS.grid + (b.dataset.page === "1" ? "Revoir l’alphabet complet, comme dans le livre" : "Revoir toutes les formes et les mots du livre");
+  b.onclick = () => openPage(+b.dataset.page);
 });
-$("again").onclick = () => show("intro");
-$("bOk").onclick = () => answer(true);
-$("bMiss").onclick = () => answer(false);
-$("bUndo").onclick = undo;
+document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
+$("go1").onclick = () => { mode = "letters"; famQuiz = $("famOn").checked; start(); };
+$("goForms").onclick = () => { mode = "forms"; famQuiz = false; start(); };
+$("goWords").onclick = () => { mode = "words"; famQuiz = false; start(); };
+$("restart").onclick = () => start(source);
+$("stop").onclick = showStats;
+$("peek").onclick = () => openPage(+$("peek").dataset.page);
+$("again").onclick = () => start(source);
+$("toHome").onclick = () => show("home");
+$("page").onclick = () => $("page").hidden = true;
 
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") { $("page").hidden = true; return; }
-  if ($("play").hidden || !$("page").hidden) return;
+  if ($("play").hidden || !$("page").hidden || mode !== "letters") return;
   if (e.key === "ArrowRight") answer(true);
   else if (e.key === "ArrowLeft") answer(false);
   else if (e.key === "Backspace") undo();
   else if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
 });
-
-setLesson(1);
 </script>
 </body>
 </html>
