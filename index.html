@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Qaida Nourania</title>
+<title>Cours d’arabe</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
 <link rel="icon" href="data:,">
@@ -174,8 +174,19 @@
 <body>
 <div class="app">
 
+  <!-- Code to enter -->
+  <section class="screen" id="gate" style="justify-content:center">
+    <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
+    <form id="gateForm" style="display:flex; flex-direction:column; gap:12px">
+      <label for="code" style="font-weight:700; text-align:center">Code de la classe</label>
+      <input id="code" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" style="height:52px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); padding:0 14px; font:inherit; font-size:18px; text-align:center">
+      <p class="muted center" id="gateMsg" aria-live="polite"></p>
+      <button class="primary" type="submit">Entrer</button>
+    </form>
+  </section>
+
   <!-- Home -->
-  <section class="screen" id="home">
+  <section class="screen" id="home" hidden>
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <button class="lesson" data-open="1">
       <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span></span>
@@ -332,7 +343,7 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = "none", pick = {}, checked = false;
 
-function show(id) { ["home","l1","l2","play","stats"].forEach(s => $(s).hidden = s !== id); }
+function show(id) { ["gate","home","l1","l2","play","stats"].forEach(s => $(s).hidden = s !== id); }
 
 function start(cards) {
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
@@ -603,6 +614,19 @@ function openPage(n) {
       <div class="words ar">${WORDS.map(w => `<div lang="ar">${coloured(w)}</div>`).join("")}</div>`;
   $("page").hidden = false;
 }
+
+// ---------- Class code. A simple lock for a class site: it keeps out passers-by, not someone who reads the page's code.
+const CODE_HASH = "17f43f0fc90e612fd5274b26b7d2ab9c43d7dc2b2f86a6fa0fc402f09a24aa92";
+const sha256 = async t => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)))].map(b => b.toString(16).padStart(2, "0")).join("");
+const remembered = () => { try { return localStorage.getItem("classCode") === CODE_HASH; } catch { return false; } };
+$("gateForm").onsubmit = async e => {
+  e.preventDefault();
+  const h = await sha256($("code").value.trim().toLowerCase());
+  if (h !== CODE_HASH) { $("gateMsg").textContent = "Code incorrect, demande-le à ton professeur."; return; }
+  try { localStorage.setItem("classCode", h); } catch {}
+  show("home");
+};
+show(remembered() ? "home" : "gate");
 
 // ---------- Wiring
 document.querySelectorAll(".ico.home").forEach(b => { b.innerHTML = ICONS.home; b.onclick = () => show("home"); });
