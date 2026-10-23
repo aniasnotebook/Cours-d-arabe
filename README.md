@@ -1,6 +1,11 @@
 # Cours d'arabe
 
-Alif Cards : un jeu pour apprendre les 30 lettres de la leçon 1 de la Qaida Nourania (حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ).
+Alif Cards : un jeu pour apprendre l'alphabet avec la Qaida Nourania.
+
+- **Leçon 1** (حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ) : les 30 lettres seules, avec un quiz optionnel des familles.
+- **Leçon 2** (حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ) : les formes des lettres au début, au milieu et à la fin d'un mot, et les lettres qui composent chaque mot du livre (chaque lettre en couleur).
+
+Par défaut les cartes arrivent au hasard (30 par tour) ; « Suivre l'ordre du livre » les donne toutes dans l'ordre.
 
 - Une lettre à la fois : dis son nom, touche la carte pour vérifier.
 - Glisse à droite pour « Je sais », à gauche pour « À revoir » (ou les boutons ✓ et ✗). Retour annule la dernière carte.

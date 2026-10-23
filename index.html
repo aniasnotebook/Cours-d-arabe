@@ -18,7 +18,7 @@
           --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; color-scheme:dark; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
-  html, body { height:100%; }
+  html, body { height:100%; overscroll-behavior:none; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
          display:flex; flex-direction:column; align-items:center; overflow:hidden;
          padding-block:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
@@ -103,15 +103,37 @@
 
   /* Full page */
   .scrim { position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:flex-end; justify-content:center; }
-  .seg { display:grid; grid-template-columns:1fr 1fr; background:var(--bg); border-radius:12px; padding:4px; }
-  .seg button { border:0; background:none; padding:10px; border-radius:9px; color:var(--muted); font-weight:600; }
-  .seg button.on { background:var(--accent); color:var(--on-accent); }
   .scrim.center { align-items:center; padding:16px; }
   .paper { width:100%; max-width:520px; max-height:100%; overflow:auto; background:#fff; color:#1d1d1b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
   .paper .grid { gap:0; border:1px solid #333; }
   .paper .mini { border:1px solid #333; border-radius:0; background:#fff; }
   .paper .muted { color:#6b665c; text-align:center; }
   @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } }
+  /* Lessons and exercise choice: big labelled options, one tap each. */
+  .tabs { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .tab { padding:10px 8px; border-radius:14px; border:1px solid var(--line); background:var(--surface); text-align:center; font-size:13px; color:var(--muted); }
+  .tab b { display:block; font-size:16px; color:var(--ink); }
+  .tab.on { border:2px solid var(--accent); background:var(--ok-bg); }
+  .tab.on b { color:var(--ok); }
+  .opts { width:100%; display:flex; flex-direction:column; gap:10px; }
+  .switch input[type=radio] { accent-color:var(--accent); }
+  .form-face { font-family:Amiri, serif; font-weight:700; font-size:min(150px, 36vw); line-height:1.3; color:var(--glyph); }
+  .word-face { font-family:Amiri, serif; font-weight:700; font-size:min(120px, 28vw); line-height:1.5; color:var(--glyph); }
+  .forms { display:flex; gap:6px; direction:rtl; font-family:Amiri, serif; font-weight:700; font-size:28px; }
+  .forms span { min-width:46px; padding:0 4px; border-radius:8px; border:1px solid #e2dccf; text-align:center; color:#1d1d1b; }
+  .forms span.on { border:2px solid #2f7d4f; background:#e3f1e7; }
+  .forms small { display:block; font:600 10px/1.2 system-ui, sans-serif; color:#6b665c; padding-bottom:3px; }
+  .parts { display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; direction:rtl; font-size:15px; font-weight:600; }
+  .parts span b { font-family:Amiri, serif; font-size:24px; margin-left:4px; }
+  .answer .sub2 { font-size:15px; font-weight:600; color:#6b665c; }
+  .mini .w { font-family:Amiri, serif; font-weight:700; font-size:clamp(18px, 5.5vw, 26px); color:var(--glyph); line-height:1.4; }
+  .table { width:100%; border-collapse:collapse; direction:rtl; font-family:Amiri, serif; font-weight:700; font-size:24px; text-align:center; }
+  .table th { font:600 11px system-ui, sans-serif; color:#6b665c; padding:4px; }
+  .table td { border:1px solid #333; padding:0 2px; line-height:1.6; }
+  .table td.n { font:600 12px system-ui, sans-serif; }
+  .words { display:grid; grid-template-columns:repeat(5, 1fr); direction:rtl; border:1px solid #333; }
+  .words div { border:1px solid #333; text-align:center; font-family:Amiri, serif; font-weight:700; font-size:26px; line-height:1.7; }
+  .paper h3 { margin:6px 0 0; font-size:14px; text-align:center; }
 </style>
 </head>
 <body>
@@ -127,17 +149,23 @@
     <div class="qhead">
       <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
       <div class="ribbons" lang="ar" dir="rtl">
-        <span class="rg">الدَّرْسُ الْأَوَّلُ</span>
-        <span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>
+        <span class="rg" id="hLesson"></span>
+        <span class="rr" id="hTitle"></span>
       </div>
-      <p class="muted">Leçon 1 · Les 30 lettres de l’alphabet</p>
     </div>
-    <p class="muted">Dis le nom de la lettre, touche la carte pour vérifier.<br>Glisse à droite si tu sais, à gauche si c’est à revoir.</p>
-    <div class="seg" style="width:100%; background:var(--surface); border:1px solid var(--line)">
-      <button id="mOrder" class="on">Dans l’ordre</button>
-      <button id="mRandom">Au hasard</button>
+    <div class="tabs">
+      <button class="tab" data-l="1"><b>Leçon 1</b>Les lettres seules</button>
+      <button class="tab" data-l="2"><b>Leçon 2</b>Les lettres liées</button>
     </div>
-    <label class="switch"><input type="checkbox" id="famOn"><span><b>Quiz des familles</b>Pour chaque lettre, dis si elle est emphatique ou de prolongation</span></label>
+    <p class="muted" id="how"></p>
+    <div class="opts" id="opts1">
+      <label class="switch"><input type="checkbox" id="famOn"><span><b>En plus : classer chaque lettre</b>Deux boutons sous la carte : « Emphatique » (lettres lourdes : <bdi lang="ar">خ ص ض غ ط ق ظ</bdi>) ou « Prolongation » (<bdi lang="ar">ا و ي</bdi>). Touche celui qui correspond, ou aucun. Score à part à la fin.</span></label>
+    </div>
+    <div class="opts" id="opts2">
+      <label class="switch"><input type="radio" name="ex" value="forms" checked><span><b>Formes des lettres</b>Reconnais une lettre au début, au milieu ou à la fin d’un mot</span></label>
+      <label class="switch"><input type="radio" name="ex" value="words"><span><b>Lettres dans les mots</b>Retrouve les lettres de chaque mot du livre</span></label>
+    </div>
+    <label class="switch"><input type="checkbox" id="inOrder"><span><b>Suivre l’ordre du livre</b>Sinon les cartes arrivent au hasard</span></label>
     <button class="primary" id="go">Commencer</button>
     <button class="secondary" id="iPage">Voir toute la page</button>
   </section>
@@ -148,6 +176,7 @@
     <div class="tally"><span class="pill m" id="nMiss">0 à revoir</span><button class="tb" id="pPage" style="padding:4px 12px">Voir la page</button><span class="pill k" id="nOk">0 je sais</span></div>
     <div class="stage" id="stage"></div>
     <div class="fams" id="fams" hidden>
+      <p class="muted" style="grid-column:1/-1; text-align:center">Cette lettre est… (rien si aucune)</p>
       <button class="fam" data-f="emph">Emphatique</button>
       <button class="fam" data-f="madd">Prolongation</button>
     </div>
@@ -176,17 +205,17 @@
     <div class="qhead">
       <div class="bism" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
       <div class="ribbons" lang="ar" dir="rtl">
-        <span class="rg">الدَّرْسُ الْأَوَّلُ</span>
-        <span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>
+        <span class="rg" id="pLesson"></span>
+        <span class="rr" id="pTitle"></span>
       </div>
     </div>
-    <div class="grid" id="sheetGrid"></div>
+    <div id="sheet"></div>
     <p class="muted">Touche pour fermer</p>
   </div>
 </div>
 
 <script>
-// Lu de droite à gauche sur la page, ligne par ligne (Qaida Nourania, leçon 1).
+// ---------- Lesson 1: the letters on their own (Noorani Qaida page 6), right to left, row by row.
 const NAMES = ["Alif","Ba","Ta","Tha","Jim","Ḥa","Kha","Dal","Dhal","Ra",
   "Zay","Sin","Chin","Ṣad","Ḍad","Ṭa","Ẓa","Ayn","Ghayn","Fa",
   "Qaf","Kaf","Lam","Mim","Noun","Waw","Ha","Hamza","Ya","Ya (long)"];
@@ -198,19 +227,91 @@ const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال",
 // Emphatic (heavy) letters: خُصَّ ضَغْطٍ قِظْ. Prolongation letters: alif, waw, ya (both forms of ya).
 const EMPH = ["خ","ص","ض","غ","ط","ق","ظ"], MADD = ["ا","و","ی","ے"];
 const FAM_NAMES = { emph:"Emphatique", madd:"Prolongation", none:"Ni l’une ni l’autre" };
-const LETTERS = NAMES.map((name, i) => ({ name, g: GLYPHS[i], ar: AR_NAMES[i],
-  fam: EMPH.includes(GLYPHS[i]) ? "emph" : MADD.includes(GLYPHS[i]) ? "madd" : "none" }));
 
 const $ = id => document.getElementById(id);
-const glyph = l => l.g === "ے" ? `<span class="yb">ے</span>` : l.g;
-const mini = l => `<div class="mini"><span class="n" lang="ar">${l.ar}</span><span class="g" lang="ar">${glyph(l)}</span></div>`;
+const glyph = g => g === "ے" ? `<span class="yb">ے</span>` : g;
 
-let mode = "order", deck = [], answers = [], shown = false, famQuiz = false, guess = "none";
+const LETTERS = NAMES.map((name, i) => {
+  const g = GLYPHS[i], ar = AR_NAMES[i];
+  return { name, ar, caption: name, unit: "lettre",
+    fam: EMPH.includes(g) ? "emph" : MADD.includes(g) ? "madd" : "none",
+    face: `<span class="glyph" lang="ar">${glyph(g)}</span>`,
+    answer: name,
+    mini: `<div class="mini"><span class="n" lang="ar">${ar}</span><span class="g" lang="ar">${glyph(g)}</span></div>` };
+});
+
+// ---------- Lesson 2: joined letters (pages 7 to 9).
+const NAME_OF = { "ي":"Ya", "ى":"Ya", "ة":"Ta marbuta", "أ":"Alif hamza", "ؤ":"Waw hamza", "ئ":"Ya hamza" };
+GLYPHS.forEach((g, i) => NAME_OF[g] = NAMES[i]);
+const T = "ـ";   // tatweel: shows where the letter joins
+// Letters that never join the next one: they only have an isolated and a final form.
+const RIGHT_ONLY = "اأإآدذرزوؤءةے";
+const joinsNext = c => !RIGHT_ONLY.includes(c);
+const joinsPrev = c => c !== "ء";
+const POS = { iso:"seule", ini:"au début", med:"au milieu", fin:"à la fin" };
+const formOf = (g, p) => p === "iso" ? g : p === "ini" ? g + T : p === "med" ? T + g + T : T + g;
+const FORM_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","و","ه","ي"];
+const positions = g => joinsNext(g) ? ["iso","ini","med","fin"] : ["iso","fin"];
+
+const FORMS = [];
+FORM_LETTERS.forEach(g => positions(g).filter(p => p !== "iso").forEach(p => {
+  const name = NAME_OF[g];
+  FORMS.push({ name, caption: `${name}, ${POS[p]}`, unit: "forme",
+    face: `<span class="form-face" lang="ar">${formOf(g, p)}</span>`,
+    answer: `${name}<span class="sub2">${POS[p]}</span><span class="forms" lang="ar">${positions(g).map(q =>
+      `<span class="${q === p ? "on" : ""}"><small>${POS[q]}</small>${formOf(g, q)}</span>`).join("")}</span>`,
+    mini: `<div class="mini"><span class="g" lang="ar">${formOf(g, p)}</span></div>` });
+}));
+
+// Joined combinations from the book, in its order.
+const WORDS = ["بلب","كب","كا","بكت","تكث","نا","تا","يا","ثا","بس","يس","نس","تس","تش","ثج","تح","نخ","يح","بج","يم","بم","نم","تم","ثم",
+  "نبل","تنل","بيل","يتل","ثل","بنن","تين","يتن","حث","خب","جت","تحت","يجب","بخت","به","يه","ته","نه","يهب","بها","بهم",
+  "جد","خذ","جر","خز","ير","تر","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ","قو","فو","فقل","قفل","يف","حم","لم","تمت"];
+// Colours like the book, one per letter, so each letter stands out inside the word.
+const INKS = ["#e0302a", "#2f8f3a", "#1d8fd1", "#1d1d1b"];
+// A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
+function coloured(w) {
+  const c = [...w];
+  return c.map((ch, i) => {
+    const before = i > 0 && joinsNext(c[i - 1]) && joinsPrev(ch) ? "\u200d" : "";
+    const after = i < c.length - 1 && joinsNext(ch) && joinsPrev(c[i + 1]) ? "\u200d" : "";
+    return `<span style="color:${INKS[i % INKS.length]}">${before}${ch}${after}</span>`;
+  }).join("");
+}
+const WORD_CARDS = WORDS.map(w => {
+  const parts = [...w];
+  return { name: w, caption: parts.map(c => NAME_OF[c]).join(" + "), unit: "mot",
+    face: `<span class="word-face" lang="ar">${w}</span>`,
+    faceShown: `<span class="word-face" lang="ar">${coloured(w)}</span>`,
+    answer: `<span class="parts" lang="ar">${parts.map((c, i) => `<span style="color:${INKS[i % INKS.length]}"><b>${c}</b>${NAME_OF[c]}</span>`).join("")}</span>`,
+    mini: `<div class="mini"><span class="w" lang="ar">${coloured(w)}</span></div>` };
+});
+
+const LESSONS = {
+  1: { head: "الدَّرْسُ الْأَوَّلُ", title: "حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ",
+       how: "Dis le nom de la lettre, touche la carte pour vérifier.<br>Glisse à droite si tu sais, à gauche si c’est à revoir." },
+  2: { head: "الدَّرْسُ الثَّانِي", title: "حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ",
+       how: "Les lettres changent de forme quand elles sont liées.<br>Dis ce que tu reconnais, touche la carte pour vérifier, puis glisse." },
+};
+const ROUND = 30;   // cards per round when shuffled; in book order the whole list is used
+
+let lesson = 1, deck = [], answers = [], shown = false, famQuiz = false, guess = "none";
 
 function shuffle(a) {
   a = a.slice();
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
+}
+
+function setLesson(n) {
+  lesson = n;
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", +t.dataset.l === n));
+  $("hLesson").textContent = $("pLesson").textContent = LESSONS[n].head;
+  $("hTitle").textContent = $("pTitle").textContent = LESSONS[n].title;
+  $("how").innerHTML = LESSONS[n].how;
+  $("opts1").hidden = n !== 1;
+  $("opts2").hidden = n !== 2;
+  $("sheet").innerHTML = n === 1 ? sheet1() : sheet2();
 }
 
 function show(id) {
@@ -219,19 +320,25 @@ function show(id) {
   if (id === "intro") $("title").textContent = "Alif Cards";
 }
 
-function start(cards = LETTERS) {
-  deck = mode === "random" ? shuffle(cards) : cards.slice();
+function lessonCards() {
+  if (lesson === 1) return LETTERS;
+  return document.querySelector("input[name=ex]:checked").value === "words" ? WORD_CARDS : FORMS;
+}
+
+function start(cards) {
+  const all = cards || lessonCards();
+  deck = $("inOrder").checked ? all.slice() : shuffle(all).slice(0, cards ? all.length : ROUND);
   answers = [];
   show("play");
   render();
 }
 
-function cardHTML(l, id, cls) {
-  return `<div class="card ${cls}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Lettre, touche pour voir le nom">
-    <span class="ar-name" lang="ar">${l.ar}</span>
-    <span class="glyph" lang="ar">${glyph(l)}</span>
-    <span class="tap">Touche pour voir le nom</span>
-    <span class="answer" hidden>${l.name}${famQuiz ? `<span class="famtag">${FAM_NAMES[l.fam]}</span>` : ""}</span>
+function cardHTML(c, id, cls) {
+  return `<div class="card ${cls}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte, touche pour voir la réponse">
+    ${c.ar ? `<span class="ar-name" lang="ar">${c.ar}</span>` : ""}
+    <span class="face">${c.face}</span>
+    <span class="tap">Touche pour voir la réponse</span>
+    <span class="answer" hidden>${c.answer}${famQuiz ? `<span class="famtag">${FAM_NAMES[c.fam]}</span>` : ""}</span>
     <span class="stamp k">Je sais</span><span class="stamp m">À revoir</span>
   </div>`;
 }
@@ -242,7 +349,7 @@ function render() {
   shown = false;
   guess = "none";
   $("fams").hidden = !famQuiz;
-  paintFams();
+  if (famQuiz) paintFams();
   const ok = answers.filter(a => a.ok).length;
   $("title").textContent = `${pos + 1} / ${deck.length}`;
   $("barFill").style.width = `${pos / deck.length * 100}%`;
@@ -266,10 +373,11 @@ function paintFams() {
 
 function flip() {
   shown = !shown;
-  paintFams();
-  const c = $("card");
+  if (famQuiz) paintFams();
+  const c = $("card"), item = deck[answers.length];
   c.querySelector(".answer").hidden = !shown;
   c.querySelector(".tap").hidden = shown;
+  if (item.faceShown) c.querySelector(".face").innerHTML = shown ? item.faceShown : item.face;
 }
 
 // Throws the card off screen, then records the answer.
@@ -281,72 +389,102 @@ function answer(ok) {
   c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`;
   c.style.opacity = 0;
   const l = deck[answers.length];
-  setTimeout(() => { answers.push({ l, ok, famOk: guess === l.fam, guess }); render(); }, 220);
+  setTimeout(() => { answers.push({ l, ok, famOk: guess === l.fam }); render(); }, 220);
 }
 
 function undo() { if (answers.length) { answers.pop(); render(); } }
 
+// Swipe with a finger (touch events, which iPhone Safari handles best), a mouse, or two fingers on a trackpad.
 function bindCard(c) {
-  let x0 = null, y0 = 0, dx = 0;
+  let x0 = null, y0 = 0, dx = 0, dy = 0;
   const stampK = c.querySelector(".stamp.k"), stampM = c.querySelector(".stamp.m");
-  c.addEventListener("pointerdown", e => { x0 = e.clientX; y0 = e.clientY; dx = 0; c.setPointerCapture(e.pointerId); c.classList.remove("anim"); });
-  c.addEventListener("pointermove", e => {
+  const begin = (x, y) => { x0 = x; y0 = y; dx = dy = 0; c.classList.remove("anim"); };
+  const move = (x, y) => {
     if (x0 === null) return;
-    dx = e.clientX - x0;
+    dx = x - x0; dy = y - y0;
     c.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`;
     stampK.style.opacity = Math.max(0, Math.min(1, dx / 90));
     stampM.style.opacity = Math.max(0, Math.min(1, -dx / 90));
     c.style.borderColor = dx > 40 ? "var(--ok)" : dx < -40 ? "var(--miss)" : "transparent";
-  });
-  const end = e => {
+  };
+  const finish = () => {
     if (x0 === null) return;
-    const moved = Math.abs(dx) > 8 || Math.abs(e.clientY - y0) > 8;
     x0 = null;
-    if (Math.abs(dx) > 90) return answer(dx > 0);
+    if (Math.abs(dx) > 80) return answer(dx > 0);
     c.classList.add("anim");
     c.style.transform = ""; c.style.borderColor = "transparent";
     stampK.style.opacity = stampM.style.opacity = 0;
-    if (!moved) flip();
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) flip();
   };
-  c.addEventListener("pointerup", end);
-  c.addEventListener("pointercancel", end);
+  c.addEventListener("touchstart", e => { const t = e.touches[0]; begin(t.clientX, t.clientY); }, { passive: true });
+  c.addEventListener("touchmove", e => { e.preventDefault(); const t = e.touches[0]; move(t.clientX, t.clientY); }, { passive: false });
+  c.addEventListener("touchend", e => { e.preventDefault(); finish(); });
+  c.addEventListener("touchcancel", finish);
+  c.addEventListener("mousedown", e => {
+    begin(e.clientX, e.clientY);
+    const mm = ev => move(ev.clientX, ev.clientY);
+    const mu = () => { removeEventListener("mousemove", mm); removeEventListener("mouseup", mu); finish(); };
+    addEventListener("mousemove", mm); addEventListener("mouseup", mu);
+  });
 }
+
+// Two-finger sideways swipe on a laptop trackpad.
+let wheelSum = 0, wheelTimer = null, wheelLock = false;
+document.addEventListener("wheel", e => {
+  if ($("play").hidden || wheelLock || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+  e.preventDefault();
+  wheelSum -= e.deltaX;
+  clearTimeout(wheelTimer);
+  wheelTimer = setTimeout(() => wheelSum = 0, 200);
+  if (Math.abs(wheelSum) > 120) {
+    answer(wheelSum > 0);
+    wheelSum = 0; wheelLock = true;
+    setTimeout(() => wheelLock = false, 700);
+  }
+}, { passive: false });
 
 // Stats count only the cards answered, so a round can stop early.
 function showStats() {
-  const done = answers.length;
+  const done = answers.length, unit = deck[0] ? deck[0].unit : "carte";
   const ok = answers.filter(a => a.ok).length;
   const famWrong = famQuiz ? answers.filter(a => !a.famOk) : [];
   const toReview = answers.filter(a => !a.ok || (famQuiz && !a.famOk)).map(a => a.l);
+  const plural = n => `${n} ${unit}${n > 1 ? "s" : ""}`;
   show("stats");
   $("title").textContent = "Résultat";
-  $("seen").textContent = done < deck.length ? `Tour arrêté après ${done} lettre${done > 1 ? "s" : ""} sur ${deck.length}` : `Tour terminé : ${deck.length} lettres`;
+  $("seen").textContent = done < deck.length ? `Tour arrêté après ${plural(done)} sur ${deck.length}` : `Tour terminé : ${plural(deck.length)}`;
   $("score").innerHTML = `${ok}<small> / ${done}</small>`;
-  $("scoreText").textContent = !done ? "Aucune lettre répondue." : toReview.length
-    ? `Tu reconnais ${Math.round(ok / done * 100)} % des lettres.${toReview.length ? " À revoir :" : ""}`
-    : "Tu reconnais toutes les lettres. Bravo !";
+  $("scoreText").textContent = !done ? "Aucune carte répondue." : toReview.length
+    ? `Tu reconnais ${Math.round(ok / done * 100)} % des ${unit}s. À revoir :`
+    : `Tu reconnais toutes les ${unit}s. Bravo !`;
   $("famText").hidden = !famQuiz || !done;
   $("famText").textContent = `Familles : ${done - famWrong.length} / ${done} justes`;
-  $("missed").innerHTML = toReview.map(l => `<figure>${mini(l)}${l.name}${famQuiz && l.fam !== "none" ? `<br>${FAM_NAMES[l.fam]}` : ""}</figure>`).join("");
+  $("missed").innerHTML = toReview.map(l => `<figure>${l.mini}${l.caption}${famQuiz && l.fam !== "none" ? `<br>${FAM_NAMES[l.fam]}` : ""}</figure>`).join("");
   $("review").hidden = !toReview.length;
-  $("review").textContent = `Revoir les ${toReview.length} lettres`;
+  $("review").textContent = `Revoir : ${plural(toReview.length)}`;
   $("review").onclick = () => start(toReview);
 }
 
-function setMode(m) {
-  mode = m;
-  $("mOrder").classList.toggle("on", m === "order");
-  $("mRandom").classList.toggle("on", m === "random");
+// What "Voir toute la page" shows for each lesson.
+function sheet1() {
+  return `<div class="grid" style="gap:0; border:1px solid #333">${LETTERS.map(l => l.mini).join("")}</div>`;
+}
+function sheet2() {
+  return `<h3>Les formes des lettres</h3>
+    <table class="table"><tr><th>Nom</th><th>${POS.iso}</th><th>${POS.ini}</th><th>${POS.med}</th><th>${POS.fin}</th></tr>
+    ${FORM_LETTERS.map(g => `<tr><td class="n">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
+      `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
+    <h3>Les lettres dans les mots</h3>
+    <div class="words">${WORDS.map(w => `<div lang="ar">${coloured(w)}</div>`).join("")}</div>`;
 }
 
 const openPage = () => $("page").hidden = false;
-$("mOrder").onclick = () => setMode("order");
-$("mRandom").onclick = () => setMode("random");
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => setLesson(+t.dataset.l));
 $("iPage").onclick = $("pPage").onclick = openPage;
 $("tReset").onclick = () => start();
 $("tStop").onclick = showStats;
 $("page").onclick = () => $("page").hidden = true;
-$("go").onclick = () => { famQuiz = $("famOn").checked; start(); };
+$("go").onclick = () => { famQuiz = lesson === 1 && $("famOn").checked; start(); };
 document.querySelectorAll(".fam").forEach(b => b.onclick = () => {
   if (shown) return;
   guess = guess === b.dataset.f ? "none" : b.dataset.f;
@@ -366,7 +504,7 @@ document.addEventListener("keydown", e => {
   else if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
 });
 
-$("sheetGrid").innerHTML = LETTERS.map(mini).join("");
+setLesson(1);
 </script>
 </body>
 </html>
