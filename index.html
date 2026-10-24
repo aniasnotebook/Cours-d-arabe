@@ -221,6 +221,10 @@
   .mini .w { font-size:clamp(17px, 5vw, 24px); line-height:1.5; }
 
   /* Full page of the book */
+  .askbox { width:100%; max-width:340px; background:var(--surface); border-radius:20px; padding:20px 16px 16px; display:flex; flex-direction:column; gap:6px; text-align:center; }
+  .askbox b { font-size:19px; } .askbox p { margin:0 0 10px; font-size:14px; }
+  .askrow { display:flex; gap:10px; } .askrow button { flex:1; }
+  #ask { z-index:30; }
   .scrim { touch-action:pan-x pan-y pinch-zoom; position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:center; justify-content:center; padding:16px; }
   .paper { width:100%; max-width:520px; max-height:100%; overflow:auto; background:#fff; color:#1d1d1b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
   .paper .grid { gap:0; border:1px solid #333; }
@@ -411,6 +415,10 @@
 </div>
 
 <!-- The book's page -->
+<div class="scrim" id="ask" hidden>
+  <div class="askbox" role="dialog" aria-modal="true"><b id="askT"></b><p class="muted" id="askP"></p>
+    <div class="askrow"><button class="secondary" id="askNo">Continuer</button><button class="primary" id="askYes"></button></div></div>
+</div>
 <div class="scrim" id="page" hidden>
   <div class="paper">
     <div class="ribbons ar" lang="ar" dir="rtl" id="pageHead"></div>
@@ -1180,7 +1188,21 @@ if ("serviceWorker" in navigator) {
 }
 
 // ---------- Wiring
-document.querySelectorAll(".ico.home").forEach(b => { b.innerHTML = ICONS.home; b.onclick = () => show("home"); });
+// Leaving a round that has started asks first: one stray tap must not lose a long round.
+const roundStarted = () => !$("play").hidden ? answers.length > 0
+  : !$("write").hidden && (wKind === "trace" ? wPos > 0 || wStrokes.length > 0 : wAnswers.length > 0);
+const ASK = { quit: ["Quitter le tour ?", "Ce que tu as fait dans ce tour ne sera pas gardé.", "Quitter"],
+  restart: ["Recommencer le tour ?", "Le tour reprend depuis la première carte.", "Recommencer"],
+  stop: ["Terminer le tour ?", "Tu verras tes résultats.", "Terminer"] };
+function askThen(kind, go) {
+  if (!roundStarted()) return go();
+  const [t, p, yes] = ASK[kind];
+  $("askT").textContent = t; $("askP").textContent = p; $("askYes").textContent = yes;
+  $("ask").hidden = false;
+  $("askNo").onclick = () => { $("ask").hidden = true; };
+  $("askYes").onclick = () => { $("ask").hidden = true; clearTimeout(quizAuto); clearTimeout(wAuto); go(); };
+}
+document.querySelectorAll(".ico.home").forEach(b => { b.innerHTML = ICONS.home; b.onclick = () => askThen("quit", () => show("home")); });
 $("restart").innerHTML = ICONS.restart;
 document.querySelectorAll(".linkbtn").forEach(b => {
   b.innerHTML = ICONS.grid + (b.dataset.page === "1" ? "Revoir l’alphabet complet, comme dans le livre" : "Revoir toutes les formes et les mots du livre");
@@ -1203,17 +1225,17 @@ document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
 });
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
 $("wRestart").innerHTML = ICONS.restart;
-$("wRestart").onclick = () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource);
-$("wStop").onclick = () => wKind !== "trace" ? showStats() : show("cw");
+$("wRestart").onclick = () => askThen("restart", () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource));
+$("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show("cw"));
 $("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1);
 $("goForms").onclick = () => openChoice("forms");
 $("goWords").onclick = () => openChoice("words");
-$("restart").onclick = () => start(source);
+$("restart").onclick = () => askThen("restart", () => start(source));
 $("pBack").innerHTML = $("wTopBack").innerHTML = ICONS.back;
-$("pBack").onclick = () => show(mode === "letters" ? "c1" : mode === "words" || mode === "forms" ? "cw" : "l2");
-$("wTopBack").onclick = () => show("cw");
+$("pBack").onclick = () => askThen("quit", () => show(mode === "letters" ? "c1" : mode === "words" || mode === "forms" ? "cw" : "l2"));
+$("wTopBack").onclick = () => askThen("quit", () => show("cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
-$("stop").onclick = showStats;
+$("stop").onclick = () => askThen("stop", showStats);
 $("peek").onclick = () => openPage(+$("peek").dataset.page);
 $("again").onclick = () => start(source);
 $("page").onclick = closePage;
