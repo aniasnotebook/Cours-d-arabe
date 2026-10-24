@@ -719,10 +719,10 @@ function check() {
   $("barFill").style.width = `${answers.length / deck.length * 100}%`;
   const btn = $("check");
   btn.textContent = answers.length >= deck.length ? "Voir le résultat" : "Suivant";
-  // The next card comes by itself after time to read the correction (longer when something was wrong).
+  // The next card comes by itself after time to read the correction.
   const next = () => { clearTimeout(quizAuto); if ($("play").hidden || pos !== answers.length - 1) return; btn.onclick = null; fly($("card"), ok, render); };
   btn.onclick = next;
-  quizAuto = setTimeout(next, ok ? 2000 : 4000);
+  quizAuto = setTimeout(next, 2000);
 }
 
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
