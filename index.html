@@ -861,7 +861,9 @@ function wCanvas() {
     if (edge) { const dx = at(e)[0] - edge.x0; edge = null; if (Math.abs(dx) > 60) wGo(dx < 0 ? 1 : -1); return; }
     if (cur && wKind === "test" && wStrokes.length === 1) wButtons();
     // Tracing moves on by itself once the finger has rested a moment (time to add the dots first).
-    if (cur && wKind === "trace") { clearTimeout(wAuto); wAuto = setTimeout(wTraceNext, 1500); }
+    // A tap or a dot alone does not count: the countdown starts once real lines are written.
+    const ink = wStrokes.reduce((t, st) => t + st.slice(1).reduce((u, p, i) => u + Math.hypot(p[0] - st[i][0], p[1] - st[i][1]), 0), 0);
+    if (cur && wKind === "trace" && ink > 60) { clearTimeout(wAuto); wAuto = setTimeout(wTraceNext, 1500); }
     cur = null;
   };
   wPaint();
