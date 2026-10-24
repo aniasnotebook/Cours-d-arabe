@@ -686,7 +686,7 @@ function qButtons() {
   if (checked) return;
   $("check").onclick = check;
   // Skipping counts the card as to review, and it leaves to the left.
-  $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false, skip: true }); fly($("card"), true, render); };   // no colour: skipped is neither right nor to review
+  $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false, skip: true }); render(); };   // no swipe: the next card simply takes its place
 }
 
 function choose(b) {
@@ -818,13 +818,13 @@ function wButtons() {
       <button class="act u" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wNext" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
     $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = wTraceNext;
-    $("wSkip").onclick = () => { clearTimeout(wAuto); fly($("wCard"), true, () => wGo(1)); };
+    $("wSkip").onclick = () => { clearTimeout(wAuto); wGo(1); };
   } else if (!wShown) {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
       <button class="act u" id="wBack" ${wAnswers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wCheck" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.verify}</span>Vérifier</button>`;
     $("wBack").onclick = wUndo;
-    $("wSkip").onclick = () => fly($("wCard"), true, () => { wAnswers.push({ item: wDeck[wPos], ok: false, skip: true }); wRender(); });
+    $("wSkip").onclick = () => { wAnswers.push({ item: wDeck[wPos], ok: false, skip: true }); wRender(); };
     $("wCheck").onclick = wReveal;
   } else {
     a.innerHTML = `<button class="act m" id="wMiss"><span>${ICONS.x}</span>À revoir</button>
