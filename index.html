@@ -169,6 +169,10 @@
   .wcard canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; }
   .wcard .prompt { position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.4; pointer-events:none; }
   .wcard .prompt.name { color:#d6301f; }
+  .wcard .prompt.swap { pointer-events:auto; z-index:1; border:0; background:none; padding:0; display:flex; flex-direction:column; align-items:center; gap:6px; color:#d6301f; font-size:inherit; }
+  .wcard .prompt.swap .fr { font-family:Amiri, serif; font-weight:700; font-size:30px; line-height:1.3; }
+  .wcard .prompt.swap .ar { line-height:1.3; }
+  .wcard .prompt .tip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; background:#f3efe6; color:#6b665c; font:600 12px/1.4 system-ui, sans-serif; }
   .wcard .prompt.sep { color:#1d1d1b; font-size:40px; word-spacing:16px; }
   .wcard .model { position:absolute; left:0; right:0; top:84px; bottom:44px; display:grid; place-items:center; pointer-events:none; line-height:1.4; }
   .wcard .model.guide { color:#d9d3c5; }
@@ -383,12 +387,16 @@ const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش"
 // The names written in red above each letter in the book.
 const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
   "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
+// The same names in French letters, for writing from memory (the Arabic name holds the letter, so it would give it away).
+// A capital marks the heavy letter: ta / Ta, tha / Tha, ha / Ha.
+const FR_NAMES = ["alif","ba","ta","tha","jim","Ha","kha","dal","dhal","ra","za","sin","shin","sad","dad","Ta","Tha","ayn","ghayn","fa",
+  "qaf","kaf","lam","mim","noun","waw","ha","hamza","ya","ya"];
 // Emphatic letters: kha, sad, dad, ghayn, ta, za, qaf. Prolongation letters: alif, waw, both ya.
 const EMPH = ["خ","ص","ض","غ","ط","ظ","ق"], MADD = ["ا","و","ى","ے"];
 const FAM = { emph:"Emphatique", madd:"Prolongation" };
 const glyph = g => g === "ے" ? `<span class="yb">ے</span>` : g;
 
-const LETTERS = GLYPHS.map((g, i) => ({ g, ar: AR_NAMES[i], fam: EMPH.includes(g) ? "emph" : MADD.includes(g) ? "madd" : "none",
+const LETTERS = GLYPHS.map((g, i) => ({ g, ar: AR_NAMES[i], fr: FR_NAMES[i], fam: EMPH.includes(g) ? "emph" : MADD.includes(g) ? "madd" : "none",
   mini: `<div class="mini ar"><span class="n" lang="ar">${AR_NAMES[i]}</span><span class="g" lang="ar">${glyph(g)}</span></div>` }));
 
 // ---------- Lesson 2: joined letters (book pages 7 to 9).
@@ -701,8 +709,12 @@ let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes
 const wWords = () => mode === "wwords";
 const wModel = it => wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${it.w}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
+const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
+let wArabic = false;
 const wPrompt = it => wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${[...it.w].map(showLetter).join(" ")}</span>`
-  : `<span class="prompt name ar" lang="ar">${it.ar}</span>`;
+  : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
+  : `<button class="prompt swap" id="wName">${wArabic ? `<span class="ar" lang="ar" style="font-size:40px">${it.ar}</span>` : `<span class="fr">${it.fr}</span>`}
+      <span class="tip">${SWAP}${wArabic ? `Touche pour revenir à « ${it.fr} »` : "Touche pour le nom en arabe"}</span></button>`;
 
 function openWriting(lesson) {
   mode = lesson === 1 ? "wletters" : "wwords";
@@ -734,7 +746,7 @@ function startWrite(cards) {
 function wRender() {
   if (wKind === "test") wPos = wAnswers.length;
   if (wPos >= wDeck.length) return wKind === "test" ? showStats() : show("cw");
-  wStrokes = []; wShown = false;
+  wStrokes = []; wShown = false; wArabic = false;
   const it = wDeck[wPos], good = wAnswers.filter(a => a.ok).length;
   $("wCount").textContent = `${wPos + 1} / ${wDeck.length}`;
   $("wBar").style.width = `${wPos / wDeck.length * 100}%`;
@@ -748,6 +760,11 @@ function wRender() {
     : wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire";
   wButtons();
   wCanvas();
+  wNameSwitch();
+}
+function wNameSwitch() {
+  const b = $("wName"); if (!b) return;
+  b.onclick = () => { wArabic = !wArabic; b.outerHTML = wPrompt(wDeck[wPos]); wNameSwitch(); };
 }
 
 function wButtons() {
