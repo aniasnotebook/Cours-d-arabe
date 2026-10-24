@@ -154,6 +154,32 @@
   .word { font-size:min(96px, 24vw); line-height:1.5; }
   .parts { display:flex; gap:14px; direction:rtl; font-size:30px; }
 
+  /* Choosing a variant: two cards, each with a small preview of the exercise. */
+  .picks { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .pick { display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:20px; border:1px solid var(--line); background:var(--surface); color:var(--ink); text-align:left; }
+  .pick .pv { position:relative; height:170px; border-radius:14px; background:var(--bg); border:1px solid var(--line); overflow:hidden; display:grid; place-items:center; }
+  .pick .pv .mc { position:relative; width:104px; height:140px; border-radius:12px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.08); color:#1d1d1b; display:grid; place-items:center; }
+  .pick b { font-size:17px; } .pick b i { font-style:normal; color:var(--accent); }
+  .pick small { font-size:13px; color:var(--muted); line-height:1.35; }
+  .ttl { text-align:center; margin:0; font-size:24px; font-weight:800; }
+
+  /* Writing: the drawing sits on the card, over the letter in grey (tracing) or alone (testing). */
+  .wcard { position:absolute; inset:0; background:var(--card); border-radius:24px; box-shadow:0 2px 6px rgba(0,0,0,.08); overflow:hidden; color:#1d1d1b; }
+  .wcard canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; }
+  .wcard .prompt { position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.4; pointer-events:none; }
+  .wcard .prompt.name { color:#d6301f; }
+  .wcard .prompt.sep { color:#1d1d1b; font-size:40px; word-spacing:16px; }
+  .wcard .model { position:absolute; left:0; right:0; top:84px; bottom:44px; display:grid; place-items:center; pointer-events:none; line-height:1.4; }
+  .wcard .model.guide { color:#d9d3c5; }
+  .wcard .model.answer { color:#2f7d4f; opacity:.4; }
+  .wcard .line { position:absolute; left:24px; right:24px; top:64%; border-top:2px dashed #e2dccf; pointer-events:none; }
+  .wcard .edge { position:absolute; top:50%; width:4px; height:56px; margin-top:-28px; border-radius:2px; background:#e2dccf; pointer-events:none; }
+  .wcard .say { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); white-space:nowrap; padding:6px 12px; border-radius:999px; font-size:14px; font-weight:700; pointer-events:none; }
+  .wcard .say { background:#f3efe6; color:#6b665c; font-weight:600; }
+  .act.n { color:var(--ink); } .act.n span { border-color:var(--line); background:var(--surface); }
+  .act.go2 { color:var(--ok); } .act.go2 span { border-color:var(--accent); background:var(--accent); color:var(--on-accent); }
+  .act:disabled.n, .act:disabled.go2 { opacity:1; color:var(--faint); } .act:disabled span { border-color:var(--line); background:var(--line); color:var(--faint); }
+
   /* Stats */
   .score { font-size:64px; font-weight:800; line-height:1; text-align:center; font-variant-numeric:tabular-nums; }
   .score small { font-size:26px; color:var(--muted); font-weight:600; }
@@ -238,9 +264,9 @@
     <div class="label">Réglages du tour</div>
     <div class="settings">
       <label><span><b>Lettres au hasard</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand1" checked></label>
-      <label><span><b>S’entraîner aussi aux familles</b><small>Indique aussi si la lettre est emphatique ou de prolongation</small></span><input type="checkbox" id="famOn"></label>
     </div>
-    <button class="go" id="go1">Commencer les 30 lettres <span aria-hidden="true">›</span></button>
+    <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>Les 30 lettres · Les familles en plus</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:#d6301f; font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
   </section>
 
   <!-- Lesson 2 -->
@@ -254,8 +280,45 @@
     <div class="settings">
       <label><span><b>Cartes au hasard</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand2" checked></label>
     </div>
-    <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Commencer les formes<small>Au début, au milieu, à la fin d’un mot</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Commencer les mots<small>Retrouve les lettres de chaque mot du livre</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Au début, au milieu, à la fin d’un mot</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Les mots<small>Les lettres qui composent chaque mot de la leçon 2</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goW2"><span class="tile ar" lang="ar" style="font-size:22px">بلب</span><span class="t">Écrire les mots<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
+  </section>
+
+  <!-- Lesson 1, recognise: with or without the families question -->
+  <section class="screen mid" id="c1" hidden>
+    <button class="ico back" aria-label="Retour à la leçon 1" data-back="l1"></button>
+    <h2 class="ttl">Reconnaître les lettres</h2>
+    <p class="center" style="margin:0 auto; max-width:30ch">Veux-tu ajouter une question sur les lettres emphatiques et de prolongation&nbsp;?</p>
+    <div class="picks">
+      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>Non <i>›</i></b><small>Juste les lettres : tu dis si tu la reconnais.</small></button>
+      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.3">ج</span><span style="position:absolute; left:6px; right:6px; bottom:8px; display:flex; flex-direction:column; gap:4px; font-size:9px; font-weight:700; text-align:center"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span></span></span></span><b>Oui <i>›</i></b><small>Sur chaque carte, tu dis aussi si elle est emphatique ou de prolongation.</small></button>
+    </div>
+  </section>
+
+  <!-- Writing: trace or test yourself -->
+  <section class="screen mid" id="cw" hidden>
+    <button class="ico back" aria-label="Retour à la leçon" id="cwBack"></button>
+    <h2 class="ttl" id="cwTitle"></h2>
+    <p class="muted center">Comment veux-tu t’entraîner&nbsp;?</p>
+    <div class="picks">
+      <button class="pick" data-w="trace"><span class="pv" id="pvTrace"></span><b>Tracer <i>›</i></b><small id="cwTraceText"></small></button>
+      <button class="pick" data-w="test"><span class="pv" id="pvTest"></span><b>Me tester <i>›</i></b><small id="cwTestText"></small></button>
+    </div>
+  </section>
+
+  <!-- Writing round -->
+  <section class="screen" id="write" hidden>
+    <div class="top">
+      <div class="left"><button class="ico home" aria-label="Accueil"></button><button class="ico" id="wRestart" aria-label="Recommencer le tour"></button></div>
+      <h1 id="wCount"></h1>
+      <button class="pillbtn" id="wStop">Terminer</button>
+    </div>
+    <div class="bar"><i id="wBar"></i></div>
+    <div class="tally" id="wTally"><span class="pill m" id="wBad"></span><button class="pillbtn" id="wPeek"></button><span class="pill k" id="wGood"></span></div>
+    <div class="stage" id="wStage"></div>
+    <p class="hint" id="wHint"></p>
+    <div class="actions" id="wActions"></div>
   </section>
 
   <!-- A round -->
@@ -305,6 +368,11 @@ const ICONS = {
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
   undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
+  skip: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18l6-6-6-6"/><path d="M13 18l6-6-6-6"/></svg>',
+  erase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20H9L4 15a2 2 0 0 1 0-3l8-8a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-8 8"/><path d="M8 11l6 6"/></svg>',
+  verify: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
 };
 
@@ -383,7 +451,7 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = "none", pick = {}, checked = false;
 
-function show(id) { ["gate","home","l1","l2","play","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play"; }
+function show(id) { ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; }
 
 // ---------- The logo: a red card, a green card and the ba card, drawn so each card can move.
 const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
@@ -396,6 +464,7 @@ const CONFETTI = [0,40,80,120,160,200,240,280,320].map((a, i) =>
 const PASSED = 0.8;
 
 function start(cards) {
+  if (mode[0] === "w") return startWrite(cards);
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
   const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
   deck = random ? shuffle(source) : source.slice();
@@ -624,23 +693,149 @@ function check() {
   btn.onclick = render;
 }
 
+// ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
+// Tracing: the letter is in grey under the drawing, no score. Testing: the red name (or the separate letters of a word),
+// a blank card, then the book's letter in green over the drawing, and the learner says if it was right.
+let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes = [], wShown = false;
+const wWords = () => mode === "wwords";
+const wModel = it => wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${it.w}</span>`
+  : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
+const wPrompt = it => wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${[...it.w].map(showLetter).join(" ")}</span>`
+  : `<span class="prompt name ar" lang="ar">${it.ar}</span>`;
+
+function openWriting(lesson) {
+  mode = lesson === 1 ? "wletters" : "wwords";
+  $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Écrire les mots";
+  $("cwBack").dataset.back = "l" + lesson;
+  $("cwTraceText").textContent = lesson === 1 ? "Tu repasses sur la lettre grise. Pas de note, tu avances à ton rythme." : "Tu repasses sur le mot gris, lettres attachées. Pas de note.";
+  $("cwTestText").textContent = lesson === 1 ? "Tu vois le nom en rouge, tu écris la lettre de mémoire, puis tu vérifies." : "Tu vois les lettres séparées, tu écris le mot attaché, puis tu vérifies.";
+  const top = lesson === 1 ? `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px; color:#d6301f">جيم</span>`
+    : `<span class="ar" lang="ar" dir="rtl" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px">ب ل ب</span>`;
+  const big = lesson === 1 ? "ج" : "بلب";
+  $("pvTrace").innerHTML = `<span class="mc">${top}<span class="ar" lang="ar" style="font-size:${lesson === 1 ? 70 : 50}px; line-height:1.3; color:#d9d3c5">${big}</span></span>`;
+  $("pvTest").innerHTML = `<span class="mc">${top}<span style="font-size:28px; color:#b9b2a3">?</span><span style="position:absolute; left:12px; right:12px; top:62%; border-top:2px dashed #e2dccf"></span></span>`;
+  show("cw");
+}
+
+function startWrite(cards) {
+  wSource = cards || (wWords() ? WORD_CARDS : LETTERS);
+  const random = wWords() ? $("rand2").checked : $("rand1").checked;
+  wDeck = random ? shuffle(wSource) : wSource.slice();
+  if (random && wWords() && !cards) wDeck = wDeck.slice(0, ROUND);
+  wAnswers = []; wPos = 0;
+  $("wPeek").textContent = wWords() ? "Voir les mots" : "Voir l’alphabet";
+  $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
+  $("wGood").hidden = $("wBad").hidden = wKind === "trace";
+  show("write");
+  wRender();
+}
+
+function wRender() {
+  if (wKind === "test") wPos = wAnswers.length;
+  if (wPos >= wDeck.length) return wKind === "test" ? showStats() : show("cw");
+  wStrokes = []; wShown = false;
+  const it = wDeck[wPos], good = wAnswers.filter(a => a.ok).length;
+  $("wCount").textContent = `${wPos + 1} / ${wDeck.length}`;
+  $("wBar").style.width = `${wPos / wDeck.length * 100}%`;
+  $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
+  $("wBad").textContent = `${wAnswers.length - good} à revoir`;
+  $("wStage").innerHTML = `<div class="wcard" id="wCard">${wPrompt(it)}<span class="line"></span>
+    ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span><span class="edge" style="left:6px"></span><span class="edge" style="right:6px"></span>` : ""}
+    <canvas id="wCanvas"></canvas></div>`;
+  $("wHint").innerHTML = wKind === "trace"
+    ? `Repasse sur ${wWords() ? "le mot" : "la lettre"} avec ton doigt<br>Pour changer, glisse depuis le bord de la carte`
+    : wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire";
+  wButtons();
+  wCanvas();
+}
+
+function wButtons() {
+  const a = $("wActions");
+  if (wKind === "trace") {
+    a.innerHTML = `<button class="act n" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.back}</span>Avant</button>
+      <button class="act u" id="wErase"><span>${ICONS.erase}</span>Effacer</button>
+      <button class="act go2" id="wNext"><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
+    $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = () => wGo(1);
+  } else if (!wShown) {
+    a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
+      <button class="act u" id="wErase"><span>${ICONS.erase}</span>Effacer</button>
+      <button class="act go2" id="wCheck" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.verify}</span>Vérifier</button>`;
+    $("wSkip").onclick = () => wAnswer(false);
+    $("wCheck").onclick = wReveal;
+  } else {
+    a.innerHTML = `<button class="act m" id="wMiss"><span>${ICONS.x}</span>À revoir</button>
+      <button class="act u" id="wBack"><span>${ICONS.undo}</span>Retour</button>
+      <button class="act k" id="wOk"><span>${ICONS.check}</span>C’était juste</button>`;
+    $("wMiss").onclick = () => wAnswer(false); $("wOk").onclick = () => wAnswer(true);
+    $("wBack").onclick = wHide;
+  }
+  const e = $("wErase"); if (e) e.onclick = () => { wStrokes = []; wPaint(); wButtons(); };
+}
+
+// The book's letter in green over the drawing.
+function wReveal() {
+  wShown = true;
+  const c = $("wCard");
+  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En noir ton dessin, en vert ${wWords() ? "le mot" : "la lettre"} du livre</span>`);
+  $("wHint").textContent = "C’était juste ?";
+  wButtons();
+}
+function wHide() { wShown = false; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire"; wButtons(); }
+function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
+function wGo(d) { const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
+
+// Drawing with a finger, a pen or a mouse. In tracing, a swipe that starts at the card's edge changes letter.
+function wCanvas() {
+  const cv = $("wCanvas"), card = $("wCard"), r = card.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  cv.width = r.width * dpr; cv.height = r.height * dpr;
+  let cur = null, edge = null;
+  const at = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  cv.onpointerdown = e => {
+    if (wShown) return;
+    cv.setPointerCapture(e.pointerId);
+    const [x, y] = at(e);
+    if (wKind === "trace" && (x < 24 || x > r.width - 24)) { edge = { x0: x }; return; }
+    cur = [[x, y]]; wStrokes.push(cur); wPaint();
+  };
+  cv.onpointermove = e => { if (cur) { cur.push(at(e)); wPaint(); } };
+  cv.onpointerup = cv.onpointercancel = e => {
+    if (edge) { const dx = at(e)[0] - edge.x0; edge = null; if (Math.abs(dx) > 60) wGo(dx < 0 ? 1 : -1); return; }
+    if (cur && wKind === "test" && wStrokes.length === 1) wButtons();
+    cur = null;
+  };
+  wPaint();
+}
+function wPaint() {
+  const cv = $("wCanvas"); if (!cv) return;
+  const x = cv.getContext("2d"), dpr = devicePixelRatio || 1;
+  x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  x.clearRect(0, 0, cv.width, cv.height);
+  x.strokeStyle = "#1d1d1b"; x.fillStyle = "#1d1d1b"; x.lineWidth = 9; x.lineCap = x.lineJoin = "round";
+  wStrokes.forEach(s => {
+    if (s.length === 1) { x.beginPath(); x.arc(s[0][0], s[0][1], 4.5, 0, 7); x.fill(); return; }
+    x.beginPath(); x.moveTo(...s[0]); s.slice(1).forEach(p => x.lineTo(...p)); x.stroke();
+  });
+}
+
 // ---------- End of a round: only the cards answered count, so a round can stop early.
 function showStats() {
+  if (mode[0] === "w") { answers = wAnswers; deck = wDeck; source = wSource; }
   const done = answers.length, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.ok || (mode === "letters" && famQuiz && !a.famOk)).map(a => a.item);
-  const unit = mode === "letters" ? "lettre" : mode === "forms" ? "forme" : "mot";
+  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" ? "forme" : "mot";
   const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`;
   show("stats");
   $("seen").textContent = done < deck.length ? `Tour arrêté après ${n(done)} sur ${deck.length}` : `Tour terminé : ${n(deck.length)}`;
   $("score").innerHTML = `${good}<small> / ${done}</small>`;
   $("party").hidden = !(done && good / done >= PASSED);
   $("party").innerHTML = $("party").hidden ? "" : CONFETTI + MARK;
-  $("scoreText").textContent = !done ? "Aucune carte répondue." : mode === "letters"
-    ? `Tu reconnais ${Math.round(good / done * 100)} % des lettres.` : `${Math.round(good / done * 100)} % de bonnes réponses.`;
+  const pct = Math.round(good / done * 100);
+  $("scoreText").textContent = !done ? "Aucune carte répondue." : mode === "letters" ? `Tu reconnais ${pct} % des lettres.`
+    : mode[0] === "w" ? `Tu écris juste ${pct} % des ${unit}s.` : `${pct} % de bonnes réponses.`;
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
-  const links = LESSON_PAGES[mode === "letters" ? 1 : 2];
+  const links = LESSON_PAGES[mode === "letters" || mode === "wletters" ? 1 : 2];
   $("lessonLinks").innerHTML = links.map((u, i) => `<a class="lessonlink" href="${u}" target="_blank" rel="noopener">Revoir la leçon${links.length > 1 ? ` · ${i + 1}/${links.length}` : ""} ${EXT}</a>`).join("");
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
@@ -706,10 +901,20 @@ document.querySelectorAll(".linkbtn").forEach(b => {
   b.onclick = () => openPage(+b.dataset.page);
 });
 document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
-$("go1").onclick = () => { mode = "letters"; famQuiz = $("famOn").checked; start(); };
+$("go1").onclick = () => show("c1");
+document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
+$("goW1").onclick = () => openWriting(1);
+$("goW2").onclick = () => openWriting(2);
+document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => { wKind = b.dataset.w; startWrite(); });
+document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
+$("wRestart").innerHTML = ICONS.restart;
+$("wRestart").onclick = () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource);
+$("wStop").onclick = () => wKind === "test" ? showStats() : show("cw");
+$("wPeek").onclick = () => openPage(wWords() ? 2 : 1);
 $("goForms").onclick = () => { mode = "forms"; famQuiz = false; start(); };
 $("goWords").onclick = () => { mode = "words"; famQuiz = false; start(); };
 $("restart").onclick = () => start(source);
+addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = showStats;
 $("peek").onclick = () => openPage(+$("peek").dataset.page);
 $("again").onclick = () => start(source);
