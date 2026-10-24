@@ -145,6 +145,7 @@
   .opt .tag { position:absolute; top:-9px; left:50%; transform:translateX(-50%); padding:1px 6px; border-radius:999px; background:var(--miss); color:var(--on-accent); font:700 10px/1.4 system-ui, sans-serif; white-space:nowrap; }
   .lessonlink { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; text-decoration:none; }
   .lessonlink svg { width:16px; height:16px; }
+  .lessonlinks { display:flex; flex-direction:column; gap:8px; }
   .primary { min-height:56px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:18px; font-weight:700; }
   .primary:disabled { opacity:.4; cursor:default; }
   .primary { display:flex; align-items:center; justify-content:center; gap:8px; } .primary .ic svg { width:22px; height:22px; display:block; }
@@ -297,6 +298,7 @@
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span></div>
     <button class="linkbtn" data-page="1"></button>
+    <div class="lessonlinks" data-lesson="1"></div>
     <div class="label">Réglages du tour</div>
     <div class="settings">
       <label><span><b>Lettres aléatoires</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand1" checked></label>
@@ -312,6 +314,7 @@
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الثَّانِي</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ</span></div>
     <p class="muted center">Les lettres changent de forme quand elles sont liées.</p>
     <button class="linkbtn" data-page="2"></button>
+    <div class="lessonlinks" data-lesson="2"></div>
     <div class="label">Réglages du tour</div>
     <div class="settings">
       <label><span><b>Cartes aléatoires</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand2" checked></label>
@@ -379,7 +382,7 @@
     <div class="rbar" id="rBar"></div>
     <p class="muted center" id="rLine"></p>
     <p class="center" id="famText" style="margin:0; font-size:14px; font-weight:600" hidden></p>
-    <div id="lessonLinks" style="display:flex; flex-direction:column; gap:8px"></div>
+    <div id="lessonLinks" class="lessonlinks"></div>
     <div class="label" id="reviewLabel">À revoir</div>
     <div class="grid" id="missed"></div>
     <div class="rfoot"><button class="primary" id="review"></button><button class="secondary" id="again">Recommencer un tour</button></div>
@@ -979,8 +982,7 @@ function showStats() {
   $("rLine").textContent = done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`;
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
-  const links = LESSON_PAGES[mode === "letters" || mode === "wletters" ? 1 : 2];
-  $("lessonLinks").innerHTML = links.map((u, i) => `<a class="lessonlink" href="${u}" target="_blank" rel="noopener">Revoir la leçon${links.length > 1 ? ` · ${i + 1}/${links.length}` : ""} ${EXT}</a>`).join("");
+  $("lessonLinks").innerHTML = lessonLinks(mode === "letters" || mode === "wletters" ? 1 : 2);
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
@@ -993,6 +995,8 @@ function showStats() {
 // The lesson in the online Qaida (one page for lesson 1, two for lesson 2).
 const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95"] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
+// The "Revoir la leçon" buttons (with the audio), on each lesson page and on the results.
+const lessonLinks = n => LESSON_PAGES[n].map((u, i, all) => `<a class="lessonlink" href="${u}" target="_blank" rel="noopener">Revoir la leçon${all.length > 1 ? ` · ${i + 1}/${all.length}` : ""} ${EXT}</a>`).join("");
 
 // ---------- Zoom: only the book's pages can be zoomed (pinch), the rest of the app stays at its size.
 const VP_FIXED = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
@@ -1122,6 +1126,7 @@ document.querySelectorAll(".linkbtn").forEach(b => {
   b.innerHTML = ICONS.grid + (b.dataset.page === "1" ? "Revoir l’alphabet complet, comme dans le livre" : "Revoir toutes les formes et les mots du livre");
   b.onclick = () => openPage(+b.dataset.page);
 });
+document.querySelectorAll(".lessonlinks[data-lesson]").forEach(d => d.innerHTML = lessonLinks(+d.dataset.lesson));
 document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
 $("go1").onclick = () => show("c1");
 document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
