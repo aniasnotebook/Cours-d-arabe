@@ -485,6 +485,9 @@ function start(cards) {
   if (random && mode !== "letters") deck = deck.slice(0, ROUND);
   deck.forEach(i => delete i.choices);
   answers = [];
+  openRound();
+}
+function openRound() {
   $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : "Voir les mots";
   $("peek").dataset.page = mode === "letters" ? 1 : 2;
   show("play");
@@ -742,6 +745,9 @@ function startWrite(cards) {
   wDeck = random ? shuffle(wSource) : wSource.slice();
   if (random && wWords() && !cards) wDeck = wDeck.slice(0, ROUND);
   wAnswers = []; wPos = 0;
+  openWriteRound();
+}
+function openWriteRound() {
   $("wPeek").textContent = wWords() ? "Voir les mots" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
@@ -939,11 +945,39 @@ $("ptr").innerHTML = MARK;
   document.addEventListener("touchend", () => {
     if (y0 === null) return;
     y0 = null;
-    if (pull > PULL) { ptr.style.transform = "translateY(24px)"; ptr.style.opacity = 1; ptr.classList.add("spin"); setTimeout(() => location.reload(), 150); }
+    if (pull > PULL) { ptr.style.transform = "translateY(24px)"; ptr.style.opacity = 1; ptr.classList.add("spin"); setTimeout(reloadHere, 150); }
     else { pull = 0; ptr.classList.add("back"); place(); }
   });
 }
-show(remembered() ? "home" : "gate");
+// A reload comes back to the same place: the same screen, and in a round the same cards and answers so far.
+const pool = m => m === "letters" || m === "wletters" ? LETTERS : m === "forms" ? FORMS : WORD_CARDS;
+function reloadHere() {
+  const screen = ["home","l1","l2","c1","cw","play","write","stats"].find(id => !$(id).hidden);
+  if (screen) try {
+    const P = pool(mode), ix = a => a.map(x => P.indexOf(x));
+    sessionStorage.setItem("place", JSON.stringify({ screen, mode, famQuiz, wKind, back: $("cwBack").dataset.back,
+      round: writing() ? { src: ix(wSource), deck: ix(wDeck), ans: wAnswers.map(a => [P.indexOf(a.item), a.ok]), pos: wPos }
+        : { src: ix(source), deck: ix(deck), ans: answers.map(a => [P.indexOf(a.item), a.ok, a.famOk]) } }));
+  } catch {}
+  location.reload();
+}
+function backToPlace() {
+  let p; try { p = JSON.parse(sessionStorage.getItem("place")); sessionStorage.removeItem("place"); } catch {}
+  if (!p) return false;
+  mode = p.mode; famQuiz = p.famQuiz; wKind = p.wKind;
+  if (p.screen === "cw") { openWriting(p.back === "l2" ? 2 : 1); return true; }
+  if (!["play", "write", "stats"].includes(p.screen)) { show(p.screen); return true; }
+  const P = pool(mode), r = p.round, at = i => P[i];
+  if (writing()) {
+    wSource = r.src.map(at); wDeck = r.deck.map(at); wAnswers = r.ans.map(([i, ok]) => ({ item: at(i), ok })); wPos = r.pos;
+    if (p.screen === "stats") showStats(); else openWriteRound();
+  } else {
+    source = r.src.map(at); deck = r.deck.map(at); answers = r.ans.map(([i, ok, famOk]) => ({ item: at(i), ok, famOk }));
+    if (p.screen === "stats") showStats(); else openRound();
+  }
+  return true;
+}
+if (!remembered()) show("gate"); else if (!backToPlace()) show("home");
 // The loader only shows if the Arabic font is still downloading after a moment (in practice, the first visit).
 { let ready = false;
   const done = () => { ready = true; $("loader").hidden = true; };
@@ -957,7 +991,7 @@ if ("serviceWorker" in navigator) {
   ).catch(() => {});
   let fresh = !navigator.serviceWorker.controller;   // the very first visit installs it: nothing to reload
   const inRound = () => !$("play").hidden || !$("write").hidden;
-  const reloadWhenFree = () => { if (!inRound()) location.reload(); else setTimeout(reloadWhenFree, 2000); };
+  const reloadWhenFree = () => { if (!inRound()) reloadHere(); else setTimeout(reloadWhenFree, 2000); };
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!fresh) { fresh = true; reloadWhenFree(); } });
 }
 
