@@ -861,13 +861,14 @@ function wSwipe(c) {
     if (x0 === null) return;
     x0 = null;
     c.style.transition = "transform .22s ease, opacity .22s ease";
-    if (Math.abs(dx) > 80) { tint(c, dx); fly(c, dx > 0, () => wAnswer(dx > 0)); }
+    if (Math.abs(dx) > 80 && !c.dataset.gone) { c.dataset.gone = 1; tint(c, dx); fly(c, dx > 0, () => wAnswer(dx > 0)); }
     else { c.style.transform = ""; tint(c, 0); }
   };
 }
 function wHide() { wShown = false; const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire"; wButtons(); }
 function wFly(ok) {
-  const c = $("wCard"); tint(c, ok ? 100 : -100);
+  const c = $("wCard"); if (!c || c.dataset.gone) return;   // a double tap answers once
+  c.dataset.gone = 1; tint(c, ok ? 100 : -100);
   fly(c, ok, () => wAnswer(ok));
 }
 function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
