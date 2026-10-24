@@ -451,7 +451,6 @@ const WORD_CARDS = WORDS.map(w => ({ w, mini: `<div class="mini ar"><span class=
 
 // ---------- Helpers
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const ROUND = 30;   // cards per shuffled round in lesson 2
 
 function choicesFor(letters, n) {
   const want = new Set(letters);
@@ -483,7 +482,6 @@ function start(cards) {
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
   const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
   deck = random ? shuffle(source) : source.slice();
-  if (random && mode !== "letters") deck = deck.slice(0, ROUND);
   deck.forEach(i => delete i.choices);
   answers = [];
   openRound();
@@ -744,7 +742,6 @@ function startWrite(cards) {
   wSource = cards || (wWords() ? WORD_CARDS : LETTERS);
   const random = wWords() ? $("rand2").checked : $("rand1").checked;
   wDeck = random ? shuffle(wSource) : wSource.slice();
-  if (random && wWords() && !cards) wDeck = wDeck.slice(0, ROUND);
   wAnswers = []; wPos = 0;
   openWriteRound();
 }
