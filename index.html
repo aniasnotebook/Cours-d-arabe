@@ -570,11 +570,18 @@ function flip() {
 }
 
 // Every card leaves the same way, as a swipe does: it flies off to one side, and the next one rises from below.
+// From a button (card at rest) it first leans to its side, as if pushed by a finger, then glides away.
 function fly(c, right, then) {
   if (!c) return then();
-  c.style.transition = "transform .22s ease .06s, opacity .22s ease .06s";
-  requestAnimationFrame(() => { c.style.transform = `translateX(${right ? 140 : -140}%) rotate(${right ? 20 : -20}deg)`; c.style.opacity = 0; });
-  setTimeout(then, 300);
+  const s = right ? 1 : -1, still = !c.style.transform;
+  const away = () => {
+    c.style.transition = "transform .38s cubic-bezier(.4,0,.7,1), opacity .38s ease-in";
+    c.style.transform = `translateX(${s * 150}%) rotate(${s * 22}deg)`; c.style.opacity = 0;
+    setTimeout(then, 400);
+  };
+  if (!still) return requestAnimationFrame(away);
+  c.style.transition = "transform .18s ease-out";
+  requestAnimationFrame(() => { c.style.transform = `translateX(${s * 16}%) rotate(${s * 5}deg)`; setTimeout(away, 180); });
 }
 
 // While a card is swiped it turns green (right) or red (left); the same when a button answers.
@@ -590,13 +597,9 @@ function answer(ok) {
   if (!c || c.dataset.gone) return;
   c.dataset.gone = 1;
   tint(c, ok ? 100 : -100);
-  c.classList.add("anim");
-  requestAnimationFrame(() => {
-    c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`;
-    c.style.opacity = 0;
-  });
+  c.classList.remove("anim");
   const l = deck[pos];
-  setTimeout(() => { answers.push({ item: l, ok, famOk: guess === l.fam }); render(); }, 300);
+  fly(c, ok, () => { answers.push({ item: l, ok, famOk: guess === l.fam }); render(); });
 }
 function undo() { if (answers.length) { answers.pop(); render(); } }
 
@@ -836,7 +839,7 @@ function wSwipe(c) {
     if (x0 === null) return;
     x0 = null;
     c.style.transition = "transform .22s ease, opacity .22s ease";
-    if (Math.abs(dx) > 80) { tint(c, dx); c.style.transform = `translateX(${dx > 0 ? 140 : -140}%) rotate(${dx > 0 ? 20 : -20}deg)`; c.style.opacity = 0; setTimeout(() => wAnswer(dx > 0), 220); }
+    if (Math.abs(dx) > 80) { tint(c, dx); fly(c, dx > 0, () => wAnswer(dx > 0)); }
     else { c.style.transform = ""; tint(c, 0); }
   };
 }
