@@ -575,11 +575,6 @@ function flip() {
 // From a button (card at rest) it first leans to its side, as if pushed by a finger, then glides away.
 function fly(c, right, then) {
   if (!c) return then();
-  if (right === null) {   // skipped: the card sinks away, neither right nor to review
-    c.style.transition = "transform .35s ease-in, opacity .35s ease-in";
-    requestAnimationFrame(() => { c.style.transform = "translateY(40%) scale(.85)"; c.style.opacity = 0; });
-    return setTimeout(then, 380);
-  }
   const s = right ? 1 : -1, still = !c.style.transform;
   const away = () => {
     c.style.transition = "transform .38s cubic-bezier(.4,0,.7,1), opacity .38s ease-in";
@@ -691,7 +686,7 @@ function qButtons() {
   if (checked) return;
   $("check").onclick = check;
   // Skipping counts the card as to review, and it leaves to the left.
-  $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false, skip: true }); fly($("card"), null, render); };
+  $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false, skip: true }); fly($("card"), true, render); };   // no colour: skipped is neither right nor to review
 }
 
 function choose(b) {
@@ -823,13 +818,13 @@ function wButtons() {
       <button class="act u" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wNext"><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
     $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = wTraceNext;
-    $("wSkip").onclick = () => { clearTimeout(wAuto); fly($("wCard"), null, () => wGo(1)); };
+    $("wSkip").onclick = () => { clearTimeout(wAuto); fly($("wCard"), true, () => wGo(1)); };
   } else if (!wShown) {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
       <button class="act u" id="wBack" ${wAnswers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wCheck" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.verify}</span>Vérifier</button>`;
     $("wBack").onclick = wUndo;
-    $("wSkip").onclick = () => fly($("wCard"), null, () => { wAnswers.push({ item: wDeck[wPos], ok: false, skip: true }); wRender(); });
+    $("wSkip").onclick = () => fly($("wCard"), true, () => { wAnswers.push({ item: wDeck[wPos], ok: false, skip: true }); wRender(); });
     $("wCheck").onclick = wReveal;
   } else {
     a.innerHTML = `<button class="act m" id="wMiss"><span>${ICONS.x}</span>À revoir</button>
@@ -881,7 +876,7 @@ function wTraceNext() {
   clearTimeout(wAuto);
   const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace" || c.dataset.gone) return;
   c.dataset.gone = 1;
-  fly(c, null, () => wGo(1));   // the quick motion of Passer: tracing has no right or to review
+  fly(c, true, () => wGo(1));
 }
 function wGo(d) { clearTimeout(wAuto); const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
 
