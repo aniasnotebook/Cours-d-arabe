@@ -147,6 +147,7 @@
   .primary { min-height:56px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:18px; font-weight:700; }
   .primary:disabled { opacity:.4; cursor:default; }
   .primary { display:flex; align-items:center; justify-content:center; gap:8px; } .primary .ic svg { width:22px; height:22px; display:block; }
+  .qrow { display:grid; grid-template-columns:1fr 2fr; gap:10px; } .qrow .secondary { min-height:56px; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--ink); } .qrow .ic svg { width:20px; height:20px; display:block; }
   .secondary { min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-weight:600; }
   .formrow { display:flex; gap:6px; direction:rtl; font-size:26px; }
   .formrow span { min-width:50px; padding:0 4px; border-radius:8px; border:1px solid #e2dccf; text-align:center; color:#1d1d1b; }
@@ -658,7 +659,7 @@ function renderQuiz() {
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <div class="q2">Où dans le mot ?</div>
       <div class="opts c3">${["ini","med","fin"].map(p => `<button class="opt" data-k="pos" data-v="${p}">${POS[p][0].toUpperCase() + POS[p].slice(1)}</button>`).join("")}</div>
-      <button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button>`;
+      <div class="qrow"><button class="secondary" id="qSkip"><span class="ic">${ICONS.skip}</span>Passer</button><button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button></div>`;
   } else {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
@@ -666,11 +667,13 @@ function renderQuiz() {
     $("below").innerHTML = `<div class="q2">Tape chaque lettre présente dans le mot</div>
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <p class="hint" style="text-align:left">Une lettre présente deux fois se tape une seule fois.</p>
-      <button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button>`;
+      <div class="qrow"><button class="secondary" id="qSkip"><span class="ic">${ICONS.skip}</span>Passer</button><button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button></div>`;
     pick.multi = new Set();
   }
   $("below").querySelectorAll(".opt").forEach(b => b.onclick = () => choose(b));
   $("check").onclick = check;
+  // Skipping counts the card as to review, and it leaves to the left.
+  $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false }); fly($("card"), false, render); };
 }
 
 function choose(b) {
@@ -718,6 +721,7 @@ function check() {
   $("nBad").textContent = `${bad} à revoir`;
   $("barFill").style.width = `${answers.length / deck.length * 100}%`;
   const btn = $("check");
+  $("qSkip").hidden = true; btn.parentNode.style.gridTemplateColumns = "1fr";
   btn.textContent = answers.length >= deck.length ? "Voir le résultat" : "Suivant";
   // The next card comes by itself after time to read the correction.
   const next = () => { clearTimeout(quizAuto); if ($("play").hidden || pos !== answers.length - 1) return; btn.onclick = null; fly($("card"), ok, render); };
