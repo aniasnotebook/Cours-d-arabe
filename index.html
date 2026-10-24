@@ -317,7 +317,7 @@
     <button class="lesson" data-open="2">
       <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></span>
       <span class="sample ar" lang="ar"><span style="color:#1d8fd1">تحت</span> <span style="color:#e0302a">بلب</span></span>
-      <span class="row"><span><b>Leçon 2 · Les lettres liées</b><span class="muted">Les formes des lettres et les mots</span></span><span class="chev" aria-hidden="true">›</span></span>
+      <span class="row"><span><b>Leçon 2 · Les lettres liées</b><span class="muted">Les formes, séparer et lier les lettres</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
   </section>
 
@@ -339,8 +339,8 @@
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></div>
     <div class="label">Exercices</div>
     <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Choisir ou écrire chaque forme : début, milieu, fin</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Les mots<small>Choisir ou écrire les lettres de chaque mot</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goW2"><span class="tile ar" lang="ar" style="font-size:22px">بلب</span><span class="t">Écrire les mots<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Séparer les lettres<small>Tu vois une case du livre, tu retrouves ses lettres</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goW2"><span class="tile ar" lang="ar" style="font-size:22px">بلب</span><span class="t">Lier les lettres<small>Tu vois les lettres séparées, tu les écris liées</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="2"></div>
   </section>
   <!-- The order setting of each lesson; shown on each exercise's level page. -->
@@ -546,7 +546,7 @@ function start(cards) {
   openRound();
 }
 function openRound() {
-  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : "Voir les mots";
+  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : "Voir le livre";
   $("peek").dataset.page = mode === "letters" ? 1 : 2;
   show("play");
   render();
@@ -727,7 +727,7 @@ function renderQuiz() {
     const letters = [...new Set(lettersOf(it.w).map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
     $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar">${wordShow(it)}</span></span>
-      <div class="grp"><span class="q">Tape chaque lettre présente dans le mot</span><span class="chips letters">${it.choices.map(c => chip("multi", c, showLetter(c), true)).join("")}</span>
+      <div class="grp"><span class="q">Tape chaque lettre de cette case</span><span class="chips letters">${it.choices.map(c => chip("multi", c, showLetter(c), true)).join("")}</span>
       <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
     pick.multi = new Set();
   }
@@ -829,13 +829,13 @@ const wPrompt = it => wKind === "form" ? `<span class="prompt pform"><span class
 
 function openWriting(lesson) {
   mode = lesson === 1 ? "wletters" : "wwords";
-  $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Écrire les mots";
+  $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Lier les lettres";
   $("cwBack").dataset.back = "l" + lesson;
   bindRand($("cwRand"), lesson);
   $("pkA").dataset.w = "trace"; $("pkB").dataset.w = "test";
   $("cwTraceName").textContent = "Tracer"; $("cwTestName").textContent = "Me tester";
-  $("cwTraceText").textContent = lesson === 1 ? "Tu repasses sur la lettre grise. Pas de note, tu avances à ton rythme." : "Tu repasses sur le mot gris, lettres attachées. Pas de note.";
-  $("cwTestText").textContent = lesson === 1 ? "Tu vois le nom en rouge, tu écris la lettre de mémoire, puis tu vérifies." : "Tu vois les lettres séparées, tu écris le mot attaché, puis tu vérifies.";
+  $("cwTraceText").textContent = lesson === 1 ? "Tu repasses sur la lettre grise. Pas de note, tu avances à ton rythme." : "Tu repasses sur les lettres liées, en gris. Pas de note.";
+  $("cwTestText").textContent = lesson === 1 ? "Tu vois le nom en rouge, tu écris la lettre de mémoire, puis tu vérifies." : "Tu vois les lettres séparées, tu les écris liées, puis tu vérifies.";
   const top = lesson === 1 ? `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px; color:#d6301f">جيم</span>`
     : `<span class="ar" lang="ar" dir="rtl" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px">ب ل ب</span>`;
   const big = lesson === 1 ? "ج" : "بلب";
@@ -843,13 +843,13 @@ function openWriting(lesson) {
   $("pvTest").innerHTML = `<span class="mc">${top}<span style="font-size:28px; color:#b9b2a3">?</span><span style="position:absolute; left:12px; right:12px; top:62%; border-top:2px dashed #e2dccf"></span></span>`;
   show("cw");
 }
-// Les formes and Les mots: choose (multiple choice) or write (harder), on the same choice screen as writing.
+// Les formes and Séparer les lettres: choose (multiple choice) or write (harder), on the same choice screen as writing.
 let choiceOf = "words";
 // Three small place pills (début, milieu, fin) for the previews, the middle one chosen.
 const PV_PLACES = `<span style="display:flex; gap:3px">${["début","milieu","fin"].map((t, i) => `<span style="padding:2px 4px; border-radius:99px; font:600 8px/1.2 system-ui, sans-serif; border:1px solid ${i === 1 ? "#1d1d1b" : "#b9b2a3"}; ${i === 1 ? "border-style:solid; background:#1d1d1b; color:#fff" : "border-style:dashed; background:#fff; color:#6b665c"}">${t}</span>`).join("")}</span>`;
 const CHOICE = {
-  words: { title: "Les mots", write: "split", top: "بلب", tiles: ["ب","ت","ل","ن"],
-    choose: "Tu vois le mot, tu tapes les lettres qui le composent.", text: "Tu vois le mot, tu écris ses lettres séparées, puis tu vérifies." },
+  words: { title: "Séparer les lettres", write: "split", top: "بلب", tiles: ["ب","ت","ل","ن"],
+    choose: "Tu vois une case du livre, tu tapes ses lettres.", text: "Tu vois une case du livre, tu écris ses lettres séparées, puis tu vérifies." },
   forms: { title: "Les formes", write: "form", top: "ـبـ", tiles: ["ب","ن"], places: true,
     choose: "Tu vois une forme, tu choisis la lettre et sa place.", text: "Tu vois une lettre et sa place, tu écris sa forme, puis tu vérifies." },
 };
@@ -883,7 +883,7 @@ function startWrite(cards) {
   openWriteRound();
 }
 function openWriteRound() {
-  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : wWords() ? "Voir les mots" : "Voir l’alphabet";
+  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : wWords() || wKind === "split" ? "Voir le livre" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
   show("write");
@@ -907,7 +907,7 @@ function wRender() {
     ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
   $("wHint").innerHTML = wKind === "trace"
-    ? `Repasse sur ${wWords() ? "le mot" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
+    ? `Repasse sur ${wWords() ? "les lettres liées" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
     : wTask();
   wButtons();
   wCanvas();
@@ -916,7 +916,7 @@ function wRender() {
 }
 // What to write, under the card.
 const wTask = () => wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
-  : wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire";
+  : wWords() ? "Écris ces lettres liées, d’un seul trait" : "Dessine la lettre de mémoire";
 function wNameSwitch() {
   const b = $("wName"); if (!b) return;
   b.onclick = () => { wArabic = !wArabic; b.outerHTML = wPrompt(wDeck[wPos]); wNameSwitch(); };
@@ -955,7 +955,7 @@ function wReveal() {
   $("wCard").classList.add("shown");
   if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
   const c = $("wCard");
-  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "le mot" : "la lettre"} du livre</span>`);
+  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
   wButtons();
   wSwipe(c);
@@ -1039,11 +1039,11 @@ function showStats() {
   const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
-  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : "mot";
+  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : "case";
   const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`, pl = (k, w) => `${w}${k > 1 ? "s" : ""}`;
   const bad = done - good, win = done && skipped <= done && good / done >= PASSED;
-  const name = writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Les mots · écrire les lettres" : { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Les mots · choisir les lettres", wwords: "Écrire les mots" }[mode];
-  const fem = unit !== "mot", right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
+  const name = writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
+  const fem = true, right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
   // Each score band has its own words and its own move of the logo; confetti from 80 %, twice for a perfect round.
   const all = good === seen && seen === deck.length, rate = done && skipped <= done ? good / done : 0;   // more skipped than answered: under 50 %
