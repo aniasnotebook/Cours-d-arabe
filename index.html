@@ -501,7 +501,7 @@ function render() {
   $("count").textContent = `${pos + 1} / ${deck.length}`;
   $("barFill").style.width = `${pos / deck.length * 100}%`;
   $("nGood").textContent = mode === "letters" ? `${good} reconnue${good > 1 ? "s" : ""}` : `${good} juste${good > 1 ? "s" : ""}`;
-  $("nBad").textContent = mode === "letters" ? `${bad} à revoir` : `${bad} fausse${bad > 1 ? "s" : ""}`;
+  $("nBad").textContent = `${bad} à revoir`;
   if (mode === "letters") renderLetter(); else renderQuiz();
 }
 
@@ -702,7 +702,7 @@ function check() {
   answers.push({ item: it, ok });
   const good = answers.filter(a => a.ok).length, bad = answers.length - good;
   $("nGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
-  $("nBad").textContent = `${bad} fausse${bad > 1 ? "s" : ""}`;
+  $("nBad").textContent = `${bad} à revoir`;
   $("barFill").style.width = `${answers.length / deck.length * 100}%`;
   const btn = $("check");
   btn.textContent = answers.length >= deck.length ? "Voir le résultat" : "Suivant";
