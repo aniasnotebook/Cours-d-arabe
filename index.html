@@ -716,7 +716,7 @@ function check() {
   let ok;
   if (mode === "forms") {
     ok = pick.letter === it.g && pick.pos === it.p;
-    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste !" : "À revoir"}</span>
+    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>
       <span class="glyph ar" lang="ar" style="font-size:min(100px, 24vw)">${formOf(it.g, it.p)}</span>
       <span style="font-weight:700"><span class="ar" lang="ar" style="color:#d6301f; font-size:26px">${NAME_OF[it.g]}</span> · ${POS[it.p]}</span>
       <span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`;
@@ -728,7 +728,7 @@ function check() {
   } else {
     const want = new Set([...it.w].map(letterOf)), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
     ok = !missed.length && !extra.length;
-    const verdict = ok ? "Juste !" : `Presque : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
+    const verdict = ok ? "Juste" : `À revoir : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
     card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "À revoir" : verdict}</span>
       <span class="word ar" lang="ar"${wf(it.w)}>${coloured(it.w)}</span>
       <span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(c)}</span>`).join("")}</span>`;
