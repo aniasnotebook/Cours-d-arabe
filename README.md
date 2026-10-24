@@ -1,6 +1,6 @@
 # Cours d'arabe
 
-Un jeu pour apprendre l'alphabet avec la Qaida Nourania. Sans IA, rien à installer : ouvre `index.html`.
+Un jeu pour apprendre l'alphabet.
 
 - **Leçon 1** (حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ) : les 30 lettres seules. Touche la carte pour voir son nom, glisse à droite si tu la reconnais, à gauche si c'est à revoir. Option : indiquer aussi si la lettre est emphatique (خ ص ض غ ط ظ ق) ou de prolongation (ا و ی ے).
 - **Leçon 2** (حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ) : retrouver la lettre et sa position (début, milieu, fin), puis les lettres de chaque mot du livre.
