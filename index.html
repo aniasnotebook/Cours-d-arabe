@@ -771,7 +771,7 @@ function check() {
     if (!$("page").hidden) { quizAuto = setTimeout(next, 1000); return; }   // the book page is open: wait
     btn.onclick = null; fly($("card"), ok, render); };
   btn.onclick = next;
-  quizAuto = setTimeout(next, 2000);
+  quizAuto = setTimeout(next, 4000);
 }
 
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
