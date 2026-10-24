@@ -823,7 +823,7 @@ function wButtons() {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
       <button class="act u" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wNext"><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
-    $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = () => wGo(1);
+    $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = wTraceNext;
     $("wSkip").onclick = () => { clearTimeout(wAuto); fly($("wCard"), null, () => wGo(1)); };
   } else if (!wShown) {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
@@ -879,7 +879,9 @@ function wFly(ok) {
 function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
 let wAuto = null;
 function wTraceNext() {
-  const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace") return;
+  clearTimeout(wAuto);
+  const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace" || c.dataset.gone) return;
+  c.dataset.gone = 1;
   fly(c, true, () => wGo(1));   // to the right: left means "to review", which tracing does not have
 }
 function wGo(d) { clearTimeout(wAuto); const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
