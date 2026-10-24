@@ -178,7 +178,6 @@
   .wcard .model.guide { color:#d9d3c5; }
   .wcard .model.answer { color:#2f7d4f; opacity:.4; }
   .wcard .line { position:absolute; left:24px; right:24px; top:64%; border-top:2px dashed #e2dccf; pointer-events:none; }
-  .wcard .edge { position:absolute; top:50%; width:4px; height:56px; margin-top:-28px; border-radius:2px; background:#e2dccf; pointer-events:none; }
   .wcard .say { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); white-space:nowrap; padding:6px 12px; border-radius:999px; font-size:14px; font-weight:700; pointer-events:none; }
   .wcard .say { background:#f3efe6; color:#6b665c; font-weight:600; }
   .wcard .erase { position:absolute; top:10px; right:10px; z-index:2; width:48px; height:48px; border-radius:50%; border:1px solid #e2dccf; background:#fff; color:#6b665c; display:grid; place-items:center; padding:0; }
@@ -802,7 +801,7 @@ function wRender() {
   $("wBad").textContent = `${wAnswers.filter(a => !a.ok && !a.skip).length} à revoir`;
   $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}<span class="line"></span>
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
-    ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span><span class="edge" style="left:6px"></span><span class="edge" style="right:6px"></span>` : ""}
+    ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
   $("wHint").innerHTML = wKind === "trace"
     ? `Repasse sur ${wWords() ? "le mot" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
