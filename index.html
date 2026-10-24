@@ -347,6 +347,7 @@
 
   <!-- End of a round -->
   <section class="screen mid" id="stats" hidden>
+    <button class="ico home" aria-label="Accueil"></button>
     <p class="muted center" id="seen"></p>
     <div class="party" id="party" hidden></div>
     <div class="score" id="score"></div>
@@ -358,7 +359,6 @@
     <div class="grid" id="missed"></div>
     <button class="primary" id="review"></button>
     <button class="secondary" id="again">Recommencer un tour</button>
-    <button class="secondary" id="toHome">Page d’accueil</button>
   </section>
 </div>
 
@@ -1099,7 +1099,6 @@ addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = showStats;
 $("peek").onclick = () => openPage(+$("peek").dataset.page);
 $("again").onclick = () => start(source);
-$("toHome").onclick = () => show("home");
 $("page").onclick = closePage;
 
 document.addEventListener("keydown", e => {
