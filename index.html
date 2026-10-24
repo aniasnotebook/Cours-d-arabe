@@ -477,20 +477,23 @@ const WORDS = ["بلب","كب","كا","بكت","تكث","با","نا","تا","ي
   "بنن","تين","يتن","ثثن","حث","خب","جت","تحت","يجب","بخت","بة","يه","ته","نة","يهب","بها","بهم","جد","خذ","جر",
   "خز","ير","تز","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ",
   "قو","فو","فقل","قفل","يف","حم","لم","تمت"];
-// The book's four inks: red, green, blue and black, one per letter in turn.
-const INKS = ["#e0302a", "#2f8f3a", "#1d8fd1", "#1d1d1b"];
+// The book's four inks. Each word has its letters' colours as printed in the book (lesson 2, pages 7 to 9), right to left:
+// R red, G green, B blue, K black.
+const INK = { R: "#e8321f", G: "#47a23a", B: "#29a3e3", K: "#1d1d1b" }, INKS = Object.values(INK);
+const BOOK_INKS = Object.fromEntries("بلب GRG,كب RG,كا RK,بكت BRB,تكث BRB,با GK,نا RK,تا BK,يا KR,ثا BK,بس BG,يس BG,نس RG,تس BG,ثس BG,ثج BR,تح BG,نخ RK,يح KG,بج GR,يم KR,بم GR,نم GR,تم GR,ثم BR,بى RK,يى RK,نى RK,تى BK,ثى BK,نبل RGR,تنل KBR,بيل GKR,يتل KGR,ثثل KBR,نبن RGR,بنن GBR,تين BKR,يتن KBR,ثثن BGR,حث GB,خب KG,جت RB,تحت BGB,يجب BRG,بخت GKB,بة GB,يه KR,ته BR,نة RB,يهب KRG,بها GRK,بهم GBR,جد RG,خذ RB,جر RG,خز KG,ير KB,تز KG,سل GR,شل BR,صب BG,طب BG,ضا GK,ظا GK,عز RG,غر KB,صع BR,ضغ GK,بعد GRG,تغذ BKB,قو BR,فو BR,فقل KBR,قفل BGR,يف KG,حم GR,لم GR,تمت GRB".split(",").map(e => e.split(" ")));
+const inkOf = (w, i) => BOOK_INKS[w] ? INK[BOOK_INKS[w][i]] : INKS[i % INKS.length];
 // Amiri matches the book best, except for these words, which the book writes flat as Scheherazade does.
 const FLAT = new Set(["يم","يهب","بها","بهم","تمت"]);
 const wf = w => FLAT.has(w) ? ` style="font-family:'Scheherazade New', Amiri, serif"` : "";
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
-const inked = w => [...w].map((ch, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(ch)}</span>`).join(" ");
+const inked = w => [...w].map((ch, i) => `<span style="color:${inkOf(w, i)}">${showLetter(ch)}</span>`).join(" ");
 function coloured(w) {
   const c = [...w];
   return c.map((ch, i) => {
     const before = i > 0 && joinsNext(c[i - 1]) && joinsPrev(ch) ? "‍" : "";
     const after = i < c.length - 1 && joinsNext(ch) && joinsPrev(c[i + 1]) ? "‍" : "";
-    return `<span style="color:${INKS[i % INKS.length]}">${before}${ch}${after}</span>`;
+    return `<span style="color:${inkOf(w, i)}">${before}${ch}${after}</span>`;
   }).join("");
 }
 const WORD_CARDS = WORDS.map(w => ({ w, mini: `<div class="mini ar"><span class="w" lang="ar"${wf(w)}>${coloured(w)}</span></div>` }));
@@ -765,7 +768,7 @@ function check() {
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste" : `À revoir : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
     ans.querySelector(".big").innerHTML = coloured(it.w);
-    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(c)}</span>`).join("")}</span>`);
+    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${inkOf(it.w, i)}">${showLetter(c)}</span>`).join("")}</span>`);
     chips.forEach(o => {
       const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
       o.className = "chip ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " off");
@@ -1045,8 +1048,8 @@ function showStats() {
   $("review").onclick = () => start(toReview);
 }
 
-// The lesson in the online Qaida (one page for lesson 1, two for lesson 2).
-const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95"] };
+// The lesson in the online Qaida (one page for lesson 1, three for lesson 2, pages 7 to 9).
+const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95", "https://furqangroup.com/sa/pages/96"] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
 // The "Revoir la leçon" buttons (with the audio), on each lesson page and on the results.
 const lessonLinks = n => LESSON_PAGES[n].map((u, i, all) => `<a class="lessonlink" href="${u}" target="_blank" rel="noopener">Revoir la leçon${all.length > 1 ? ` · ${i + 1}/${all.length}` : ""} ${EXT}</a>`).join("");
