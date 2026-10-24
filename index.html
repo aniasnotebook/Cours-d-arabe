@@ -501,7 +501,7 @@ const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}$
 const inkOf = (w, i, k) => k ? INK[k[i]] : INKS[i % INKS.length];
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
-const inked = (w, k) => [...w].map((ch, i) => ch === "ـ" ? "" : `<span style="color:${inkOf(w, i, k)}">${glyph(l1Show(ch))}</span>`).filter(Boolean).join(" ");
+const inked = (w, k) => [...w].map((ch, i) => ch === "ـ" ? "" : `<span style="color:${inkOf(w, i, k)}">${l1Show(ch, w)}</span>`).filter(Boolean).join(" ");
 const wordShow = it => bookImg(it, true);   // the word as asked: the book's writing in plain black
 const wordInk = it => bookImg(it);          // the answer: the book's writing in its colours
 // Lesson 2 practice: all 127 cells of pages 7 to 9, in the book's order, repeats and single letters included (the calligraphy differs).
@@ -514,15 +514,21 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 
 // Séparer les lettres: the chips are always the 30 letters of lesson 1, as learned there, so the learner links the new
 // way of writing to a letter they know. A hamza on alif, waw or ya is the hamza (ء); the Persian kaf is kaf; ta marbuta
-// is written like ha. The ya with two dots (يـ) is either ya of lesson 1 (ى or ے): either one, or both, is right.
-const YA = "Y", YAS = ["ى", "ے"];
-const L1 = c => ({ "ک": "ك", "أ": "ء", "إ": "ء", "ؤ": "ء", "ئ": "ء", "ة": "ه", "ي": YA })[c] || c;
-const l1Show = c => L1(c) === YA ? "ى" : L1(c);
-const L1_LOOKALIKE = [["ب","ت","ث","ن","ى","ے"],["ج","ح","خ"],["د","ذ"],["ر","ز"],["س","ش"],["ص","ض"],["ط","ظ"],["ع","غ","ء"],["ف","ق"],["ك","ل"],["م","ه","و","ا"]];
+// is read ta (ت). A ya is one chip "ى / ے" (either ya of lesson 1), except in the one cell with both ya (يى), where the
+// dotted one is ے and the round one is ى.
+const YA = "Y", YA_LABEL = `ى / <span class="yb">ے</span>`;
+const L1 = (c, w = "") => /ي/.test(w) && /ى/.test(w) ? ({ "ي": "ے", "ى": "ى" })[c] || L1(c)
+  : ({ "ک": "ك", "أ": "ء", "إ": "ء", "ؤ": "ء", "ئ": "ء", "ة": "ت", "ي": YA, "ى": YA })[c] || c;
+const l1Show = (c, w) => chipLabel(L1(c, w));
+const HAMZA = `<span style="font-size:1.5em; line-height:0.6">ء</span>`;   // the lone hamza is drawn small: enlarged to read
+const chipLabel = c => c === YA ? YA_LABEL : c === "ء" ? HAMZA : glyph(c);
+const L1_LETTERS = GLYPHS.filter(c => c !== "ى" && c !== "ے").concat(YA);
+const L1_LOOKALIKE = [["ب","ت","ث","ن",YA],["ج","ح","خ"],["د","ذ"],["ر","ز"],["س","ش"],["ص","ض"],["ط","ظ"],["ع","غ","ء"],["ف","ق"],["ك","ل"],["م","ه","و","ا"]];
 function lessonChoices(tokens, n) {
-  const want = new Set(tokens.flatMap(t => t === YA ? YAS : [t]));
-  const near = shuffle(L1_LOOKALIKE.filter(g => g.some(c => want.has(c))).flat().filter(c => !want.has(c)));
-  const rest = shuffle(GLYPHS.filter(c => !want.has(c) && !near.includes(c)));
+  const want = new Set(tokens);
+  const pool = want.has("ے") ? L1_LETTERS.filter(c => c !== YA) : L1_LETTERS;
+  const near = shuffle(L1_LOOKALIKE.filter(g => g.some(c => want.has(c))).flat().filter(c => !want.has(c) && pool.includes(c)));
+  const rest = shuffle(pool.filter(c => !want.has(c) && !near.includes(c)));
   const k = Math.max(0, n - want.size), nearCount = Math.min(near.length, Math.ceil(k / 2));
   return shuffle([...want, ...near.slice(0, nearCount), ...rest.slice(0, k - nearCount)]);
 }
@@ -739,10 +745,10 @@ function renderQuiz() {
       <div class="grp"><span class="q">Quelle lettre ?</span><span class="chips letters">${it.choices.map(c => chip("letter", c, showLetter(c), true)).join("")}</span></div>
       <div class="grp"><span class="q">Où dans le mot ?</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
   } else {
-    const letters = [...new Set(lettersOf(it.w).map(L1))];
+    const letters = [...new Set(lettersOf(it.w).map(c => L1(c, it.w)))];
     it.choices = it.choices || lessonChoices(letters, Math.max(8, letters.length + 4));
     $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar">${wordShow(it)}</span></span>
-      <div class="grp"><span class="q">Tape chaque lettre de cette case</span><span class="chips letters">${it.choices.map(c => chip("multi", c, glyph(c), true)).join("")}</span>
+      <div class="grp"><span class="q">Tape chaque lettre de cette case</span><span class="chips letters">${it.choices.map(c => chip("multi", c, chipLabel(c), true)).join("")}</span>
       <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
     pick.multi = new Set();
   }
@@ -791,17 +797,14 @@ function check() {
     });
     card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
   } else {
-    const want = new Set(lettersOf(it.w).map(L1)), ya = want.has(YA);
-    const has = c => c === YA ? YAS.some(y => pick.multi.has(y)) : pick.multi.has(c);
-    const missed = [...want].filter(c => !has(c)), extra = [...pick.multi].filter(c => !want.has(c) && !(ya && YAS.includes(c)));
+    const want = new Set(lettersOf(it.w).map(c => L1(c, it.w)));
+    const missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste" : `À revoir : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
     ans.querySelector(".big").innerHTML = wordInk(it);
-    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => c === "ـ" ? "" : `<span style="color:${inkOf(it.w, i, it.k)}">${glyph(l1Show(c))}</span>`).join("")}</span>`);
+    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => c === "ـ" ? "" : `<span style="color:${inkOf(it.w, i, it.k)}">${l1Show(c, it.w)}</span>`).join("")}</span>`);
     chips.forEach(o => {
-      const v = o.dataset.v, chosen = pick.multi.has(v), yaHere = ya && YAS.includes(v);
-      // For the dotted ya, a ya chosen is right; if none was chosen, only the first is marked forgotten.
-      const inWord = want.has(v) || (yaHere && (chosen || (!has(YA) && v === YAS[0])));
+      const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
       o.className = "chip ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " off");
       if (inWord && !chosen) o.innerHTML += `<span class="tag">oubliée</span>`;
       if (!inWord && chosen) o.innerHTML += `<span class="tag">en trop</span>`;
