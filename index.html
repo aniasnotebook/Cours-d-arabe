@@ -962,12 +962,12 @@ function showStats() {
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
   const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" ? "forme" : "mot";
   const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`, pl = (k, w) => `${w}${k > 1 ? "s" : ""}`;
-  const bad = done - good, win = done && good / done >= PASSED;
+  const bad = done - good, win = done && skipped <= done && good / done >= PASSED;
   const name = { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes", words: "Les mots", wwords: "Écrire les mots" }[mode];
   const fem = unit !== "mot", right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
   // Each score band has its own words and its own move of the logo; confetti from 80 %, twice for a perfect round.
-  const all = good === seen && seen === deck.length, rate = done ? good / done : 0;
+  const all = good === seen && seen === deck.length, rate = done && skipped <= done ? good / done : 0;   // more skipped than answered: under 50 %
   const [mood, title] = all ? ["m5", "Bravo, tu as tout réussi"] : win ? ["m4", "Tu y es presque"]
     : rate >= .5 ? ["m3", "Persévère"] : ["m2", "Tu peux mieux faire, continue à t’entraîner"];
   $("party").className = "party " + mood;
