@@ -1,5 +1,5 @@
 // Works offline once opened: the page is fetched fresh when there is a connection, the copy is used otherwise.
-const CACHE = "cours-arabe-v44";
+const CACHE = "cours-arabe-v45";
 const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
@@ -18,13 +18,19 @@ self.addEventListener("fetch", e => {
   // Fonts never change: keep the first copy.
   if (url.hostname.endsWith("gstatic.com") || url.hostname.endsWith("googleapis.com")) {
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => {
-      const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
+      if (res.ok || res.type === "opaque") { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+      return res;
     })));
     return;
   }
   if (url.origin !== location.origin) return;
   // The game itself: newest version when online, saved copy when offline.
-  e.respondWith(fetch(req).then(res => {
-    const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
-  }).catch(() => caches.match(req).then(hit => hit || caches.match("./"))));
+  // On a weak connection, the saved copy is used after 4 seconds instead of waiting.
+  const net = fetch(req, { cache: "no-cache" }).then(res => {
+    if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+    return res;
+  });
+  const saved = () => caches.match(req).then(hit => hit || caches.match("./"));
+  const slow = new Promise(r => setTimeout(r, 4000)).then(() => saved()).then(hit => hit || net);
+  e.respondWith(Promise.race([net, slow]).catch(saved));
 });

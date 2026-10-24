@@ -34,8 +34,9 @@
   .app { width:100%; max-width:440px; height:100%; display:flex; flex-direction:column; }
   .screen { flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; overflow:auto; }
   .screen > .ico { align-self:flex-start; }
+  .toprow { display:flex; gap:8px; } .mid > .toprow + * { margin-top:auto; }
   /* Home and lesson screens sit in the middle of the screen; auto margins still let them scroll when tall. */
-  .mid > :first-child:not(.ico) { margin-top:auto; } .mid > .ico + * { margin-top:auto; } .mid > :last-child { margin-bottom:auto; }
+  .mid > :first-child:not(.ico):not(.toprow) { margin-top:auto; } .mid > .ico + * { margin-top:auto; } .mid > :last-child { margin-bottom:auto; }
   .ar { font-family:Amiri, "Noto Naskh Arabic", serif; font-weight:700; }
 
   /* Round icon buttons and the top bar */
@@ -298,7 +299,7 @@
 
   <!-- Lesson 1, recognise: with or without the families question -->
   <section class="screen mid" id="c1" hidden>
-    <button class="ico back" aria-label="Retour à la leçon 1" data-back="l1"></button>
+    <div class="toprow"><button class="ico back" aria-label="Retour à la leçon 1" data-back="l1"></button><button class="ico home" aria-label="Accueil"></button></div>
     <h2 class="ttl">Reconnaître les lettres</h2>
     <p class="center" style="margin:0 auto; max-width:30ch">Veux-tu ajouter une question sur les lettres emphatiques et de prolongation&nbsp;?</p>
     <div class="picks">
@@ -309,7 +310,7 @@
 
   <!-- Writing: trace or test yourself -->
   <section class="screen mid" id="cw" hidden>
-    <button class="ico back" aria-label="Retour à la leçon" id="cwBack"></button>
+    <div class="toprow"><button class="ico back" aria-label="Retour à la leçon" id="cwBack"></button><button class="ico home" aria-label="Accueil"></button></div>
     <h2 class="ttl" id="cwTitle"></h2>
     <p class="muted center">Comment veux-tu t’entraîner&nbsp;?</p>
     <div class="picks">
@@ -524,7 +525,7 @@ function letterCard(l, id, cls) {
 function renderLetter() {
   const next = deck[pos + 1];
   $("stage").innerHTML = (next ? letterCard(next, "", "under") : "") + letterCard(deck[pos], "card", "");
-  $("below").innerHTML = `<p class="hint" id="hint">${SWIPE_HINT}</p>
+  $("below").innerHTML = `<p class="hint" id="hint">${famQuiz ? "Tape la carte pour vérifier la famille. " : ""}${SWIPE_HINT}</p>
     <div class="actions">
       <button class="act m" id="bMiss"><span>${ICONS.x}</span>À revoir</button>
       <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
@@ -575,6 +576,8 @@ function flip() {
 // From a button (card at rest) it first leans to its side, as if pushed by a finger, then glides away.
 function fly(c, right, then) {
   if (!c) return then();
+  const done = then;
+  then = () => { if (c.isConnected && !c.closest(".screen").hidden) done(); };
   const s = right ? 1 : -1, still = !c.style.transform;
   const away = () => {
     c.style.transition = "transform .38s cubic-bezier(.4,0,.7,1), opacity .38s ease-in";
@@ -585,6 +588,9 @@ function fly(c, right, then) {
   c.style.transition = "transform .18s ease-out";
   requestAnimationFrame(() => { c.style.transform = `translateX(${s * 16}%) rotate(${s * 5}deg)`; setTimeout(away, 180); });
 }
+
+// A row just rebuilt under the finger ignores taps for a moment: a double tap must not hit the new button.
+function settle(row) { row.style.pointerEvents = "none"; setTimeout(() => row.style.pointerEvents = "", 300); }
 
 // While a card is swiped it turns green (right) or red (left); the same when a button answers.
 const TINT = { ok: ["#2f7d4f", "#e3f1e7"], miss: ["#c2410c", "#fdebe1"] };
@@ -682,10 +688,11 @@ function qButtons() {
     : `<button class="act n" id="qSkip"><span>${ICONS.skip}</span>Passer</button>
        <button class="act u" id="qBack" ${answers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
        <button class="act go2" id="check" disabled><span>${ICONS.verify}</span>Vérifier</button>`;
+  settle($("qActions"));
   $("qBack").onclick = () => { clearTimeout(quizAuto); undo(); };
   if (checked) return;
   $("check").onclick = check;
-  // Skipping counts the card as to review, and it leaves to the left.
+  // Skipping is its own count (not to review, not in the score); the next card simply takes its place.
   $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false, skip: true }); render(); };   // no swipe: the next card simply takes its place
 }
 
@@ -727,7 +734,7 @@ function check() {
     });
     $("below").querySelector(".hint").hidden = true;
   }
-  card.classList.add(ok ? "good" : "bad");
+  card.classList.add(ok ? "good" : "bad"); tint(card, ok ? 100 : -100);
   answers.push({ item: it, ok });
   const good = answers.filter(a => a.ok).length, bad = answers.filter(a => !a.ok && !a.skip).length;
   $("nGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
@@ -736,7 +743,9 @@ function check() {
   qButtons();
   const btn = $("check");
   // The next card comes by itself after time to read the correction.
-  const next = () => { clearTimeout(quizAuto); if ($("play").hidden || pos !== answers.length - 1) return; btn.onclick = null; fly($("card"), ok, render); };
+  const next = () => { clearTimeout(quizAuto); if ($("play").hidden || pos !== answers.length - 1) return;
+    if (!$("page").hidden) { quizAuto = setTimeout(next, 1000); return; }   // the book page is open: wait
+    btn.onclick = null; fly($("card"), ok, render); };
   btn.onclick = next;
   quizAuto = setTimeout(next, 2000);
 }
@@ -786,6 +795,7 @@ function openWriteRound() {
 }
 
 function wRender() {
+  clearTimeout(wAuto);
   if (wKind === "test") wPos = wAnswers.length;
   if (wPos >= wDeck.length) return wKind === "test" ? showStats() : show("cw");
   wStrokes = []; wShown = false; wArabic = false;
@@ -812,7 +822,7 @@ function wNameSwitch() {
 }
 
 function wButtons() {
-  const a = $("wActions");
+  const a = $("wActions"); settle(a);
   if (wKind === "trace") {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
       <button class="act u" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
@@ -876,6 +886,7 @@ let wAuto = null;
 function wTraceNext() {
   clearTimeout(wAuto);
   const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace" || c.dataset.gone) return;
+  if (!$("page").hidden) { wAuto = setTimeout(wTraceNext, 1000); return; }
   c.dataset.gone = 1;
   fly(c, true, () => wGo(1));
 }
@@ -883,7 +894,7 @@ function wGo(d) { clearTimeout(wAuto); const n = wPos + d; if (n < 0) return; wP
 
 // Drawing with a finger, a pen or a mouse. In tracing, a swipe that starts at the card's edge changes letter.
 function wCanvas() {
-  const cv = $("wCanvas"), card = $("wCard"), r = card.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  const cv = $("wCanvas"), card = $("wCard"), r = { width: card.offsetWidth, height: card.offsetHeight }, dpr = devicePixelRatio || 1;
   cv.width = r.width * dpr; cv.height = r.height * dpr;
   let cur = null, edge = null;
   const at = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
@@ -1046,6 +1057,7 @@ function backToPlace() {
   if (!["play", "write", "stats"].includes(p.screen)) { show(p.screen); return true; }
   const P = pool(mode), r = p.round, at = i => P[i];
   if (writing()) {
+    openWriting(mode === "wwords" ? 2 : 1);
     wSource = r.src.map(at); wDeck = r.deck.map(at); wAnswers = r.ans.map(([i, ok, skip]) => ({ item: at(i), ok, skip })); wPos = r.pos;
     if (p.screen === "stats") showStats(); else openWriteRound();
   } else {
@@ -1067,7 +1079,7 @@ if ("serviceWorker" in navigator) {
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); })
   ).catch(() => {});
   let fresh = !navigator.serviceWorker.controller;   // the very first visit installs it: nothing to reload
-  const inRound = () => !$("play").hidden || !$("write").hidden;
+  const inRound = () => !$("play").hidden || !$("write").hidden || !$("gate").hidden || !$("page").hidden;
   const reloadWhenFree = () => { if (!inRound()) reloadHere(); else setTimeout(reloadWhenFree, 2000); };
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!fresh) { fresh = true; reloadWhenFree(); } });
 }

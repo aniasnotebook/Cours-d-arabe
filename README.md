@@ -2,9 +2,9 @@
 
 Un jeu pour apprendre l'alphabet.
 
-- **Leçon 1** (حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ) : les 30 lettres seules. Touche la carte pour voir son nom, glisse à droite si tu la reconnais, à gauche si c'est à revoir. Option : indiquer aussi si la lettre est emphatique (خ ص ض غ ط ظ ق) ou de prolongation (ا و ی ے).
-- **Leçon 2** (حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ) : retrouver la lettre et sa position (début, milieu, fin), puis les lettres de chaque mot du livre.
-- À la fin du tour : le score et les cartes à revoir. Par défaut les cartes arrivent dans un ordre aléatoire ; une case permet de suivre l'ordre du livre.
+- **Leçon 1** (حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ) : les 30 lettres seules. Le nom est en rouge dans le coin, comme dans le livre ; glisse à droite si tu la reconnais, à gauche si c'est à revoir. Option : indiquer aussi si la lettre est emphatique (خ ص ض غ ط ظ ق) ou de prolongation (ا و ی ے). Écrire : tracer chaque lettre, ou l’écrire de mémoire à partir de son nom.
+- **Leçon 2** (حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ) : retrouver la lettre et sa position (début, milieu, fin), puis les lettres de chaque mot du livre, et écrire les mots (tracer ou de mémoire).
+- À la fin du tour : les justes, les cartes à revoir et les cartes passées. Par défaut les cartes arrivent dans un ordre aléatoire ; une case permet de suivre l'ordre du livre.
 
 Lettres dans la police libre [Amiri](https://github.com/aliftype/amiri) (licence OFL), chargée depuis Google Fonts.
 
