@@ -310,12 +310,12 @@
   <section class="screen mid" id="home" hidden>
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
     <button class="lesson" data-open="1">
-      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرۡسُ الۡأَوَّلُ</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُفۡرَدَةُ</span></span>
+      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span></span>
       <span class="sample ar" lang="ar">ا ب ت ث</span>
       <span class="row"><span><b>Leçon 1 · Les lettres seules</b><span class="muted">Les 30 lettres de l’alphabet</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
     <button class="lesson" data-open="2">
-      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرۡسُ الثَّانِي</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُرَكَّبَةُ</span></span>
+      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></span>
       <span class="sample ar" lang="ar"><span style="color:#1d8fd1">تحت</span> <span style="color:#e0302a">بلب</span></span>
       <span class="row"><span><b>Leçon 2 · Les lettres liées</b><span class="muted">Les formes des lettres et les mots</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
@@ -325,7 +325,7 @@
   <section class="screen mid" id="l1" hidden>
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
-    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرۡسُ الۡأَوَّلُ</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُفۡرَدَةُ</span></div>
+    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span></div>
     <div class="label">Exercices</div>
     <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>Les 30 lettres · Les familles en plus</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:#d6301f; font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
@@ -336,7 +336,7 @@
   <section class="screen mid" id="l2" hidden>
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
-    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرۡسُ الثَّانِي</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُرَكَّبَةُ</span></div>
+    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></div>
     <div class="label">Exercices</div>
     <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Choisir ou écrire chaque forme : début, milieu, fin</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Les mots<small>Choisir ou écrire les lettres de chaque mot</small></span><span aria-hidden="true">›</span></button>
@@ -1080,8 +1080,8 @@ document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("pag
 
 // ---------- The book's page
 function openPage(n, part = "book") {
-  $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرۡسُ الۡأَوَّلُ</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُفۡرَدَةُ</span>`
-    : `<span class="rg">الدَّرۡسُ الثَّانِي</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُرَكَّبَةُ</span>`;
+  $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span>`
+    : `<span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span>`;
   $("sheet").innerHTML = n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
     : part === "forms" ? `<h3>Les formes des lettres</h3><p class="muted center" style="margin:-4px 0 8px; font-size:13px">Tableau fait par l’app pour s’entraîner : il n’est pas dans le livre.</p>
       <table class="table ar"><tr><th></th>${["iso","ini","med","fin"].map(p => `<th>${POS[p]}</th>`).join("")}</tr>
