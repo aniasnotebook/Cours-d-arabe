@@ -882,7 +882,7 @@ function wTraceNext() {
   clearTimeout(wAuto);
   const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace" || c.dataset.gone) return;
   c.dataset.gone = 1;
-  fly(c, true, () => wGo(1));   // to the right: left means "to review", which tracing does not have
+  fly(c, null, () => wGo(1));   // the quick motion of Passer: tracing has no right or to review
 }
 function wGo(d) { clearTimeout(wAuto); const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
 
