@@ -365,7 +365,7 @@
   <div class="paper">
     <div class="ribbons ar" lang="ar" dir="rtl" id="pageHead"></div>
     <div id="sheet"></div>
-    <p class="muted center" style="color:#6b665c">Touche pour fermer</p>
+    <p class="muted center" style="color:#6b665c">Tape pour fermer</p>
   </div>
 </div>
 
@@ -648,7 +648,7 @@ function renderQuiz() {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
     $("stage").innerHTML = `<div class="card" id="card"><span class="word ar" lang="ar"${wf(it.w)}>${it.w}</span></div>`;
-    $("below").innerHTML = `<div class="q2">Touche chaque lettre présente dans le mot</div>
+    $("below").innerHTML = `<div class="q2">Tape chaque lettre présente dans le mot</div>
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <p class="hint" style="text-align:left">Une lettre présente deux fois se touche une seule fois.</p>
       <button class="primary" id="check" disabled>Vérifier</button>`;
@@ -719,7 +719,7 @@ let wArabic = false;
 const wPrompt = it => wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${[...it.w].map(showLetter).join(" ")}</span>`
   : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
   : `<button class="prompt swap" id="wName">${wArabic ? `<span class="ar" lang="ar" style="font-size:40px">${it.ar}</span>` : `<span class="fr">${it.fr}</span>`}
-      <span class="tip">${SWAP}${wArabic ? `Touche pour revenir à « ${it.fr} »` : "Touche pour le nom en arabe"}</span></button>`;
+      <span class="tip">${SWAP}${wArabic ? `Tape pour revenir à « ${it.fr} »` : "Tape pour le nom en arabe"}</span></button>`;
 
 function openWriting(lesson) {
   mode = lesson === 1 ? "wletters" : "wwords";
