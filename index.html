@@ -677,7 +677,7 @@ function renderQuiz() {
 // The same row as in every exercise: skip or to review on the left, back in the middle, go on the right.
 function qButtons() {
   $("qActions").innerHTML = checked
-    ? `<span></span><button class="act u" id="qBack"><span>${ICONS.undo}</span>Retour</button>
+    ? `<button class="act n" disabled><span>${ICONS.skip}</span>Passer</button><button class="act u" id="qBack"><span>${ICONS.undo}</span>Retour</button>
        <button class="act go2" id="check"><span>${ICONS.next}</span>${answers.length >= deck.length ? "Résultat" : "Suivante"}</button>`
     : `<button class="act n" id="qSkip"><span>${ICONS.skip}</span>Passer</button>
        <button class="act u" id="qBack" ${answers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
