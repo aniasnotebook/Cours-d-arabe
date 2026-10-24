@@ -347,14 +347,14 @@
   </section>
 
   <!-- End of a round -->
-  <section class="screen" id="stats" hidden style="justify-content:center">
+  <section class="screen mid" id="stats" hidden>
     <p class="muted center" id="seen"></p>
     <div class="party" id="party" hidden></div>
     <div class="score" id="score"></div>
     <p class="muted center" id="scoreText"></p>
     <p class="muted center" id="skipText" hidden></p>
     <p class="center" id="famText" style="margin:0; font-size:14px; font-weight:600" hidden></p>
-    <div id="lessonLinks" style="display:flex; gap:8px"></div>
+    <div id="lessonLinks" style="display:flex; flex-direction:column; gap:8px"></div>
     <p class="muted center" id="reviewLabel">À revoir :</p>
     <div class="grid" id="missed"></div>
     <button class="primary" id="review"></button>
@@ -467,7 +467,7 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = "none", pick = {}, checked = false;
 
-function show(id) { ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; }
+function show(id) { ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
 
 // ---------- The logo: a red card, a green card and the ba card, drawn so each card can move.
 const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
@@ -1005,12 +1005,15 @@ $("ptr").innerHTML = MARK;
 // Pull down from the top of a screen to reload, as an installed app has no reload button. Cards and the drawing
 // keep their own gestures.
 { let y0 = null, pull = 0;
-  const ptr = $("ptr"), PULL = 90;
+  // A pull only counts when the screen was already resting at the top: scrolling back up to the top does not reload.
+  const ptr = $("ptr"), PULL = 110;
+  let lastScroll = 0;
+  document.addEventListener("scroll", () => lastScroll = Date.now(), true);
   const screen = () => [...document.querySelectorAll(".screen")].find(s => !s.hidden);
   const place = () => { const d = Math.min(pull, PULL * 1.4); ptr.style.opacity = Math.min(1, d / PULL); ptr.style.transform = `translateY(${d * .7 - 40}px)`; };
   document.addEventListener("touchstart", e => {
     const s = screen();
-    y0 = s && s.scrollTop <= 0 && $("page").hidden && !e.target.closest(".card, .wcard, .stage, canvas, input") ? e.touches[0].clientY : null;
+    y0 = s && s.scrollTop <= 0 && Date.now() - lastScroll > 600 && $("page").hidden && !e.target.closest(".card, .wcard, .stage, canvas, input") ? e.touches[0].clientY : null;
     pull = 0; ptr.classList.remove("back");
   }, { passive: true });
   document.addEventListener("touchmove", e => {
