@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" id="vp" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Cours d’arabe</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@700&display=swap">
@@ -24,7 +24,7 @@
           --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
-  html, body { height:100%; overscroll-behavior:none; }
+  html, body { height:100%; overscroll-behavior:none; touch-action:manipulation; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
          display:flex; flex-direction:column; align-items:center; overflow:hidden;
          padding-block:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
@@ -195,7 +195,7 @@
   .mini .w { font-size:clamp(17px, 5vw, 24px); line-height:1.5; }
 
   /* Full page of the book */
-  .scrim { position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .scrim { touch-action:pan-x pan-y pinch-zoom; position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:center; justify-content:center; padding:16px; }
   .paper { width:100%; max-width:520px; max-height:100%; overflow:auto; background:#fff; color:#1d1d1b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
   .paper .grid { gap:0; border:1px solid #333; }
   .paper .mini { border:1px solid #333; border-radius:0; }
@@ -871,6 +871,15 @@ function showStats() {
 const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95"] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
 
+// ---------- Zoom: only the book's pages can be zoomed (pinch), the rest of the app stays at its size.
+const VP_FIXED = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
+const VP_ZOOM = "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover";
+function zoom(on) { $("vp").setAttribute("content", on ? VP_ZOOM : VP_FIXED); }
+function closePage() { $("page").hidden = true; zoom(false); }
+// iPhone ignores the viewport's no-zoom, so pinching is stopped by hand outside the book's pages.
+["gesturestart", "gesturechange"].forEach(t => document.addEventListener(t, e => { if ($("page").hidden) e.preventDefault(); }, { passive: false }));
+document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("page").hidden) e.preventDefault(); }, { passive: false });
+
 // ---------- The book's page
 function openPage(n) {
   $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span>`
@@ -883,6 +892,7 @@ function openPage(n) {
       <h3>Les lettres dans les mots</h3>
       <div class="words ar">${WORDS.map(w => `<div lang="ar"${wf(w)}>${coloured(w)}</div>`).join("")}</div>`;
   $("page").hidden = false;
+  zoom(true);
 }
 
 // ---------- Class code. A simple lock for a class site: it keeps out passers-by, not someone who reads the page's code.
@@ -976,10 +986,10 @@ $("stop").onclick = showStats;
 $("peek").onclick = () => openPage(+$("peek").dataset.page);
 $("again").onclick = () => start(source);
 $("toHome").onclick = () => show("home");
-$("page").onclick = () => $("page").hidden = true;
+$("page").onclick = closePage;
 
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") { $("page").hidden = true; return; }
+  if (e.key === "Escape") { closePage(); return; }
   if ($("play").hidden || !$("page").hidden || mode !== "letters") return;
   if (e.key === "ArrowRight") answer(true);
   else if (e.key === "ArrowLeft") answer(false);
