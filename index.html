@@ -187,9 +187,15 @@
   .act.go2 { color:var(--ok); } .act.go2 span { border-color:var(--accent); background:var(--accent); color:var(--on-accent); }
   .act:disabled.n, .act:disabled.go2 { opacity:1; color:var(--faint); } .act:disabled span { border-color:var(--line); background:var(--line); color:var(--faint); }
 
+  /* Stats: three counts side by side, the bar of the whole round, the cards to review, the buttons pinned at the bottom. */
+  .tiles { display:flex; gap:8px; }
+  .tiles span { flex:1; border-radius:16px; padding:12px 6px; text-align:center; font-size:13px; font-weight:600; }
+  .tiles b { display:block; font-size:28px; line-height:1.1; font-variant-numeric:tabular-nums; }
+  .tiles .g { background:#e3f1e7; color:#2f7d4f; } .tiles .r { background:#fdebe1; color:#c2410c; } .tiles .s { background:#ebe6db; color:#6b665c; }
+  .rbar { display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--line); }
+  .rbar i { display:block; } .rbar .g { background:#2f7d4f; } .rbar .r { background:#c2410c; } .rbar .s { background:#cfc8b8; }
+  .rfoot { position:sticky; bottom:0; margin-top:auto; padding:12px 0 4px; display:flex; flex-direction:column; gap:10px; background:var(--bg); }
   /* Stats */
-  .score { font-size:64px; font-weight:800; line-height:1; text-align:center; font-variant-numeric:tabular-nums; }
-  .score small { font-size:26px; color:var(--muted); font-weight:600; }
   .grid { width:100%; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px; direction:rtl; }
   .mini { background:var(--card); border-radius:10px; border:1px solid var(--line); aspect-ratio:1; position:relative; display:grid; place-items:center; color:#1d1d1b; }
   .mini .g { font-size:clamp(24px, 8vw, 34px); line-height:1.3; }
@@ -347,19 +353,18 @@
   </section>
 
   <!-- End of a round -->
-  <section class="screen mid" id="stats" hidden>
+  <section class="screen" id="stats" hidden>
     <button class="ico home" aria-label="Accueil"></button>
-    <p class="muted center" id="seen"></p>
     <div class="party" id="party" hidden></div>
-    <div class="score" id="score"></div>
-    <p class="muted center" id="scoreText"></p>
-    <p class="muted center" id="skipText" hidden></p>
+    <div class="center"><h2 class="ttl" id="rTitle"></h2><p class="muted" id="rSub"></p></div>
+    <div class="tiles" id="rTiles"></div>
+    <div class="rbar" id="rBar"></div>
+    <p class="muted center" id="rLine"></p>
     <p class="center" id="famText" style="margin:0; font-size:14px; font-weight:600" hidden></p>
     <div id="lessonLinks" style="display:flex; flex-direction:column; gap:8px"></div>
-    <p class="muted center" id="reviewLabel">À revoir :</p>
+    <div class="label" id="reviewLabel">À revoir</div>
     <div class="grid" id="missed"></div>
-    <button class="primary" id="review"></button>
-    <button class="secondary" id="again">Recommencer un tour</button>
+    <div class="rfoot"><button class="primary" id="review"></button><button class="secondary" id="again">Recommencer un tour</button></div>
   </section>
 </div>
 
@@ -937,17 +942,18 @@ function showStats() {
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
   const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" ? "forme" : "mot";
-  const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`;
+  const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`, pl = (k, w) => `${w}${k > 1 ? "s" : ""}`;
+  const bad = done - good, win = done && good / done >= PASSED;
+  const name = { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes", words: "Les mots", wwords: "Écrire les mots" }[mode];
+  const fem = unit !== "mot", right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
-  $("seen").textContent = seen < deck.length ? `Tour arrêté après ${n(seen)} sur ${deck.length}` : `Tour terminé : ${n(deck.length)}`;
-  $("score").innerHTML = `${good}<small> / ${done}</small>`;
-  $("party").hidden = !(done && good / done >= PASSED);
-  $("party").innerHTML = $("party").hidden ? "" : CONFETTI + MARK;
-  const pct = Math.round(good / done * 100);
-  $("scoreText").textContent = !done ? "Aucune carte répondue." : mode === "letters" ? `Tu reconnais ${pct} % des lettres.`
-    : writing() ? `Tu écris juste ${pct} % des ${unit}s.` : `${pct} % de bonnes réponses.`;
-  $("skipText").hidden = !skipped;
-  $("skipText").textContent = `${skipped} passée${skipped > 1 ? "s" : ""}`;
+  $("party").hidden = !win;
+  $("party").innerHTML = win ? CONFETTI + MARK : "";
+  $("rTitle").textContent = win ? (bad || skipped ? "Bravo, tour réussi !" : "Bravo, sans faute !") : "Tour terminé";
+  $("rSub").textContent = `${name} · ${seen < deck.length ? `arrêté après ${seen} sur ${n(deck.length)}` : n(deck.length)}`;
+  $("rTiles").innerHTML = `<span class="g"><b>${good}</b>${pl(good, right)}</span><span class="r"><b>${bad}</b>à revoir</span><span class="s"><b>${skipped}</b>${pl(skipped, "passée")}</span>`;
+  $("rBar").innerHTML = seen ? [["g", good], ["r", bad], ["s", skipped]].map(([c, k]) => `<i class="${c}" style="width:${k / seen * 100}%"></i>`).join("") : "";
+  $("rLine").textContent = done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`;
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
   const links = LESSON_PAGES[mode === "letters" || mode === "wletters" ? 1 : 2];
@@ -956,6 +962,8 @@ function showStats() {
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
   $("review").textContent = `Revoir : ${n(toReview.length)}`;
+  // With nothing to review, starting again becomes the main (green) button.
+  $("again").className = toReview.length ? "secondary" : "primary";
   $("review").onclick = () => start(toReview);
 }
 
