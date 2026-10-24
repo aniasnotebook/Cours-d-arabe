@@ -478,7 +478,7 @@ const CONFETTI = [0,40,80,120,160,200,240,280,320].map((a, i) =>
 const PASSED = 0.8;
 
 function start(cards) {
-  if (mode[0] === "w") return startWrite(cards);
+  if (writing()) return startWrite(cards);
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
   const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
   deck = random ? shuffle(source) : source.slice();
@@ -710,6 +710,7 @@ function check() {
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
 // Tracing: the letter is in grey under the drawing, no score. Testing: the red name (or the separate letters of a word),
 // a blank card, then the book's letter in green over the drawing, and the learner says if it was right.
+const writing = () => mode === "wletters" || mode === "wwords";
 let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes = [], wShown = false;
 const wWords = () => mode === "wwords";
 const wModel = it => wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${it.w}</span>`
@@ -842,7 +843,7 @@ function wPaint() {
 
 // ---------- End of a round: only the cards answered count, so a round can stop early.
 function showStats() {
-  if (mode[0] === "w") { answers = wAnswers; deck = wDeck; source = wSource; }
+  if (writing()) { answers = wAnswers; deck = wDeck; source = wSource; }
   const done = answers.length, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.ok || (mode === "letters" && famQuiz && !a.famOk)).map(a => a.item);
@@ -855,7 +856,7 @@ function showStats() {
   $("party").innerHTML = $("party").hidden ? "" : CONFETTI + MARK;
   const pct = Math.round(good / done * 100);
   $("scoreText").textContent = !done ? "Aucune carte répondue." : mode === "letters" ? `Tu reconnais ${pct} % des lettres.`
-    : mode[0] === "w" ? `Tu écris juste ${pct} % des ${unit}s.` : `${pct} % de bonnes réponses.`;
+    : writing() ? `Tu écris juste ${pct} % des ${unit}s.` : `${pct} % de bonnes réponses.`;
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
   const links = LESSON_PAGES[mode === "letters" || mode === "wletters" ? 1 : 2];
