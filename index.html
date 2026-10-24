@@ -164,6 +164,11 @@
   .pick .pv .mc { position:relative; width:104px; height:140px; border-radius:12px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.08); color:#1d1d1b; display:grid; place-items:center; }
   .pick b { font-size:17px; } .pick b i { font-style:normal; color:var(--accent); }
   .pick small { font-size:13px; color:var(--muted); line-height:1.35; }
+  .pick .lvl { display:inline-flex; align-items:center; gap:6px; align-self:flex-start; padding:3px 9px 3px 7px; border-radius:999px; background:var(--bg); color:var(--muted); font-size:12px; font-weight:700; }
+  .pick .lvl > span { display:inline-flex; align-items:flex-end; gap:2px; }
+  .pick .lvl i { width:4px; border-radius:1px; background:var(--line); }
+  .pick .lvl i:first-child { height:7px; } .pick .lvl i:nth-child(2) { height:11px; } .pick .lvl i:nth-child(3) { height:15px; }
+  .pick .lvl.l1 i.on { background:#2f7d4f; } .pick .lvl.l2 i.on { background:#c2410c; }
   .ttl { text-align:center; margin:0; font-size:24px; font-weight:800; }
 
   /* Writing: the drawing sits on the card, over the letter in grey (tracing) or alone (testing). */
@@ -175,10 +180,15 @@
   .wcard .prompt.swap .fr { font-family:Amiri, serif; font-weight:700; font-size:30px; line-height:1.3; }
   .wcard .prompt.swap .ar { line-height:1.3; }
   .wcard .prompt .tip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; background:#f3efe6; color:#6b665c; font:600 12px/1.4 system-ui, sans-serif; }
+  /* Writing the forms: the letter alone, and under it in red the place to write it in. */
+  .wcard .prompt.pform { display:flex; flex-direction:column; align-items:center; line-height:1.2; }
+  .wcard .prompt.pform b { color:#d6301f; font:700 17px/1.3 system-ui, sans-serif; }
   .wcard .prompt.sep { color:#1d1d1b; font-size:40px; word-spacing:16px; }
   .wcard .model { position:absolute; left:0; right:0; top:84px; bottom:44px; display:grid; place-items:center; pointer-events:none; line-height:1.4; }
   .wcard .model.guide { color:#d9d3c5; }
-  .wcard .model.answer { color:#2f7d4f; opacity:.4; }
+  /* Checking: the drawing fades to grey underneath, the book's answer stays clear in green on top. */
+  .wcard .model.answer { color:#2f7d4f; opacity:.85; }
+  .wcard.shown canvas { opacity:.3; }
   .wcard .line { position:absolute; left:24px; right:24px; top:64%; border-top:2px dashed #e2dccf; pointer-events:none; }
   .wcard .say { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); white-space:nowrap; padding:6px 12px; border-radius:999px; font-size:14px; font-weight:700; pointer-events:none; }
   .wcard .say { background:#f3efe6; color:#6b665c; font-weight:600; }
@@ -319,8 +329,8 @@
     <div class="settings">
       <label><span><b>Cartes aléatoires</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand2" checked></label>
     </div>
-    <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Au début, au milieu, à la fin d’un mot</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Les mots<small>Les lettres qui composent chaque mot de la leçon 2</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Choisir ou écrire chaque forme : début, milieu, fin</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Les mots<small>Choisir ou écrire les lettres de chaque mot</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW2"><span class="tile ar" lang="ar" style="font-size:22px">بلب</span><span class="t">Écrire les mots<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
   </section>
 
@@ -330,8 +340,8 @@
     <h2 class="ttl">Reconnaître les lettres</h2>
     <p class="center" style="margin:0 auto; max-width:30ch">Veux-tu ajouter une question sur les lettres emphatiques et de prolongation&nbsp;?</p>
     <div class="picks">
-      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>Non <i>›</i></b><small>Juste les lettres : tu dis si tu la reconnais.</small></button>
-      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.3">ج</span><span style="position:absolute; left:6px; right:6px; bottom:8px; display:flex; flex-direction:column; gap:4px; font-size:9px; font-weight:700; text-align:center"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span></span></span></span><b>Oui <i>›</i></b><small>Sur chaque carte, tu dis aussi si elle est emphatique ou de prolongation.</small></button>
+      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>Non <i>›</i></b><small>Juste les lettres : tu indiques si tu la reconnais.</small></button>
+      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.3">ج</span><span style="position:absolute; left:6px; right:6px; bottom:8px; display:flex; flex-direction:column; gap:4px; font-size:9px; font-weight:700; text-align:center"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span></span></span></span><b>Oui <i>›</i></b><small>Sur chaque carte, tu indiques aussi si elle est emphatique ou de prolongation.</small></button>
     </div>
   </section>
 
@@ -341,8 +351,8 @@
     <h2 class="ttl" id="cwTitle"></h2>
     <p class="muted center">Comment veux-tu t’entraîner&nbsp;?</p>
     <div class="picks">
-      <button class="pick" data-w="trace"><span class="pv" id="pvTrace"></span><b>Tracer <i>›</i></b><small id="cwTraceText"></small></button>
-      <button class="pick" data-w="test"><span class="pv" id="pvTest"></span><b>Me tester <i>›</i></b><small id="cwTestText"></small></button>
+      <button class="pick" data-w="trace" id="pkA"><span class="pv" id="pvTrace"></span><b><span id="cwTraceName">Tracer</span> <i>›</i></b><small id="cwTraceText"></small></button>
+      <button class="pick" data-w="test" id="pkB"><span class="pv" id="pvTest"></span><b><span id="cwTestName">Me tester</span> <i>›</i></b><small id="cwTestText"></small></button>
     </div>
   </section>
 
@@ -462,11 +472,14 @@ const WORDS = ["بلب","كب","كا","بكت","تكث","با","نا","تا","ي
   "بنن","تين","يتن","ثثن","حث","خب","جت","تحت","يجب","بخت","بة","يه","ته","نة","يهب","بها","بهم","جد","خذ","جر",
   "خز","ير","تز","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ",
   "قو","فو","فقل","قفل","يف","حم","لم","تمت"];
+// The book's four inks: red, green, blue and black, one per letter in turn.
 const INKS = ["#e0302a", "#2f8f3a", "#1d8fd1", "#1d1d1b"];
 // Amiri matches the book best, except for these words, which the book writes flat as Scheherazade does.
 const FLAT = new Set(["يم","يهب","بها","بهم","تمت"]);
 const wf = w => FLAT.has(w) ? ` style="font-family:'Scheherazade New', Amiri, serif"` : "";
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
+// The separate letters of a word, each in its ink.
+const inked = w => [...w].map((ch, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(ch)}</span>`).join(" ");
 function coloured(w) {
   const c = [...w];
   return c.map((ch, i) => {
@@ -780,14 +793,19 @@ function check() {
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
 // Tracing: the letter is in grey under the drawing, no score. Testing: the red name (or the separate letters of a word),
 // a blank card, then the book's letter in green over the drawing, and the learner says if it was right.
-const writing = () => mode === "wletters" || mode === "wwords";
+const writing = () => mode === "wletters" || mode === "wwords" || mode === "wforms";
 let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes = [], wShown = false;
 const wWords = () => mode === "wwords";
-const wModel = it => wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${it.w}</span>`
+const wLesson2 = () => mode === "wwords" || mode === "wforms";
+const wModel = it => wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
+  : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="font-size:min(64px, 15vw, 9vh); word-spacing:14px">${inked(it.w)}</span>`
+  : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${wKind === "trace" ? it.w : coloured(it.w)}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
 let wArabic = false;
-const wPrompt = it => wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${[...it.w].map(showLetter).join(" ")}</span>`
+const wPrompt = it => wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
+  : wKind === "split" ? `<span class="prompt ar" lang="ar"${FLAT.has(it.w) ? " style=\"font-family:'Scheherazade New', Amiri, serif\"" : ""}>${it.w}</span>`
+  : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w)}</span>`
   : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
   : `<button class="prompt swap" id="wName">${wArabic ? `<span class="ar" lang="ar" style="font-size:40px">${it.ar}</span>` : `<span class="fr">${it.fr}</span>`}
       <span class="tip">${SWAP}${wArabic ? `Tape pour revenir à « ${it.fr} »` : "Tape pour le nom en arabe"}</span></button>`;
@@ -796,6 +814,8 @@ function openWriting(lesson) {
   mode = lesson === 1 ? "wletters" : "wwords";
   $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Écrire les mots";
   $("cwBack").dataset.back = "l" + lesson;
+  $("pkA").dataset.w = "trace"; $("pkB").dataset.w = "test";
+  $("cwTraceName").textContent = "Tracer"; $("cwTestName").textContent = "Me tester";
   $("cwTraceText").textContent = lesson === 1 ? "Tu repasses sur la lettre grise. Pas de note, tu avances à ton rythme." : "Tu repasses sur le mot gris, lettres attachées. Pas de note.";
   $("cwTestText").textContent = lesson === 1 ? "Tu vois le nom en rouge, tu écris la lettre de mémoire, puis tu vérifies." : "Tu vois les lettres séparées, tu écris le mot attaché, puis tu vérifies.";
   const top = lesson === 1 ? `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px; color:#d6301f">جيم</span>`
@@ -805,16 +825,42 @@ function openWriting(lesson) {
   $("pvTest").innerHTML = `<span class="mc">${top}<span style="font-size:28px; color:#b9b2a3">?</span><span style="position:absolute; left:12px; right:12px; top:62%; border-top:2px dashed #e2dccf"></span></span>`;
   show("cw");
 }
+// Les formes and Les mots: choose (multiple choice) or write (harder), on the same choice screen as writing.
+let choiceOf = "words";
+// Three small place pills (début, milieu, fin) for the previews, the middle one chosen.
+const PV_PLACES = `<span style="display:flex; gap:3px; margin-top:5px">${["début","milieu","fin"].map((t, i) => `<span style="padding:2px 5px; border-radius:99px; font:600 9px/1.2 system-ui, sans-serif; border:1px solid ${i === 1 ? "#2f7d4f" : "#e2dccf"}; background:${i === 1 ? "#e3f1e7" : "#fff"}; color:${i === 1 ? "#2f7d4f" : "#1d1d1b"}">${t}</span>`).join("")}</span>`;
+const CHOICE = {
+  words: { title: "Les mots", write: "split", top: "بلب", tiles: ["ب","ت","ل","ن"],
+    choose: "Tu vois le mot, tu tapes les lettres qui le composent.", text: "Tu vois le mot, tu écris ses lettres séparées, puis tu vérifies." },
+  forms: { title: "Les formes", write: "form", top: "ـبـ", tiles: ["ب","ن"], places: true,
+    choose: "Tu vois une forme, tu choisis la lettre et sa place.", text: "Tu vois une lettre et sa place, tu écris sa forme, puis tu vérifies." },
+};
+function openChoice(which) {
+  const c = CHOICE[which];
+  choiceOf = which; mode = which;
+  $("cwTitle").textContent = c.title;
+  $("cwBack").dataset.back = "l2";
+  $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write;
+  $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
+  $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
+  const top = `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:24px">${c.top}</span>`;
+  $("pvTrace").innerHTML = `<span class="mc">${top}<span style="display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:26px">${c.tiles.map((t, i) =>
+    `<span class="ar" lang="ar" style="font-size:17px; width:34px; height:30px; border-radius:7px; border:1px solid ${i % 2 ? "#e2dccf" : "#2f7d4f"}; background:${i % 2 ? "#fff" : "#e3f1e7"}; display:grid; place-items:center; line-height:1">${t}</span>`).join("")}</span>${c.places ? PV_PLACES : ""}</span>`;
+  $("pvTest").innerHTML = which === "forms"
+    ? `<span class="mc"><span style="position:absolute; top:4px; left:0; right:0; display:flex; flex-direction:column; align-items:center"><span class="ar" lang="ar" style="font-size:24px; line-height:1.3">ب</span><b style="font-size:10px; color:#d6301f">au milieu</b></span><span style="font-size:28px; color:#b9b2a3; margin-top:24px">?</span><span style="position:absolute; left:12px; right:12px; top:68%; border-top:2px dashed #e2dccf"></span></span>`
+    : `<span class="mc">${top}<span style="font-size:28px; color:#b9b2a3">?</span><span style="position:absolute; left:12px; right:12px; top:62%; border-top:2px dashed #e2dccf"></span></span>`;
+  show("cw");
+}
 
 function startWrite(cards) {
-  wSource = cards || (wWords() ? WORD_CARDS : LETTERS);
-  const random = wWords() ? $("rand2").checked : $("rand1").checked;
+  wSource = cards || (mode === "wforms" ? FORMS : wWords() ? WORD_CARDS : LETTERS);
+  const random = wLesson2() ? $("rand2").checked : $("rand1").checked;
   wDeck = random ? shuffle(wSource) : wSource.slice();
   wAnswers = []; wPos = 0;
   openWriteRound();
 }
 function openWriteRound() {
-  $("wPeek").textContent = wWords() ? "Voir les mots" : "Voir l’alphabet";
+  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : wWords() ? "Voir les mots" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
   show("write");
@@ -823,8 +869,8 @@ function openWriteRound() {
 
 function wRender() {
   clearTimeout(wAuto);
-  if (wKind === "test") wPos = wAnswers.length;
-  if (wPos >= wDeck.length) return wKind === "test" ? showStats() : show("cw");
+  if (wKind !== "trace") wPos = wAnswers.length;
+  if (wPos >= wDeck.length) return wKind !== "trace" ? showStats() : show("cw");
   wStrokes = []; wShown = false; wArabic = false;
   const it = wDeck[wPos], good = wAnswers.filter(a => a.ok).length;
   $("wCount").textContent = `${wPos + 1} / ${wDeck.length}`;
@@ -837,12 +883,15 @@ function wRender() {
     <canvas id="wCanvas"></canvas></div>`;
   $("wHint").innerHTML = wKind === "trace"
     ? `Repasse sur ${wWords() ? "le mot" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
-    : wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire";
+    : wTask();
   wButtons();
   wCanvas();
   wNameSwitch();
   $("wErase").onclick = wErase;
 }
+// What to write, under the card.
+const wTask = () => wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
+  : wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire";
 function wNameSwitch() {
   const b = $("wName"); if (!b) return;
   b.onclick = () => { wArabic = !wArabic; b.outerHTML = wPrompt(wDeck[wPos]); wNameSwitch(); };
@@ -878,8 +927,10 @@ function wUndo() { if (!wAnswers.length) return; wAnswers.pop(); wRender(); }
 // The book's letter in green over the drawing.
 function wReveal() {
   wShown = true;
+  $("wCard").classList.add("shown");
+  if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = coloured(wDeck[wPos].w);   // the word takes the letters' inks
   const c = $("wCard");
-  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En noir ton dessin, en vert ${wWords() ? "le mot" : "la lettre"} du livre</span>`);
+  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "le mot" : "la lettre"} du livre</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
   wButtons();
   wSwipe(c);
@@ -902,7 +953,7 @@ function wSwipe(c) {
     else { c.style.transform = ""; tint(c, 0); }
   };
 }
-function wHide() { wShown = false; const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire"; wButtons(); }
+function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").textContent = wDeck[wPos].w; const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
 function wFly(ok) {
   const c = $("wCard"); if (!c || c.dataset.gone) return;   // a double tap answers once
   c.dataset.gone = 1; tint(c, ok ? 100 : -100);
@@ -963,10 +1014,10 @@ function showStats() {
   const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
-  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" ? "forme" : "mot";
+  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : "mot";
   const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`, pl = (k, w) => `${w}${k > 1 ? "s" : ""}`;
   const bad = done - good, win = done && skipped <= done && good / done >= PASSED;
-  const name = { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes", words: "Les mots", wwords: "Écrire les mots" }[mode];
+  const name = writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Les mots · écrire les lettres" : { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Les mots · choisir les lettres", wwords: "Écrire les mots" }[mode];
   const fem = unit !== "mot", right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
   // Each score band has its own words and its own move of the logo; confetti from 80 %, twice for a perfect round.
@@ -1073,12 +1124,12 @@ $("ptr").innerHTML = MARK;
   });
 }
 // A reload comes back to the same place: the same screen, and in a round the same cards and answers so far.
-const pool = m => m === "letters" || m === "wletters" ? LETTERS : m === "forms" ? FORMS : WORD_CARDS;
+const pool = m => m === "letters" || m === "wletters" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : WORD_CARDS;
 function reloadHere() {
   const screen = ["home","l1","l2","c1","cw","play","write","stats"].find(id => !$(id).hidden);
   if (screen) try {
     const P = pool(mode), ix = a => a.map(x => P.indexOf(x));
-    sessionStorage.setItem("place", JSON.stringify({ screen, mode, famQuiz, wKind, back: $("cwBack").dataset.back,
+    sessionStorage.setItem("place", JSON.stringify({ screen, mode, famQuiz, wKind, back: $("pkA").dataset.w === "choose" ? choiceOf : $("cwBack").dataset.back,
       round: writing() ? { src: ix(wSource), deck: ix(wDeck), ans: wAnswers.map(a => [P.indexOf(a.item), a.ok, a.skip]), pos: wPos }
         : { src: ix(source), deck: ix(deck), ans: answers.map(a => [P.indexOf(a.item), a.ok, a.famOk, a.skip]) } }));
   } catch {}
@@ -1088,14 +1139,15 @@ function backToPlace() {
   let p; try { p = JSON.parse(sessionStorage.getItem("place")); sessionStorage.removeItem("place"); } catch {}
   if (!p) return false;
   mode = p.mode; famQuiz = p.famQuiz; wKind = p.wKind;
-  if (p.screen === "cw") { openWriting(p.back === "l2" ? 2 : 1); return true; }
+  if (p.screen === "cw") { p.back === "words" || p.back === "forms" ? openChoice(p.back) : openWriting(p.back === "l2" ? 2 : 1); return true; }
   if (!["play", "write", "stats"].includes(p.screen)) { show(p.screen); return true; }
   const P = pool(mode), r = p.round, at = i => P[i];
   if (writing()) {
-    openWriting(mode === "wwords" ? 2 : 1);
+    wKind === "split" || wKind === "form" ? openChoice(wKind === "split" ? "words" : "forms") : openWriting(mode === "wwords" ? 2 : 1); mode = p.mode; wKind = p.wKind;
     wSource = r.src.map(at); wDeck = r.deck.map(at); wAnswers = r.ans.map(([i, ok, skip]) => ({ item: at(i), ok, skip })); wPos = r.pos;
     if (p.screen === "stats") showStats(); else openWriteRound();
   } else {
+    if (mode === "words" || mode === "forms") openChoice(mode);   // so Retour from the round finds the choice screen
     source = r.src.map(at); deck = r.deck.map(at); answers = r.ans.map(([i, ok, famOk, skip]) => ({ item: at(i), ok, famOk, skip }));
     if (p.screen === "stats") showStats(); else openRound();
   }
@@ -1126,23 +1178,31 @@ document.querySelectorAll(".linkbtn").forEach(b => {
   b.innerHTML = ICONS.grid + (b.dataset.page === "1" ? "Revoir l’alphabet complet, comme dans le livre" : "Revoir toutes les formes et les mots du livre");
   b.onclick = () => openPage(+b.dataset.page);
 });
+// Each choice screen goes from the easier way (left) to the harder one (right), with its level: one green bar, then two orange bars.
+document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) =>
+  b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${i + 1}"><span>${[0, 1, 2].map(k => `<i class="${k <= i ? "on" : ""}"></i>`).join("")}</span>Niveau ${i + 1}</span>`)));
 document.querySelectorAll(".lessonlinks[data-lesson]").forEach(d => d.innerHTML = lessonLinks(+d.dataset.lesson));
 document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
 $("go1").onclick = () => show("c1");
 document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
 $("goW1").onclick = () => openWriting(1);
 $("goW2").onclick = () => openWriting(2);
-document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => { wKind = b.dataset.w; startWrite(); });
+document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
+  if (b.dataset.w === "choose") { mode = choiceOf; famQuiz = false; return start(); }
+  if (b.dataset.w === "split") mode = "wwords";
+  if (b.dataset.w === "form") mode = "wforms";
+  wKind = b.dataset.w; startWrite();
+});
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
 $("wRestart").innerHTML = ICONS.restart;
 $("wRestart").onclick = () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource);
-$("wStop").onclick = () => wKind === "test" ? showStats() : show("cw");
-$("wPeek").onclick = () => openPage(wWords() ? 2 : 1);
-$("goForms").onclick = () => { mode = "forms"; famQuiz = false; start(); };
-$("goWords").onclick = () => { mode = "words"; famQuiz = false; start(); };
+$("wStop").onclick = () => wKind !== "trace" ? showStats() : show("cw");
+$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1);
+$("goForms").onclick = () => openChoice("forms");
+$("goWords").onclick = () => openChoice("words");
 $("restart").onclick = () => start(source);
 $("pBack").innerHTML = $("wTopBack").innerHTML = ICONS.back;
-$("pBack").onclick = () => show(mode === "letters" ? "c1" : "l2");
+$("pBack").onclick = () => show(mode === "letters" ? "c1" : mode === "words" || mode === "forms" ? "cw" : "l2");
 $("wTopBack").onclick = () => show("cw");
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = showStats;
