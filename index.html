@@ -500,11 +500,12 @@ const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}$
 const inkOf = (w, i, k) => k ? INK[k[i]] : INKS[i % INKS.length];
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
-const inked = (w, k) => [...w].map((ch, i) => `<span style="color:${inkOf(w, i, k)}">${showLetter(ch)}</span>`).join(" ");
+const inked = (w, k) => [...w].map((ch, i) => ch === "ـ" ? "" : `<span style="color:${inkOf(w, i, k)}">${showLetter(ch)}</span>`).filter(Boolean).join(" ");
 const wordShow = it => bookImg(it, true);   // the word as asked: the book's writing in plain black
 const wordInk = it => bookImg(it);          // the answer: the book's writing in its colours
-// Lesson 2 practice: every cell of two letters or more, in the book's order (single letters are lesson 1).
-const WORD_CARDS = BOOK_CELLS.filter(c => c.w.replace(/ـ/g, "").length > 1)
+// Lesson 2 practice: all 127 cells of pages 7 to 9, in the book's order, repeats and single letters included (the calligraphy differs).
+const lettersOf = w => [...w].filter(c => c !== "ـ");   // the joining stroke (ـ) is not a letter
+const WORD_CARDS = BOOK_CELLS
   .map(it => ({ ...it, mini: `<div class="mini ar"><span class="w">${wordInk(it)}</span></div>` }));
 
 // ---------- Helpers
@@ -721,7 +722,7 @@ function renderQuiz() {
       <div class="grp"><span class="q">Quelle lettre ?</span><span class="chips letters">${it.choices.map(c => chip("letter", c, showLetter(c), true)).join("")}</span></div>
       <div class="grp"><span class="q">Où dans le mot ?</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
   } else {
-    const letters = [...new Set([...it.w].map(letterOf))];
+    const letters = [...new Set(lettersOf(it.w).map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
     $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar">${wordShow(it)}</span></span>
       <div class="grp"><span class="q">Tape chaque lettre présente dans le mot</span><span class="chips letters">${it.choices.map(c => chip("multi", c, showLetter(c), true)).join("")}</span>
@@ -773,11 +774,11 @@ function check() {
     });
     card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
   } else {
-    const want = new Set([...it.w].map(letterOf)), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
+    const want = new Set(lettersOf(it.w).map(letterOf)), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste" : `À revoir : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
     ans.querySelector(".big").innerHTML = wordInk(it);
-    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${inkOf(it.w, i, it.k)}">${showLetter(c)}</span>`).join("")}</span>`);
+    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => c === "ـ" ? "" : `<span style="color:${inkOf(it.w, i, it.k)}">${showLetter(c)}</span>`).join("")}</span>`);
     chips.forEach(o => {
       const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
       o.className = "chip ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " off");
