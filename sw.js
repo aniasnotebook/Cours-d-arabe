@@ -1,6 +1,6 @@
 // Works offline once opened: the page is fetched fresh when there is a connection, the copy is used otherwise.
-const CACHE = "cours-arabe-v55";
-const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
+const CACHE = "cours-arabe-v56";
+const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", ...[1, 2, 4, 6, 7, 8].map(i => `book/c${i}.png`)];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
