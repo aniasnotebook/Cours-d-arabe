@@ -6,7 +6,7 @@
 <meta name="viewport" id="vp" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Cours d’arabe</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Scheherazade+New:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -488,9 +488,6 @@ const BOOK_PAGES = [
 const BOOK_CELLS = BOOK_PAGES.flat().flatMap(r => r.split("|")).map((c, n) => { const [w, k] = c.split(" "); return { w, k, img: n }; });
 const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}${it.img}.png" alt="${it.w}">`;
 const inkOf = (w, i, k) => k ? INK[k[i]] : INKS[i % INKS.length];
-// Amiri matches the book best, except for these words, which the book writes flat as Scheherazade does.
-const FLAT = new Set(["يم","يهب","بها","بهم","تمت"]);
-const wf = w => FLAT.has(w) ? ` style="font-family:'Scheherazade New', Amiri, serif"` : "";
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
 const inked = (w, k) => [...w].map((ch, i) => `<span style="color:${inkOf(w, i, k)}">${showLetter(ch)}</span>`).join(" ");
@@ -716,7 +713,7 @@ function renderQuiz() {
   } else {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
-    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar"${wf(it.w)}>${wordShow(it)}</span></span>
+    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar">${wordShow(it)}</span></span>
       <div class="grp"><span class="q">Tape chaque lettre présente dans le mot</span><span class="chips letters">${it.choices.map(c => chip("multi", c, showLetter(c), true)).join("")}</span>
       <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
     pick.multi = new Set();
@@ -806,12 +803,12 @@ const wWords = () => mode === "wwords";
 const wLesson2 = () => mode === "wwords" || mode === "wforms";
 const wModel = it => wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
   : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="font-size:min(64px, 15vw, 9vh); word-spacing:14px">${inked(it.w, it.k)}</span>`
-  : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
+  : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh)">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
 let wArabic = false;
 const wPrompt = it => wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
-  : wKind === "split" ? `<span class="prompt ar" lang="ar"${FLAT.has(it.w) ? " style=\"font-family:'Scheherazade New', Amiri, serif\"" : ""}>${wordShow(it)}</span>`
+  : wKind === "split" ? `<span class="prompt ar" lang="ar">${wordShow(it)}</span>`
   : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}</span>`
   : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
   : `<button class="prompt swap" id="wName">${wArabic ? `<span class="ar" lang="ar" style="font-size:40px">${it.ar}</span>` : `<span class="fr">${it.fr}</span>`}
