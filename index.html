@@ -1097,7 +1097,7 @@ const remembered = () => { try { return localStorage.getItem("classCode") === CO
 $("gateForm").onsubmit = async e => {
   e.preventDefault();
   const h = await sha256($("code").value.trim().toLowerCase());
-  if (h !== CODE_HASH) { $("gateMsg").textContent = "Code incorrect, demande-le à ton professeur."; return; }
+  if (h !== CODE_HASH) { $("gateMsg").textContent = "Code incorrect, demande-le sur le groupe."; return; }
   try { localStorage.setItem("classCode", h); } catch {}
   show("home");
 };
