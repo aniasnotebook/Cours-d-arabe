@@ -852,7 +852,7 @@ function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
 let wAuto = null;
 function wTraceNext() {
   const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace") return;
-  fly(c, false, () => wGo(1));
+  fly(c, true, () => wGo(1));   // to the right: left means "to review", which tracing does not have
 }
 function wGo(d) { clearTimeout(wAuto); const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
 
