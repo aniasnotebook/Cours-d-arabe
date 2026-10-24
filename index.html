@@ -352,6 +352,7 @@
     <div class="party" id="party" hidden></div>
     <div class="score" id="score"></div>
     <p class="muted center" id="scoreText"></p>
+    <p class="muted center" id="skipText" hidden></p>
     <p class="center" id="famText" style="margin:0; font-size:14px; font-weight:600" hidden></p>
     <div id="lessonLinks" style="display:flex; gap:8px"></div>
     <p class="muted center" id="reviewLabel">À revoir :</p>
@@ -500,7 +501,7 @@ function render() {
   pos = answers.length;
   if (pos >= deck.length) return showStats();
   shown = false; checked = false; guess = "none"; pick = {};
-  const good = answers.filter(a => a.ok).length, bad = pos - good;
+  const good = answers.filter(a => a.ok).length, bad = answers.filter(a => !a.ok && !a.skip).length;
   $("count").textContent = `${pos + 1} / ${deck.length}`;
   $("barFill").style.width = `${pos / deck.length * 100}%`;
   $("nGood").textContent = mode === "letters" ? `${good} reconnue${good > 1 ? "s" : ""}` : `${good} juste${good > 1 ? "s" : ""}`;
@@ -575,6 +576,11 @@ function flip() {
 // From a button (card at rest) it first leans to its side, as if pushed by a finger, then glides away.
 function fly(c, right, then) {
   if (!c) return then();
+  if (right === null) {   // skipped: the card sinks away, neither right nor to review
+    c.style.transition = "transform .35s ease-in, opacity .35s ease-in";
+    requestAnimationFrame(() => { c.style.transform = "translateY(40%) scale(.85)"; c.style.opacity = 0; });
+    return setTimeout(then, 380);
+  }
   const s = right ? 1 : -1, still = !c.style.transform;
   const away = () => {
     c.style.transition = "transform .38s cubic-bezier(.4,0,.7,1), opacity .38s ease-in";
@@ -686,7 +692,7 @@ function qButtons() {
   if (checked) return;
   $("check").onclick = check;
   // Skipping counts the card as to review, and it leaves to the left.
-  $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false }); tint($("card"), -100); fly($("card"), false, render); };
+  $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false, skip: true }); fly($("card"), null, render); };
 }
 
 function choose(b) {
@@ -729,7 +735,7 @@ function check() {
   }
   card.classList.add(ok ? "good" : "bad");
   answers.push({ item: it, ok });
-  const good = answers.filter(a => a.ok).length, bad = answers.length - good;
+  const good = answers.filter(a => a.ok).length, bad = answers.filter(a => !a.ok && !a.skip).length;
   $("nGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("nBad").textContent = `${bad} à revoir`;
   $("barFill").style.width = `${answers.length / deck.length * 100}%`;
@@ -793,7 +799,7 @@ function wRender() {
   $("wCount").textContent = `${wPos + 1} / ${wDeck.length}`;
   $("wBar").style.width = `${wPos / wDeck.length * 100}%`;
   $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
-  $("wBad").textContent = `${wAnswers.length - good} à revoir`;
+  $("wBad").textContent = `${wAnswers.filter(a => !a.ok && !a.skip).length} à revoir`;
   $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}<span class="line"></span>
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span><span class="edge" style="left:6px"></span><span class="edge" style="right:6px"></span>` : ""}
@@ -823,7 +829,7 @@ function wButtons() {
       <button class="act u" id="wBack" ${wAnswers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wCheck" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.verify}</span>Vérifier</button>`;
     $("wBack").onclick = wUndo;
-    $("wSkip").onclick = () => wFly(false);
+    $("wSkip").onclick = () => fly($("wCard"), null, () => { wAnswers.push({ item: wDeck[wPos], ok: false, skip: true }); wRender(); });
     $("wCheck").onclick = wReveal;
   } else {
     a.innerHTML = `<button class="act m" id="wMiss"><span>${ICONS.x}</span>À revoir</button>
@@ -918,19 +924,21 @@ function wPaint() {
 // ---------- End of a round: only the cards answered count, so a round can stop early.
 function showStats() {
   if (writing()) { answers = wAnswers; deck = wDeck; source = wSource; }
-  const done = answers.length, good = answers.filter(a => a.ok).length;
+  const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
-  const toReview = answers.filter(a => !a.ok || (mode === "letters" && famQuiz && !a.famOk)).map(a => a.item);
+  const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
   const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" ? "forme" : "mot";
   const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`;
   show("stats");
-  $("seen").textContent = done < deck.length ? `Tour arrêté après ${n(done)} sur ${deck.length}` : `Tour terminé : ${n(deck.length)}`;
+  $("seen").textContent = seen < deck.length ? `Tour arrêté après ${n(seen)} sur ${deck.length}` : `Tour terminé : ${n(deck.length)}`;
   $("score").innerHTML = `${good}<small> / ${done}</small>`;
   $("party").hidden = !(done && good / done >= PASSED);
   $("party").innerHTML = $("party").hidden ? "" : CONFETTI + MARK;
   const pct = Math.round(good / done * 100);
   $("scoreText").textContent = !done ? "Aucune carte répondue." : mode === "letters" ? `Tu reconnais ${pct} % des lettres.`
     : writing() ? `Tu écris juste ${pct} % des ${unit}s.` : `${pct} % de bonnes réponses.`;
+  $("skipText").hidden = !skipped;
+  $("skipText").textContent = `${skipped} passée${skipped > 1 ? "s" : ""}`;
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
   const links = LESSON_PAGES[mode === "letters" || mode === "wletters" ? 1 : 2];
@@ -1024,8 +1032,8 @@ function reloadHere() {
   if (screen) try {
     const P = pool(mode), ix = a => a.map(x => P.indexOf(x));
     sessionStorage.setItem("place", JSON.stringify({ screen, mode, famQuiz, wKind, back: $("cwBack").dataset.back,
-      round: writing() ? { src: ix(wSource), deck: ix(wDeck), ans: wAnswers.map(a => [P.indexOf(a.item), a.ok]), pos: wPos }
-        : { src: ix(source), deck: ix(deck), ans: answers.map(a => [P.indexOf(a.item), a.ok, a.famOk]) } }));
+      round: writing() ? { src: ix(wSource), deck: ix(wDeck), ans: wAnswers.map(a => [P.indexOf(a.item), a.ok, a.skip]), pos: wPos }
+        : { src: ix(source), deck: ix(deck), ans: answers.map(a => [P.indexOf(a.item), a.ok, a.famOk, a.skip]) } }));
   } catch {}
   location.reload();
 }
@@ -1037,10 +1045,10 @@ function backToPlace() {
   if (!["play", "write", "stats"].includes(p.screen)) { show(p.screen); return true; }
   const P = pool(mode), r = p.round, at = i => P[i];
   if (writing()) {
-    wSource = r.src.map(at); wDeck = r.deck.map(at); wAnswers = r.ans.map(([i, ok]) => ({ item: at(i), ok })); wPos = r.pos;
+    wSource = r.src.map(at); wDeck = r.deck.map(at); wAnswers = r.ans.map(([i, ok, skip]) => ({ item: at(i), ok, skip })); wPos = r.pos;
     if (p.screen === "stats") showStats(); else openWriteRound();
   } else {
-    source = r.src.map(at); deck = r.deck.map(at); answers = r.ans.map(([i, ok, famOk]) => ({ item: at(i), ok, famOk }));
+    source = r.src.map(at); deck = r.deck.map(at); answers = r.ans.map(([i, ok, famOk, skip]) => ({ item: at(i), ok, famOk, skip }));
     if (p.screen === "stats") showStats(); else openRound();
   }
   return true;
