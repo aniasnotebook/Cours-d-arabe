@@ -147,6 +147,7 @@
   .lessonlink svg { width:16px; height:16px; }
   .primary { min-height:56px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:18px; font-weight:700; }
   .primary:disabled { opacity:.4; cursor:default; }
+  .primary { display:flex; align-items:center; justify-content:center; gap:8px; } .primary .ic svg { width:22px; height:22px; display:block; }
   .secondary { min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-weight:600; }
   .formrow { display:flex; gap:6px; direction:rtl; font-size:26px; }
   .formrow span { min-width:50px; padding:0 4px; border-radius:8px; border:1px solid #e2dccf; text-align:center; color:#1d1d1b; }
@@ -646,15 +647,15 @@ function renderQuiz() {
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <div class="q2">Où dans le mot ?</div>
       <div class="opts c3">${["ini","med","fin"].map(p => `<button class="opt" data-k="pos" data-v="${p}">${POS[p][0].toUpperCase() + POS[p].slice(1)}</button>`).join("")}</div>
-      <button class="primary" id="check" disabled>Vérifier</button>`;
+      <button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button>`;
   } else {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
     $("stage").innerHTML = `<div class="card" id="card"><span class="word ar" lang="ar"${wf(it.w)}>${it.w}</span></div>`;
     $("below").innerHTML = `<div class="q2">Tape chaque lettre présente dans le mot</div>
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
-      <p class="hint" style="text-align:left">Une lettre présente deux fois se touche une seule fois.</p>
-      <button class="primary" id="check" disabled>Vérifier</button>`;
+      <p class="hint" style="text-align:left">Une lettre présente deux fois se tape une seule fois.</p>
+      <button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button>`;
     pick.multi = new Set();
   }
   $("below").querySelectorAll(".opt").forEach(b => b.onclick = () => choose(b));
@@ -807,10 +808,29 @@ function wReveal() {
   wShown = true;
   const c = $("wCard");
   c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En noir ton dessin, en vert ${wWords() ? "le mot" : "la lettre"} du livre</span>`);
-  $("wHint").textContent = "C’était juste ?";
+  $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
   wButtons();
+  wSwipe(c);
 }
-function wHide() { wShown = false; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire"; wButtons(); }
+// Once the answer shows, the card swipes like the letter cards: right if it was right, left if it is to review.
+function wSwipe(c) {
+  let x0 = null, dx = 0;
+  c.onpointerdown = e => { if (wShown) { x0 = e.clientX; dx = 0; c.style.transition = "none"; } };
+  c.onpointermove = e => {
+    if (x0 === null) return;
+    dx = e.clientX - x0;
+    c.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`;
+    c.style.boxShadow = dx > 40 ? "0 0 0 3px var(--ok)" : dx < -40 ? "0 0 0 3px var(--miss)" : "";
+  };
+  c.onpointerup = c.onpointercancel = () => {
+    if (x0 === null) return;
+    x0 = null;
+    c.style.transition = "transform .22s ease, opacity .22s ease";
+    if (Math.abs(dx) > 80) { c.style.transform = `translateX(${dx > 0 ? 140 : -140}%) rotate(${dx > 0 ? 20 : -20}deg)`; c.style.opacity = 0; setTimeout(() => wAnswer(dx > 0), 220); }
+    else { c.style.transform = ""; c.style.boxShadow = ""; }
+  };
+}
+function wHide() { wShown = false; const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire"; wButtons(); }
 function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
 function wGo(d) { const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
 
