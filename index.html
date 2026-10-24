@@ -230,7 +230,9 @@
   .table td.n { color:#d6301f; font-size:18px; }
   .words { direction:rtl; border:1px solid #333; } .words > div { display:grid; }
   .words > div > span { border:1px solid #333; text-align:center; font-size:28px; line-height:1.7; }
-  .words img { display:block; height:1.6em; margin:0.05em auto; mix-blend-mode:multiply; }
+  img.cal { height:1.25em; vertical-align:middle; } .mini img.cal { height:1.6em; } .wcard .prompt img.cal { height:1.4em; }
+  .wcard .model.guide img.cal { opacity:.25; }
+  .words img { display:block; width:100%; height:auto; }
   .bookpage { margin-bottom:14px; } .bookpage .pn { display:block; font:600 12px/1.6 system-ui, sans-serif; color:#6b665c; text-align:center; }
   @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } .enter { animation:none; } }
   /* The logo: three cards. In the top-right corner (Arabic reads from the right), hidden during a round. */
@@ -473,40 +475,30 @@ const FORMS = [];
 FORM_LETTERS.forEach(g => positions(g).filter(p => p !== "iso").forEach(p => FORMS.push({ g, p,
   mini: `<div class="mini ar"><span class="g" lang="ar">${formOf(g, p)}</span></div>` })));
 
-// Joined combinations from the book, in its order.
-const WORDS = ["بلب","كب","كا","بكت","تكث","با","نا","تا","يا","ثا","بس","يس","نس","تس","ثس","ثج","تح","نخ","يح","بج","يم","بم","نم","تم",
-  "ثم","بى","يى","نى","تى","ثى","نبل","تنل","بيل","يتل","ثثل","نبن",
-  "بنن","تين","يتن","ثثن","حث","خب","جت","تحت","يجب","بخت","بة","يه","ته","نة","يهب","بها","بهم","جد","خذ","جر",
-  "خز","ير","تز","سل","شل","صب","طب","ضا","ظا","عز","غر","صع","ضغ","بعد","تغذ",
-  "قو","فو","فقل","قفل","يف","حم","لم","تمت"];
-// The book's four inks. Each word has its letters' colours as printed in the book (lesson 2, pages 7 to 9), right to left:
-// R red, G green, B blue, K black.
+// The book's four inks; each cell of lesson 2 has its letters' colours as printed, right to left: R red, G green, B blue, K black.
 const INK = { R: "#e8321f", G: "#47a23a", B: "#29a3e3", K: "#1d1d1b" }, INKS = Object.values(INK);
-const BOOK_INKS = Object.fromEntries("بلب GRG,كب RG,كا RK,بكت BRB,تكث BRB,با GK,نا RK,تا BK,يا KR,ثا BK,بس BG,يس BG,نس RG,تس BG,ثس BG,ثج BR,تح BG,نخ RK,يح KG,بج GR,يم KR,بم GR,نم GR,تم GR,ثم BR,بى RK,يى RK,نى RK,تى BK,ثى BK,نبل RGR,تنل KBR,بيل GKR,يتل KGR,ثثل KBR,نبن RGR,بنن GBR,تين BKR,يتن KBR,ثثن BGR,حث GB,خب KG,جت RB,تحت BGB,يجب BRG,بخت GKB,بة GB,يه KR,ته BR,نة RB,يهب KRG,بها GRK,بهم GBR,جد RG,خذ RB,جر RG,خز KG,ير KB,تز KG,سل GR,شل BR,صب BG,طب BG,ضا GK,ظا GK,عز RG,غر KB,صع BR,ضغ GK,بعد GRG,تغذ BKB,قو BR,فو BR,فقل KBR,قفل BGR,يف KG,حم GR,لم GR,تمت GRB".split(",").map(e => e.split(" ")));
 // Lesson 2 as printed, page by page (7, 8, 9), row by row from the right: each cell is "text inks".
 const BOOK_PAGES = [
-  ["ا K|@c1 لا|@c2 لا|با GK|@c4 لا|ل R", "@c6 لا|@c7 ح|@c8 لا|بلب GRG|ک R|ك R", "كب RG|كب RG|كا RK|كا RK|بكت BRB|تكث BRB", "ب G|ت B|ث B|ن R|ى K|با GK", "نا RK|تا BK|يا KR|ثا BK|بس BG|يس BG", "نس RG|تس BG|ثس BG|ثج BR|تح BG|نخ RK", "يح KG|بج GR|يم KR|بم GR|نم GR|تم GR", "ثم BR|بى RK|يى RK|نى RK|تى BK|ثى BK", "نبل RGR|تنل KBR|بيل GKR|يتل KGR|ثثل KBR|نبن RGR"],
+  ["ا K|لا RK|لا RK|با GK|لا RK|ل R", "لا RK|لح GG|لا RK|بلب GRG|ک R|ك R", "كب RG|كب RG|كا RK|كا RK|بكت BRB|تكث BRB", "ب G|ت B|ث B|ن R|ى K|با GK", "نا RK|تا BK|يا KR|ثا BK|بس BG|يس BG", "نس RG|تس BG|ثس BG|ثج BR|تح BG|نخ RK", "يح KG|بج GR|يم KR|بم GR|نم GR|تم GR", "ثم BR|بى RK|يى RK|نى RK|تى BK|ثى BK", "نبل RGR|تنل KBR|بيل GKR|يتل KGR|ثثل KBR|نبن RGR"],
   ["بنن GBR|تين BKR|يتن KBR|ثثن BGR|ج R|ح G", "خ K|حث GB|خب KG|جت RB|تحت BGB|يجب BRG", "بخت GKB|ة B|ه R|بة GB|يه KR|ته BR", "نة RB|هـ RR|يهب KRG|بها GRK|بهم GBR|د G", "ذ B|جد RG|خذ RB|ر B|ز G|جر RG", "خز KG|ر B|ز G|ير KB|تز KG|س G", "ش B|سل GR|شل BR|ص B|ض G|ط B", "ظ G|صب BG|طب BG|ضا GK|ظا GK|ع R", "غ K|ء K|عز RG|غر KB|صع BR|ضغ GK", "بعد GRG|تغذ BKB|أ B|ؤ B|ئ B|ف G"],
   ["ق B|و R|قو BR|فو BR|فقل KBR", "قفل BGR|يف KG|م R|ـم RR|حم GR", "لم GR|تم BR|تمت GRB"]
 ];
-// A cell the font cannot draw as the book does (the calligraphic lam-alif and ha) shows the book's own picture of it.
-const bookCell = c => { const [t, k] = c.split(" "); return t[0] === "@" ? `<img src="book/${t.slice(1)}.png" alt="${k}">` : coloured(t, k); };
-const inkOf = (w, i, k = BOOK_INKS[w]) => k ? INK[k[i]] : INKS[i % INKS.length];
+// Every cell is shown with the book's own picture of it (book/c<n>.png in colour, book/k<n>.png in plain black), so the
+// calligraphy and the colours are exactly the book's; the text and inks stay for the letters and the corrections.
+const BOOK_CELLS = BOOK_PAGES.flat().flatMap(r => r.split("|")).map((c, n) => { const [w, k] = c.split(" "); return { w, k, img: n }; });
+const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}${it.img}.png" alt="${it.w}">`;
+const inkOf = (w, i, k) => k ? INK[k[i]] : INKS[i % INKS.length];
 // Amiri matches the book best, except for these words, which the book writes flat as Scheherazade does.
 const FLAT = new Set(["يم","يهب","بها","بهم","تمت"]);
 const wf = w => FLAT.has(w) ? ` style="font-family:'Scheherazade New', Amiri, serif"` : "";
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
-const inked = w => [...w].map((ch, i) => `<span style="color:${inkOf(w, i)}">${showLetter(ch)}</span>`).join(" ");
-function coloured(w, k) {
-  const c = [...w];
-  return c.map((ch, i) => {
-    const before = i > 0 && joinsNext(c[i - 1]) && joinsPrev(ch) ? "‍" : "";
-    const after = i < c.length - 1 && joinsNext(ch) && joinsPrev(c[i + 1]) ? "‍" : "";
-    return `<span style="color:${inkOf(w, i, k)}">${before}${ch}${after}</span>`;
-  }).join("");
-}
-const WORD_CARDS = WORDS.map(w => ({ w, mini: `<div class="mini ar"><span class="w" lang="ar"${wf(w)}>${coloured(w)}</span></div>` }));
+const inked = (w, k) => [...w].map((ch, i) => `<span style="color:${inkOf(w, i, k)}">${showLetter(ch)}</span>`).join(" ");
+const wordShow = it => bookImg(it, true);   // the word as asked: the book's writing in plain black
+const wordInk = it => bookImg(it);          // the answer: the book's writing in its colours
+// Lesson 2 practice: every cell of two letters or more, in the book's order (single letters are lesson 1).
+const WORD_CARDS = BOOK_CELLS.filter(c => c.w.replace(/ـ/g, "").length > 1)
+  .map(it => ({ ...it, mini: `<div class="mini ar"><span class="w">${wordInk(it)}</span></div>` }));
 
 // ---------- Helpers
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -724,7 +716,7 @@ function renderQuiz() {
   } else {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
-    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar"${wf(it.w)}>${it.w}</span></span>
+    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar"${wf(it.w)}>${wordShow(it)}</span></span>
       <div class="grp"><span class="q">Tape chaque lettre présente dans le mot</span><span class="chips letters">${it.choices.map(c => chip("multi", c, showLetter(c), true)).join("")}</span>
       <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
     pick.multi = new Set();
@@ -777,8 +769,8 @@ function check() {
     const want = new Set([...it.w].map(letterOf)), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste" : `À revoir : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
-    ans.querySelector(".big").innerHTML = coloured(it.w);
-    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${inkOf(it.w, i)}">${showLetter(c)}</span>`).join("")}</span>`);
+    ans.querySelector(".big").innerHTML = wordInk(it);
+    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${inkOf(it.w, i, it.k)}">${showLetter(c)}</span>`).join("")}</span>`);
     chips.forEach(o => {
       const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
       o.className = "chip ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " off");
@@ -813,14 +805,14 @@ let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes
 const wWords = () => mode === "wwords";
 const wLesson2 = () => mode === "wwords" || mode === "wforms";
 const wModel = it => wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
-  : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="font-size:min(64px, 15vw, 9vh); word-spacing:14px">${inked(it.w)}</span>`
-  : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${wKind === "trace" ? it.w : coloured(it.w)}</span>`
+  : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="font-size:min(64px, 15vw, 9vh); word-spacing:14px">${inked(it.w, it.k)}</span>`
+  : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh);${FLAT.has(it.w) ? " font-family:'Scheherazade New', Amiri, serif" : ""}">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
 let wArabic = false;
 const wPrompt = it => wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
-  : wKind === "split" ? `<span class="prompt ar" lang="ar"${FLAT.has(it.w) ? " style=\"font-family:'Scheherazade New', Amiri, serif\"" : ""}>${it.w}</span>`
-  : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w)}</span>`
+  : wKind === "split" ? `<span class="prompt ar" lang="ar"${FLAT.has(it.w) ? " style=\"font-family:'Scheherazade New', Amiri, serif\"" : ""}>${wordShow(it)}</span>`
+  : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}</span>`
   : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
   : `<button class="prompt swap" id="wName">${wArabic ? `<span class="ar" lang="ar" style="font-size:40px">${it.ar}</span>` : `<span class="fr">${it.fr}</span>`}
       <span class="tip">${SWAP}${wArabic ? `Tape pour revenir à « ${it.fr} »` : "Tape pour le nom en arabe"}</span></button>`;
@@ -943,7 +935,7 @@ function wUndo() { if (!wAnswers.length) return; wAnswers.pop(); wRender(); }
 function wReveal() {
   wShown = true;
   $("wCard").classList.add("shown");
-  if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = coloured(wDeck[wPos].w);   // the word takes the letters' inks
+  if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
   const c = $("wCard");
   c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "le mot" : "la lettre"} du livre</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
@@ -968,7 +960,7 @@ function wSwipe(c) {
     else { c.style.transform = ""; tint(c, 0); }
   };
 }
-function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").textContent = wDeck[wPos].w; const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
+function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordShow(wDeck[wPos]); const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
 function wFly(ok) {
   const c = $("wCard"); if (!c || c.dataset.gone) return;   // a double tap answers once
   c.dataset.gone = 1; tint(c, ok ? 100 : -100);
@@ -1083,8 +1075,8 @@ function openPage(n) {
       ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
         `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
       <h3>Les lettres dans les mots</h3>
-      ${BOOK_PAGES.map((pg, i) => `<div class="bookpage"><span class="pn">Page ${7 + i}</span><div class="words ar">${pg.map(r => `<div style="grid-template-columns:repeat(${r.split("|").length}, minmax(0, 1fr))">${r.split("|").map(c =>
-        `<span lang="ar"${wf(c.split(" ")[0])}>${bookCell(c)}</span>`).join("")}</div>`).join("")}</div></div>`).join("")}`;
+      ${(() => { let n = 0; return BOOK_PAGES.map((pg, i) => `<div class="bookpage"><span class="pn">Page ${7 + i}</span><div class="words">${pg.map(r =>
+        `<div style="grid-template-columns:repeat(${r.split("|").length}, minmax(0, 1fr))">${r.split("|").map(() => `<span>${bookImg(BOOK_CELLS[n++])}</span>`).join("")}</div>`).join("")}</div></div>`).join(""); })()}`;
   $("page").hidden = false;
   zoom(true);
 }

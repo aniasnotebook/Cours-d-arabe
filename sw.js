@@ -1,6 +1,6 @@
 // Works offline once opened: the page is fetched fresh when there is a connection, the copy is used otherwise.
-const CACHE = "cours-arabe-v56";
-const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", ...[1, 2, 4, 6, 7, 8].map(i => `book/c${i}.png`)];
+const CACHE = "cours-arabe-v58";
+const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
@@ -24,6 +24,14 @@ self.addEventListener("fetch", e => {
     return;
   }
   if (url.origin !== location.origin) return;
+  // The book's pictures never change either: keep the first copy (each one is fetched the first time it shows).
+  if (url.pathname.includes("/book/")) {
+    e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => {
+      if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+      return res;
+    })));
+    return;
+  }
   // The game itself: newest version when online, saved copy when offline.
   // On a weak connection, the saved copy is used after 4 seconds instead of waiting.
   const net = fetch(req, { cache: "no-cache" }).then(res => {
