@@ -557,6 +557,8 @@ function render() {
   clearTimeout(quizAuto);
   pos = answers.length;
   if (pos >= deck.length) return showStats();
+  if (pos === 0) pausedAt = -1;
+  pageBreak(pos, deck.length, source, showStats);
   shown = false; checked = false; guess = "none"; pick = {};
   const good = answers.filter(a => a.ok).length, bad = answers.filter(a => !a.ok && !a.skip).length;
   $("count").textContent = `${pos + 1} / ${deck.length}`;
@@ -892,6 +894,8 @@ function wRender() {
   clearTimeout(wAuto);
   if (wKind !== "trace") wPos = wAnswers.length;
   if (wPos >= wDeck.length) return wKind !== "trace" ? showStats() : show("cw");
+  if (wPos === 0) pausedAt = -1;
+  pageBreak(wPos, wDeck.length, wSource, () => wKind !== "trace" ? showStats() : show("cw"));
   wStrokes = []; wShown = false; wArabic = false;
   const it = wDeck[wPos], good = wAnswers.filter(a => a.ok).length;
   $("wCount").textContent = `${wPos + 1} / ${wDeck.length}`;
@@ -1199,10 +1203,26 @@ const roundStarted = () => !$("play").hidden ? answers.length > 0
 const ASK = { quit: ["Quitter le tour ?", "Ce que tu as fait dans ce tour ne sera pas gardé.", "Quitter"],
   restart: ["Recommencer le tour ?", "Le tour reprend depuis la première carte.", "Recommencer"],
   stop: ["Terminer le tour ?", "Tu verras tes résultats.", "Terminer"] };
+// The 127 cells of lesson 2 are long for one round: after each book page's worth of cards (54, then 60), a pause asks
+// whether to go on or see the results. In the book's order it names the page; in random order it counts the cards.
+const PAGE_BREAKS = [54, 114];
+let pausedAt = -1;
+function pageBreak(done, total, src, finish) {
+  if (src !== WORD_CARDS || total !== WORD_CARDS.length || !PAGE_BREAKS.includes(done) || pausedAt === done) return false;
+  pausedAt = done;
+  const page = PAGE_BREAKS.indexOf(done) + 7, inOrder = !$("rand2").checked;
+  $("askT").textContent = inOrder ? `Page ${page} terminée` : `${done} cartes faites`;
+  $("askP").textContent = inOrder ? `Continuer avec la page ${page + 1}, ou voir tes résultats\u00a0?` : `Il en reste ${total - done}. Continuer, ou voir tes résultats\u00a0?`;
+  $("askNo").textContent = "Continuer"; $("askYes").textContent = "Résultats";
+  $("ask").hidden = false;
+  $("askNo").onclick = () => { $("ask").hidden = true; };
+  $("askYes").onclick = () => { $("ask").hidden = true; finish(); };
+  return true;
+}
 function askThen(kind, go) {
   if (!roundStarted()) return go();
   const [t, p, yes] = ASK[kind];
-  $("askT").textContent = t; $("askP").textContent = p; $("askYes").textContent = yes;
+  $("askT").textContent = t; $("askP").textContent = p; $("askYes").textContent = yes; $("askNo").textContent = "Continuer";
   $("ask").hidden = false;
   $("askNo").onclick = () => { $("ask").hidden = true; };
   $("askYes").onclick = () => { $("ask").hidden = true; clearTimeout(quizAuto); clearTimeout(wAuto); go(); };
