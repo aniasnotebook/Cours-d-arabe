@@ -1079,16 +1079,15 @@ function closePage() { $("page").hidden = true; zoom(false); }
 document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("page").hidden) e.preventDefault(); }, { passive: false });
 
 // ---------- The book's page
-function openPage(n) {
+function openPage(n, part = "book") {
   $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرۡسُ الۡأَوَّلُ</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُفۡرَدَةُ</span>`
     : `<span class="rg">الدَّرۡسُ الثَّانِي</span><span class="rr">حُرُوفُ الۡهِجَاءِ الۡمُرَكَّبَةُ</span>`;
   $("sheet").innerHTML = n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
-    : `<h3>Les formes des lettres</h3>
+    : part === "forms" ? `<h3>Les formes des lettres</h3><p class="muted center" style="margin:-4px 0 8px; font-size:13px">Tableau fait par l’app pour s’entraîner : il n’est pas dans le livre.</p>
       <table class="table ar"><tr><th></th>${["iso","ini","med","fin"].map(p => `<th>${POS[p]}</th>`).join("")}</tr>
       ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
         `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
-      <h3>Les lettres dans les mots</h3>
-      ${(() => { let n = 0; return BOOK_PAGES.map((pg, i) => `<div class="bookpage"><span class="pn">Page ${7 + i}</span><div class="words">${pg.map(r =>
+` : `${(() => { let n = 0; return BOOK_PAGES.map((pg, i) => `<div class="bookpage"><span class="pn">Page ${7 + i}</span><div class="words">${pg.map(r =>
         `<div style="grid-template-columns:repeat(${r.split("|").length}, minmax(0, 1fr))">${r.split("|").map(() => `<span>${bookImg(BOOK_CELLS[n++])}</span>`).join("")}</div>`).join("")}</div></div>`).join(""); })()}`;
   $("page").hidden = false;
   zoom(true);
@@ -1216,9 +1215,10 @@ const FIRST_PAGE = { 1: 6, 2: 7 };
 document.querySelectorAll(".lessonbox[data-lesson]").forEach(d => {
   const n = +d.dataset.lesson, pages = LESSON_PAGES[n].map((u, i) => [u, FIRST_PAGE[n] + i]);
   d.innerHTML = `<div class="label">Leçon</div>
-    <div class="lrow"><span>${BOOK_ICON}Lire</span><button class="lbtn">${pages.length > 1 ? `Pages ${pages[0][1]} à ${pages.at(-1)[1]}` : `Page ${pages[0][1]}`}</button></div>
+    <div class="lrow"><span>${BOOK_ICON}Lire</span>${n === 2 ? `<button class="lbtn" data-part="forms">Les formes</button>` : ""}<button class="lbtn" data-part="book">${pages.length > 1 ? `Pages ${pages[0][1]} à ${pages.at(-1)[1]}` : `Page ${pages[0][1]}`}</button></div>
     <div class="lrow"><span>${EAR_ICON}Écouter</span>${pages.map(([u, p]) => `<a class="lbtn" href="${u}" target="_blank" rel="noopener">p.${p}</a>`).join("")}</div>`;
-  d.querySelector("button").onclick = () => openPage(n);
+  // Lesson 2 has two things to read: the book's pages, and the table of forms the app adds (not in the book).
+  d.querySelectorAll("button").forEach(b => b.onclick = () => openPage(n, b.dataset.part));
 });
 // The order setting sits on each level page and drives its lesson's switch (rand1 or rand2).
 function bindRand(box, lesson) {
@@ -1245,7 +1245,7 @@ document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; 
 $("wRestart").innerHTML = ICONS.restart;
 $("wRestart").onclick = () => askThen("restart", () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource));
 $("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show("cw"));
-$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1);
+$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : "book");
 $("goForms").onclick = () => openChoice("forms");
 $("goWords").onclick = () => openChoice("words");
 $("restart").onclick = () => askThen("restart", () => start(source));
@@ -1254,7 +1254,7 @@ $("pBack").onclick = () => askThen("quit", () => show(mode === "letters" ? "c1" 
 $("wTopBack").onclick = () => askThen("quit", () => show("cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = () => askThen("stop", showStats);
-$("peek").onclick = () => openPage(+$("peek").dataset.page);
+$("peek").onclick = () => openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
 $("again").onclick = () => start(source);
 $("page").onclick = closePage;
 
