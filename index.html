@@ -892,7 +892,17 @@ show(remembered() ? "home" : "gate");
   const done = () => { ready = true; $("loader").hidden = true; };
   setTimeout(() => { if (!ready) { $("loader").innerHTML = `<div style="width:96px;height:96px">${MARK}</div>`; $("loader").hidden = false; } }, 250);
   Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 4000))]).then(done); }
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+// Updates on their own: each time the installed app comes back to the screen it asks for a new version, and loads it
+// as soon as no round is under way (an installed app has no reload button).
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then(reg =>
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); })
+  ).catch(() => {});
+  let fresh = !navigator.serviceWorker.controller;   // the very first visit installs it: nothing to reload
+  const inRound = () => !$("play").hidden || !$("write").hidden;
+  const reloadWhenFree = () => { if (!inRound()) location.reload(); else setTimeout(reloadWhenFree, 2000); };
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (!fresh) { fresh = true; reloadWhenFree(); } });
+}
 
 // ---------- Wiring
 document.querySelectorAll(".ico.home").forEach(b => { b.innerHTML = ICONS.home; b.onclick = () => show("home"); });
