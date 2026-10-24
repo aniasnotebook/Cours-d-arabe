@@ -89,6 +89,8 @@
           user-select:none; -webkit-user-select:none; border:3px solid transparent; overflow:hidden; }
   .card.swipe { touch-action:none; cursor:grab; }
   .card.under { transform:scale(.95) translateY(10px); }
+  .enter { animation:enter .25s ease; }
+  @keyframes enter { from { transform:scale(.95) translateY(10px); opacity:.6; } to { transform:none; opacity:1; } }
   .card.anim { transition:transform .22s ease .06s, opacity .22s ease .06s; }
   .card.good { border-color:#2f7d4f; } .card.bad { border-color:#c2410c; }
   .glyph { font-size:min(150px, 34vw, 18vh); line-height:1.25; position:relative; }
@@ -204,7 +206,7 @@
   .table td.n { color:#d6301f; font-size:18px; }
   .words { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); direction:rtl; border:1px solid #333; }
   .words div { border:1px solid #333; text-align:center; font-size:24px; line-height:1.7; }
-  @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } }
+  @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } .enter { animation:none; } }
   /* The logo: three cards. In the top-right corner (Arabic reads from the right), hidden during a round. */
   .app { position:relative; }
   .corner { position:absolute; top:0; right:0; width:40px; height:40px; pointer-events:none; z-index:2; }
@@ -490,7 +492,9 @@ function openRound() {
   render();
 }
 
+let quizAuto = null;
 function render() {
+  clearTimeout(quizAuto);
   pos = answers.length;
   if (pos >= deck.length) return showStats();
   shown = false; checked = false; guess = "none"; pick = {};
@@ -563,6 +567,14 @@ function flip() {
   if (!famQuiz) return;
   shown = !shown;
   paintFams();
+}
+
+// Every card leaves the same way, as a swipe does: it flies off to one side, and the next one rises from below.
+function fly(c, right, then) {
+  if (!c) return then();
+  c.style.transition = "transform .22s ease .06s, opacity .22s ease .06s";
+  requestAnimationFrame(() => { c.style.transform = `translateX(${right ? 140 : -140}%) rotate(${right ? 20 : -20}deg)`; c.style.opacity = 0; });
+  setTimeout(then, 300);
 }
 
 // While a card is swiped it turns green (right) or red (left); the same when a button answers.
@@ -638,7 +650,7 @@ function renderQuiz() {
   const it = deck[pos];
   if (mode === "forms") {
     it.choices = it.choices || choicesFor([it.g], 4);
-    $("stage").innerHTML = `<div class="card" id="card"><span class="glyph ar" lang="ar">${formOf(it.g, it.p)}</span></div>`;
+    $("stage").innerHTML = `<div class="card enter" id="card"><span class="glyph ar" lang="ar">${formOf(it.g, it.p)}</span></div>`;
     $("below").innerHTML = `<div class="q2">Quelle lettre ?</div>
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <div class="q2">Où dans le mot ?</div>
@@ -647,7 +659,7 @@ function renderQuiz() {
   } else {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
-    $("stage").innerHTML = `<div class="card" id="card"><span class="word ar" lang="ar"${wf(it.w)}>${it.w}</span></div>`;
+    $("stage").innerHTML = `<div class="card enter" id="card"><span class="word ar" lang="ar"${wf(it.w)}>${it.w}</span></div>`;
     $("below").innerHTML = `<div class="q2">Tape chaque lettre présente dans le mot</div>
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <p class="hint" style="text-align:left">Une lettre présente deux fois se tape une seule fois.</p>
@@ -704,7 +716,10 @@ function check() {
   $("barFill").style.width = `${answers.length / deck.length * 100}%`;
   const btn = $("check");
   btn.textContent = answers.length >= deck.length ? "Voir le résultat" : "Suivant";
-  btn.onclick = render;
+  // The next card comes by itself after time to read the correction (longer when something was wrong).
+  const next = () => { clearTimeout(quizAuto); if ($("play").hidden || pos !== answers.length - 1) return; btn.onclick = null; fly($("card"), ok, render); };
+  btn.onclick = next;
+  quizAuto = setTimeout(next, ok ? 2000 : 4000);
 }
 
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
@@ -760,7 +775,7 @@ function wRender() {
   $("wBar").style.width = `${wPos / wDeck.length * 100}%`;
   $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("wBad").textContent = `${wAnswers.length - good} à revoir`;
-  $("wStage").innerHTML = `<div class="wcard" id="wCard">${wPrompt(it)}<span class="line"></span>
+  $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}<span class="line"></span>
     ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span><span class="edge" style="left:6px"></span><span class="edge" style="right:6px"></span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
   $("wHint").innerHTML = wKind === "trace"
@@ -828,17 +843,13 @@ function wSwipe(c) {
 function wHide() { wShown = false; const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire"; wButtons(); }
 function wFly(ok) {
   const c = $("wCard"); tint(c, ok ? 100 : -100);
-  c.style.transition = "transform .22s ease .06s, opacity .22s ease .06s";
-  requestAnimationFrame(() => { c.style.transform = `translateX(${ok ? 140 : -140}%) rotate(${ok ? 20 : -20}deg)`; c.style.opacity = 0; });
-  setTimeout(() => wAnswer(ok), 300);
+  fly(c, ok, () => wAnswer(ok));
 }
 function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
 let wAuto = null;
 function wTraceNext() {
   const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace") return;
-  c.style.transition = "transform .25s ease, opacity .25s ease";
-  c.style.transform = "translateX(-120%) rotate(-8deg)"; c.style.opacity = 0;
-  setTimeout(() => wGo(1), 260);
+  fly(c, false, () => wGo(1));
 }
 function wGo(d) { clearTimeout(wAuto); const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
 
