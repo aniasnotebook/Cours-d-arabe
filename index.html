@@ -147,6 +147,7 @@
   .card.quiz .chip .tag { position:absolute; top:-10px; left:50%; transform:translateX(-50%); padding:1px 7px; border-radius:999px; background:#c2410c; color:#fff; font:700 10px/1.4 system-ui, sans-serif; }
   .card.quiz .note { font-size:12px; color:#6b665c; }
   @media (max-height:720px) { .card.quiz .big { font-size:12vh; } .card.quiz .big.word { font-size:11vh; } .card.quiz .chip.ar { height:42px; min-width:48px; font-size:24px; } .card.quiz .chip { height:36px; } }
+  .card.quiz .ans .formrow { margin-top:.4em; }   /* room for a tall final tail (م ج ح ع غ) above the forms */
   .card.quiz .formrow span { border:0; background:none; } .card.quiz .formrow span.on, .card.quiz .formrow span.on small { color:#2f7d4f; font-weight:800; }
   .lessonlink { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; text-decoration:none; }
   .lessonlink svg { width:16px; height:16px; }
@@ -210,6 +211,7 @@
   .tiles .g { background:#e3f1e7; color:#2f7d4f; } .tiles .r { background:#fdebe1; color:#c2410c; } .tiles .s { background:#ebe6db; color:#6b665c; }
   .rbar { display:flex; flex:none; height:10px; border-radius:5px; overflow:hidden; background:var(--line); }
   .rbar i { display:block; } .rbar .g { background:#2f7d4f; } .rbar .r { background:#c2410c; } .rbar .s { background:#cfc8b8; }
+  #stats > * { flex-shrink:0; }   /* a long list scrolls instead of being squeezed under the buttons */
   .rfoot { position:sticky; bottom:0; margin-top:auto; padding:12px 0 4px; display:flex; flex-direction:column; gap:10px; background:var(--bg); }
   /* Stats */
   .grid { width:100%; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px; direction:rtl; }
@@ -486,7 +488,8 @@ const BOOK_PAGES = [
 // Every cell is shown with the book's own picture of it (book/c<n>.png in colour, book/k<n>.png in plain black), so the
 // calligraphy and the colours are exactly the book's; the text and inks stay for the letters and the corrections.
 const BOOK_CELLS = BOOK_PAGES.flat().flatMap(r => r.split("|")).map((c, n) => { const [w, k] = c.split(" "); return { w, k, img: n }; });
-const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}${it.img}.png" alt="${it.w}">`;
+// If a picture cannot load (offline before it was ever shown), the word is written instead of a broken image.
+const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}${it.img}.png" alt="${it.w}" onerror="this.outerHTML='<span lang=ar>'+this.alt+'</span>'">`;
 const inkOf = (w, i, k) => k ? INK[k[i]] : INKS[i % INKS.length];
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.

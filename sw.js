@@ -1,9 +1,11 @@
 // Works offline once opened: the page is fetched fresh when there is a connection, the copy is used otherwise.
-const CACHE = "cours-arabe-v59";
+const CACHE = "cours-arabe-v60";
 const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
+  // The book's pictures are saved too, one by one, so lesson 2 also works offline (a missing one never blocks the install).
+  const BOOK = [...Array(127).keys()].flatMap(i => [`book/c${i}.png`, `book/k${i}.png`]);
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE).then(() => Promise.all(BOOK.map(u => c.add(u).catch(() => {}))))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", e => {
