@@ -130,19 +130,24 @@
   .act.u svg { width:22px; height:22px; }
   .act:disabled { opacity:.35; cursor:default; }
 
-  /* Lesson 2 choices */
-  .q2 { font-size:14px; font-weight:700; }
-  .opts { display:grid; gap:8px; }
-  .opts.c4 { grid-template-columns:repeat(4, minmax(0, 1fr)); direction:rtl; }
-  .opts.c3 { grid-template-columns:repeat(3, minmax(0, 1fr)); }
-  .opt { position:relative; height:52px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); display:grid; place-items:center; font-size:15px; font-weight:600; }
-  .opt.ar { font-size:28px; }
-  .opt.on { border:2px solid var(--pick); background:var(--pick); color:var(--on-pick); }
-  .opt.right { border:2px solid var(--ok); background:var(--ok-bg); color:var(--ok); }
-  .opt.wrong { border:2px solid var(--miss); background:var(--miss-bg); color:var(--miss); }
-  .opt.missed { border:2px dashed var(--miss); color:var(--miss); }
-  .opt.dim { color:var(--faint); }
-  .opt .tag { position:absolute; top:-9px; left:50%; transform:translateX(-50%); padding:1px 6px; border-radius:999px; background:var(--miss); color:var(--on-accent); font:700 10px/1.4 system-ui, sans-serif; white-space:nowrap; }
+  /* Lesson 2 choices: everything is on the card (as the family chips), below it only the action buttons. */
+  .card.quiz { justify-content:flex-start; padding:12px 10px 12px; gap:8px; }
+  .card.quiz .ans { margin:auto 0; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .card.quiz .big { font-size:min(150px, 34vw, 15vh); line-height:1.6; }   /* tall line: a final mim's tail stays clear of the row below */
+  .card.quiz .big.word { font-size:min(130px, 30vw, 15vh); }
+  .card.quiz .grp { display:flex; flex-direction:column; align-items:center; gap:8px; width:100%; }
+  .card.quiz .q { font-size:13px; font-weight:600; color:#6b665c; }
+  .card.quiz .chips { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+  .card.quiz .chips.letters { direction:rtl; }
+  .card.quiz .chips.tagged { row-gap:16px; margin-top:8px; }
+  .card.quiz .chip { position:relative; white-space:nowrap; padding:0 10px; gap:4px; }
+  .card.quiz .chips:not(.letters) { gap:6px; flex-wrap:nowrap; }
+  .card.quiz .chip.ar { font-family:Amiri, serif; font-size:28px; min-width:56px; height:48px; justify-content:center; padding:0 10px; line-height:1; }
+  .card.quiz .chip.missed { border:2px dashed #c2410c; color:#c2410c; background:#fff; }
+  .card.quiz .chip .tag { position:absolute; top:-10px; left:50%; transform:translateX(-50%); padding:1px 7px; border-radius:999px; background:#c2410c; color:#fff; font:700 10px/1.4 system-ui, sans-serif; }
+  .card.quiz .note { font-size:12px; color:#6b665c; }
+  @media (max-height:720px) { .card.quiz .big { font-size:12vh; } .card.quiz .big.word { font-size:11vh; } .card.quiz .chip.ar { height:42px; min-width:48px; font-size:24px; } .card.quiz .chip { height:36px; } }
+  .card.quiz .formrow span { border:0; background:none; } .card.quiz .formrow span.on, .card.quiz .formrow span.on small { color:#2f7d4f; font-weight:800; }
   .lessonlink { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; text-decoration:none; }
   .lessonlink svg { width:16px; height:16px; }
   .lessonlinks { display:flex; flex-direction:column; gap:8px; }
@@ -697,26 +702,22 @@ document.addEventListener("wheel", e => {
 
 // ---------- Lesson 2: choose, check, next
 function renderQuiz() {
-  const it = deck[pos];
+  const it = deck[pos], chip = (k, v, label, ar) => `<button class="chip${ar ? " ar" : ""}" data-k="${k}" data-v="${v}"${ar ? ' lang="ar"' : ""}>${ar ? "" : ICONS.plus}${label}</button>`;
   if (mode === "forms") {
     it.choices = it.choices || choicesFor([it.g], 4);
-    $("stage").innerHTML = `<div class="card enter" id="card"><span class="glyph ar" lang="ar">${formOf(it.g, it.p)}</span></div>`;
-    $("below").innerHTML = `<div class="q2">Quelle lettre ?</div>
-      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
-      <div class="q2">Où dans le mot ?</div>
-      <div class="opts c3">${["ini","med","fin"].map(p => `<button class="opt" data-k="pos" data-v="${p}">${POS[p][0].toUpperCase() + POS[p].slice(1)}</button>`).join("")}</div>
-      <div class="actions" id="qActions"></div>`;
+    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big ar" lang="ar">${formOf(it.g, it.p)}</span></span>
+      <div class="grp"><span class="q">Quelle lettre ?</span><span class="chips letters">${it.choices.map(c => chip("letter", c, showLetter(c), true)).join("")}</span></div>
+      <div class="grp"><span class="q">Où dans le mot ?</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
   } else {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
-    $("stage").innerHTML = `<div class="card enter" id="card"><span class="word ar" lang="ar"${wf(it.w)}>${it.w}</span></div>`;
-    $("below").innerHTML = `<div class="q2">Tape chaque lettre présente dans le mot</div>
-      <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
-      <p class="hint" style="text-align:left">Une lettre présente deux fois se tape une seule fois.</p>
-      <div class="actions" id="qActions"></div>`;
+    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big word ar" lang="ar"${wf(it.w)}>${it.w}</span></span>
+      <div class="grp"><span class="q">Tape chaque lettre présente dans le mot</span><span class="chips letters">${it.choices.map(c => chip("multi", c, showLetter(c), true)).join("")}</span>
+      <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
     pick.multi = new Set();
   }
-  $("below").querySelectorAll(".opt").forEach(b => b.onclick = () => choose(b));
+  $("below").innerHTML = `<div class="actions" id="qActions"></div>`;
+  $("card").querySelectorAll(".chip").forEach(b => b.onclick = () => choose(b));
   qButtons();
 }
 // The same row as in every exercise: skip or to review on the left, back in the middle, go on the right.
@@ -740,7 +741,7 @@ function choose(b) {
   if (checked) return;
   const k = b.dataset.k, v = b.dataset.v;
   if (k === "multi") { pick.multi.has(v) ? pick.multi.delete(v) : pick.multi.add(v); b.classList.toggle("on"); }
-  else { pick[k] = v; $("below").querySelectorAll(`.opt[data-k="${k}"]`).forEach(o => o.classList.toggle("on", o === b)); }
+  else { pick[k] = v; $("card").querySelectorAll(`.chip[data-k="${k}"]`).forEach(o => { o.classList.toggle("on", o === b); if (k === "pos") o.innerHTML = (o === b ? ICONS.check : ICONS.plus) + POS[o.dataset.v]; }); }
   $("check").disabled = mode === "forms" ? !(pick.letter && pick.pos) : !pick.multi.size;
 }
 
@@ -748,31 +749,32 @@ function check() {
   checked = true;
   const it = deck[pos], card = $("card");
   let ok;
+  const ans = card.querySelector(".ans"), chips = card.querySelectorAll(".chip");
+  chips.forEach(o => o.disabled = true);
   if (mode === "forms") {
     ok = pick.letter === it.g && pick.pos === it.p;
-    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>
-      <span class="glyph ar" lang="ar" style="font-size:min(100px, 24vw)">${formOf(it.g, it.p)}</span>
-      <span style="font-weight:700"><span class="ar" lang="ar" style="color:#d6301f; font-size:26px">${NAME_OF[it.g]}</span> · ${POS[it.p]}</span>
-      <span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`;
-    $("below").querySelectorAll(".opt").forEach(o => {
-      const right = o.dataset.k === "letter" ? o.dataset.v === it.g : o.dataset.v === it.p;
-      const chosen = o.classList.contains("on");
-      o.className = "opt" + (o.dataset.k === "letter" ? " ar" : "") + (right ? " right" : chosen ? " wrong" : " dim");
+    ans.insertAdjacentHTML("beforeend", `<span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`);
+    chips.forEach(o => {
+      const right = o.dataset.k === "letter" ? o.dataset.v === it.g : o.dataset.v === it.p, chosen = o.classList.contains("on");
+      o.className = "chip" + (o.dataset.k === "letter" ? " ar" : "") + (right ? " right" : chosen ? " wrong" : " off");
+      if (o.dataset.k === "pos") o.innerHTML = (right ? ICONS.check : "") + POS[o.dataset.v];
     });
+    card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
   } else {
     const want = new Set([...it.w].map(letterOf)), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste" : `À revoir : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
-    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "À revoir" : verdict}</span>
-      <span class="word ar" lang="ar"${wf(it.w)}>${coloured(it.w)}</span>
-      <span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(c)}</span>`).join("")}</span>`;
-    $("below").querySelectorAll(".opt").forEach(o => {
+    ans.querySelector(".big").innerHTML = coloured(it.w);
+    ans.insertAdjacentHTML("beforeend", `<span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(c)}</span>`).join("")}</span>`);
+    chips.forEach(o => {
       const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
-      o.className = "opt ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " dim");
+      o.className = "chip ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " off");
       if (inWord && !chosen) o.innerHTML += `<span class="tag">oubliée</span>`;
       if (!inWord && chosen) o.innerHTML += `<span class="tag">en trop</span>`;
     });
-    $("below").querySelector(".hint").hidden = true;
+    card.querySelector(".chips").classList.add("tagged");
+    card.querySelector(".note").remove();
+    card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "À revoir" : verdict}</span>`);
   }
   card.classList.add(ok ? "good" : "bad"); tint(card, ok ? 100 : -100);
   answers.push({ item: it, ok });
