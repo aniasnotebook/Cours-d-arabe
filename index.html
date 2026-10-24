@@ -48,7 +48,7 @@
   .pillbtn { justify-self:end; height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--surface); font-size:14px; font-weight:600; }
 
   /* Book header */
-  .bism { text-align:center; font-size:clamp(26px, 8vw, 32px); line-height:1.6; }
+  .bism { text-align:center; font-size:clamp(24px, 7vw, 28px); line-height:1.6; }
   .ribbons { width:100%; display:flex; gap:6px; color:#fff; font-size:clamp(17px, 5vw, 20px); }
   .ribbons span { padding:6px 12px 8px; line-height:1.6; }
   .rg { background:var(--q-green); flex:0 0 auto; border-radius:4px 12px 12px 4px; }
@@ -64,8 +64,12 @@
   .chev { font-size:26px; color:var(--accent); }
 
   /* Lesson screens */
-  .linkbtn { display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-size:15px; font-weight:600; }
-  .linkbtn svg { width:18px; height:18px; flex:0 0 auto; }
+  .lessonbox { display:flex; flex-direction:column; gap:6px; margin-top:6px; padding-top:14px; border-top:1px solid var(--line); }
+  .lessonbox .lrow { display:flex; align-items:center; gap:8px; min-height:46px; }
+  .lessonbox .lrow > span { display:flex; align-items:center; gap:8px; flex:1; font-weight:600; font-size:15px; }
+  .lessonbox .lrow svg { width:18px; height:18px; }
+  .lessonbox .lbtn { display:grid; place-items:center; min-width:48px; height:42px; padding:0 10px; border-radius:12px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font:700 15px/1 system-ui, sans-serif; text-decoration:none; }
+  .randset label { padding:10px 16px; }
   .label { font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); }
   .settings { display:flex; flex-direction:column; border-radius:16px; border:1px solid var(--line); background:var(--surface); }
   .settings label { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; }
@@ -322,14 +326,10 @@
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الْأَوَّلُ</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُفْرَدَةُ</span></div>
-    <button class="linkbtn" data-page="1"></button>
-    <div class="lessonlinks" data-lesson="1"></div>
-    <div class="label">Réglages du tour</div>
-    <div class="settings">
-      <label><span><b>Lettres aléatoires</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand1" checked></label>
-    </div>
+    <div class="label">Exercices</div>
     <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>Les 30 lettres · Les familles en plus</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:#d6301f; font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
+    <div class="lessonbox" data-lesson="1"></div>
   </section>
 
   <!-- Lesson 2 -->
@@ -337,17 +337,14 @@
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرْسُ الثَّانِي</span><span class="rr">حُرُوفُ الْهِجَاءِ الْمُرَكَّبَةُ</span></div>
-    <p class="muted center">Les lettres changent de forme quand elles sont liées.</p>
-    <button class="linkbtn" data-page="2"></button>
-    <div class="lessonlinks" data-lesson="2"></div>
-    <div class="label">Réglages du tour</div>
-    <div class="settings">
-      <label><span><b>Cartes aléatoires</b><small>Sinon, dans l’ordre du livre</small></span><input type="checkbox" id="rand2" checked></label>
-    </div>
+    <div class="label">Exercices</div>
     <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Choisir ou écrire chaque forme : début, milieu, fin</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Les mots<small>Choisir ou écrire les lettres de chaque mot</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW2"><span class="tile ar" lang="ar" style="font-size:22px">بلب</span><span class="t">Écrire les mots<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
+    <div class="lessonbox" data-lesson="2"></div>
   </section>
+  <!-- The order setting of each lesson; shown on each exercise's level page. -->
+  <div hidden><input type="checkbox" id="rand1" checked><input type="checkbox" id="rand2" checked></div>
 
   <!-- Lesson 1, recognise: with or without the families question -->
   <section class="screen mid" id="c1" hidden>
@@ -358,6 +355,7 @@
       <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>Non <i>›</i></b><small>Juste les lettres : tu indiques si tu la reconnais.</small></button>
       <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.3">ج</span><span style="position:absolute; left:6px; right:6px; bottom:8px; display:flex; flex-direction:column; gap:4px; font-size:9px; font-weight:700; text-align:center"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span></span></span></span><b>Oui <i>›</i></b><small>Sur chaque carte, tu indiques aussi si elle est emphatique ou de prolongation.</small></button>
     </div>
+    <div class="settings randset" data-lesson="1"><label><span><b>Lettres aléatoires</b></span><input type="checkbox"></label></div>
   </section>
 
   <!-- Writing: trace or test yourself -->
@@ -369,6 +367,7 @@
       <button class="pick" data-w="trace" id="pkA"><span class="pv" id="pvTrace"></span><b><span id="cwTraceName">Tracer</span> <i>›</i></b><small id="cwTraceText"></small></button>
       <button class="pick" data-w="test" id="pkB"><span class="pv" id="pvTest"></span><b><span id="cwTestName">Me tester</span> <i>›</i></b><small id="cwTestText"></small></button>
     </div>
+    <div class="settings randset" id="cwRand"><label><span><b></b></span><input type="checkbox"></label></div>
   </section>
 
   <!-- Writing round -->
@@ -829,6 +828,7 @@ function openWriting(lesson) {
   mode = lesson === 1 ? "wletters" : "wwords";
   $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Écrire les mots";
   $("cwBack").dataset.back = "l" + lesson;
+  bindRand($("cwRand"), lesson);
   $("pkA").dataset.w = "trace"; $("pkB").dataset.w = "test";
   $("cwTraceName").textContent = "Tracer"; $("cwTestName").textContent = "Me tester";
   $("cwTraceText").textContent = lesson === 1 ? "Tu repasses sur la lettre grise. Pas de note, tu avances à ton rythme." : "Tu repasses sur le mot gris, lettres attachées. Pas de note.";
@@ -855,6 +855,7 @@ function openChoice(which) {
   choiceOf = which; mode = which;
   $("cwTitle").textContent = c.title;
   $("cwBack").dataset.back = "l2";
+  bindRand($("cwRand"), 2);
   $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write;
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
   $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
@@ -1204,14 +1205,27 @@ function askThen(kind, go) {
 }
 document.querySelectorAll(".ico.home").forEach(b => { b.innerHTML = ICONS.home; b.onclick = () => askThen("quit", () => show("home")); });
 $("restart").innerHTML = ICONS.restart;
-document.querySelectorAll(".linkbtn").forEach(b => {
-  b.innerHTML = ICONS.grid + (b.dataset.page === "1" ? "Revoir l’alphabet complet, comme dans le livre" : "Revoir toutes les formes et les mots du livre");
-  b.onclick = () => openPage(+b.dataset.page);
+// Each lesson page ends with the lesson itself: read it in the app (the book's pages) or listen to it (one link per page).
+const BOOK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>';
+const EAR_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2" y="14" width="5" height="7" rx="2"/><rect x="17" y="14" width="5" height="7" rx="2"/></svg>';
+const FIRST_PAGE = { 1: 6, 2: 7 };
+document.querySelectorAll(".lessonbox[data-lesson]").forEach(d => {
+  const n = +d.dataset.lesson, pages = LESSON_PAGES[n].map((u, i) => [u, FIRST_PAGE[n] + i]);
+  d.innerHTML = `<div class="label">Leçon</div>
+    <div class="lrow"><span>${BOOK_ICON}Lire</span><button class="lbtn">${pages.length > 1 ? `Pages ${pages[0][1]} à ${pages.at(-1)[1]}` : `Page ${pages[0][1]}`}</button></div>
+    <div class="lrow"><span>${EAR_ICON}Écouter</span>${pages.map(([u, p]) => `<a class="lbtn" href="${u}" target="_blank" rel="noopener">p.${p}</a>`).join("")}</div>`;
+  d.querySelector("button").onclick = () => openPage(n);
 });
+// The order setting sits on each level page and drives its lesson's switch (rand1 or rand2).
+function bindRand(box, lesson) {
+  const src = $("rand" + lesson), input = box.querySelector("input");
+  box.querySelector("b").textContent = lesson === 1 ? "Lettres aléatoires" : "Cartes aléatoires";
+  input.checked = src.checked; input.onchange = () => { src.checked = input.checked; };
+}
+bindRand(document.querySelector('.randset[data-lesson="1"]'), 1);
 // Each choice screen goes from the easier way (left) to the harder one (right), with its level: one green bar, then two orange bars.
 document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) =>
   b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${i + 1}"><span>${[0, 1, 2].map(k => `<i class="${k <= i ? "on" : ""}"></i>`).join("")}</span>Niveau ${i + 1}</span>`)));
-document.querySelectorAll(".lessonlinks[data-lesson]").forEach(d => d.innerHTML = lessonLinks(+d.dataset.lesson));
 document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
 $("go1").onclick = () => show("c1");
 document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
