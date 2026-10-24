@@ -564,7 +564,7 @@ function paintFams() {
     const ok = guess === l.fam, what = l.fam === "none" ? "ni emphatique ni de prolongation" : l.fam === "emph" ? "lettre emphatique" : "lettre de prolongation";
     if (!res) { res = document.createElement("span"); box.appendChild(res); }
     res.className = "res " + (ok ? "good" : "bad");
-    res.textContent = `${ok ? "Juste" : "Faux"} : ${what}`;
+    res.textContent = `${ok ? "Juste" : "À revoir"} : ${what}`;
     box.querySelector(".note").hidden = true;
   } else if (res) { res.remove(); box.querySelector(".note").hidden = false; }
 }
@@ -688,13 +688,14 @@ function renderQuiz() {
 // The same row as in every exercise: skip or to review on the left, back in the middle, go on the right.
 function qButtons() {
   $("qActions").innerHTML = checked
-    ? `<button class="act n" disabled><span>${ICONS.skip}</span>Passer</button><button class="act u" id="qBack"><span>${ICONS.undo}</span>Retour</button>
-       <button class="act go2" id="check"><span>${ICONS.next}</span>${answers.length >= deck.length ? "Résultat" : "Suivante"}</button>`
+    ? `<button class="act n" disabled><span>${ICONS.skip}</span>Passer</button><button class="act u" id="qBack" ${answers.length > 1 ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
+       <button class="act go2" id="check"><span>${ICONS.next}</span>${answers.length >= deck.length ? "Terminer" : "Suivante"}</button>`
     : `<button class="act n" id="qSkip"><span>${ICONS.skip}</span>Passer</button>
        <button class="act u" id="qBack" ${answers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
        <button class="act go2" id="check" disabled><span>${ICONS.verify}</span>Vérifier</button>`;
   settle($("qActions"));
-  $("qBack").onclick = () => { clearTimeout(quizAuto); undo(); };
+  // Retour always goes to the previous card, even once this one is checked.
+  $("qBack").onclick = () => { clearTimeout(quizAuto); if (checked) answers.pop(); undo(); };
   if (checked) return;
   $("check").onclick = check;
   // Skipping is its own count (not to review, not in the score); the next card simply takes its place.
@@ -715,7 +716,7 @@ function check() {
   let ok;
   if (mode === "forms") {
     ok = pick.letter === it.g && pick.pos === it.p;
-    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste !" : "Faux"}</span>
+    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste !" : "À revoir"}</span>
       <span class="glyph ar" lang="ar" style="font-size:min(100px, 24vw)">${formOf(it.g, it.p)}</span>
       <span style="font-weight:700"><span class="ar" lang="ar" style="color:#d6301f; font-size:26px">${NAME_OF[it.g]}</span> · ${POS[it.p]}</span>
       <span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`;
@@ -728,7 +729,7 @@ function check() {
     const want = new Set([...it.w].map(letterOf)), missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
     ok = !missed.length && !extra.length;
     const verdict = ok ? "Juste !" : `Presque : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
-    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "Faux" : verdict}</span>
+    card.innerHTML = `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "À revoir" : verdict}</span>
       <span class="word ar" lang="ar"${wf(it.w)}>${coloured(it.w)}</span>
       <span class="parts ar" lang="ar">${[...it.w].map((c, i) => `<span style="color:${INKS[i % INKS.length]}">${showLetter(c)}</span>`).join("")}</span>`;
     $("below").querySelectorAll(".opt").forEach(o => {
@@ -831,7 +832,7 @@ function wButtons() {
   if (wKind === "trace") {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
       <button class="act u" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
-      <button class="act go2" id="wNext" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
+      <button class="act go2" id="wNext" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Terminer" : "Suivante"}</button>`;
     $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = wTraceNext;
     $("wSkip").onclick = () => { clearTimeout(wAuto); wGo(1); };
   } else if (!wShown) {
