@@ -216,6 +216,10 @@
   #loader .r { animation:fanR 1.4s ease-in-out infinite; } #loader .g { animation:fanG 1.4s ease-in-out infinite; }
   @keyframes fanR { 0%,100% { transform:rotate(0); } 50% { transform:rotate(-14deg); } }
   @keyframes fanG { 0%,100% { transform:rotate(0); } 50% { transform:rotate(-6deg); } }
+  /* Pull down to reload: the logo comes down with the finger, then fans while the page reloads. */
+  #ptr { position:fixed; left:50%; top:0; width:44px; height:44px; margin-left:-22px; z-index:40; pointer-events:none; opacity:0; transform:translateY(-50px); }
+  #ptr.back { transition:transform .2s, opacity .2s; }
+  #ptr.spin .r { animation:fanR 1.4s ease-in-out infinite; } #ptr.spin .g { animation:fanG 1.4s ease-in-out infinite; }
   /* Round passed: the logo jumps once and confetti bursts behind it. */
   .party { position:relative; width:96px; height:96px; margin:0 auto; }
   .party .mark { position:relative; z-index:1; animation:jump 1.2s cubic-bezier(.3,.6,.4,1) 2; transform-origin:50% 100%; }
@@ -229,6 +233,7 @@
 </head>
 <body>
 <div id="loader" hidden></div>
+<div id="ptr" aria-hidden="true"></div>
 <div class="app">
   <div class="corner" id="corner" aria-hidden="true"></div>
 
@@ -903,6 +908,30 @@ $("eye").onclick = () => {
   $("code").focus();
 };
 $("corner").innerHTML = MARK;
+$("ptr").innerHTML = MARK;
+// Pull down from the top of a screen to reload, as an installed app has no reload button. Cards and the drawing
+// keep their own gestures.
+{ let y0 = null, pull = 0;
+  const ptr = $("ptr"), PULL = 90;
+  const screen = () => [...document.querySelectorAll(".screen")].find(s => !s.hidden);
+  const place = () => { const d = Math.min(pull, PULL * 1.4); ptr.style.opacity = Math.min(1, d / PULL); ptr.style.transform = `translateY(${d * .7 - 40}px)`; };
+  document.addEventListener("touchstart", e => {
+    const s = screen();
+    y0 = s && s.scrollTop <= 0 && $("page").hidden && !e.target.closest(".card, .wcard, .stage, canvas, input") ? e.touches[0].clientY : null;
+    pull = 0; ptr.classList.remove("back");
+  }, { passive: true });
+  document.addEventListener("touchmove", e => {
+    if (y0 === null) return;
+    pull = e.touches[0].clientY - y0;
+    if (pull > 0) place(); else { pull = 0; place(); }
+  }, { passive: true });
+  document.addEventListener("touchend", () => {
+    if (y0 === null) return;
+    y0 = null;
+    if (pull > PULL) { ptr.style.transform = "translateY(24px)"; ptr.style.opacity = 1; ptr.classList.add("spin"); setTimeout(() => location.reload(), 150); }
+    else { pull = 0; ptr.classList.add("back"); place(); }
+  });
+}
 show(remembered() ? "home" : "gate");
 // The loader only shows if the Arabic font is still downloading after a moment (in practice, the first visit).
 { let ready = false;
