@@ -192,6 +192,11 @@
   .wcard .prompt.swap .ar { line-height:1.3; }
   .wcard .prompt .tip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; background:#f3efe6; color:#6b665c; font:600 12px/1.4 system-ui, sans-serif; }
   /* Writing the forms: the letter alone, and under it in red the place to write it in. */
+  .wcard .prompt .way { display:block; width:max-content; margin:4px auto 0; padding:3px 10px; border-radius:99px; background:#f3efe6; color:#6b665c; font:600 13px/1.3 system-ui, sans-serif; word-spacing:normal; direction:ltr; }
+  .wcard .ways { position:absolute; left:0; right:0; bottom:54px; display:flex; justify-content:center; gap:6px; direction:rtl; pointer-events:none; }
+  .wcard .ways span { width:46px; height:40px; border-radius:10px; display:grid; place-items:center; border:1px solid #e2dccf; opacity:.55; background:#fff; }
+  .wcard .ways span.on { border:2px solid #2f7d4f; background:#e3f1e7; opacity:1; }
+  .wcard .ways img { height:30px; width:auto; }
   .wcard .prompt.pform { display:flex; flex-direction:column; align-items:center; line-height:1.2; }
   .wcard .prompt.pform b { color:#d6301f; font:700 17px/1.3 system-ui, sans-serif; }
   .wcard .prompt.sep { color:#1d1d1b; font-size:40px; word-spacing:16px; }
@@ -844,7 +849,7 @@ const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke
 let wArabic = false;
 const wPrompt = it => wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
   : wKind === "split" ? `<span class="prompt ar" lang="ar">${wordShow(it)}</span>`
-  : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}</span>`
+  : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}${wayBadge(it)}</span>`
   : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
   : `<button class="prompt swap" id="wName">${wArabic ? `<span class="ar" lang="ar" style="font-size:40px">${it.ar}</span>` : `<span class="fr">${it.fr}</span>`}
       <span class="tip">${SWAP}${wArabic ? `Tape pour revenir à « ${it.fr} »` : "Tape pour le nom en arabe"}</span></button>`;
@@ -972,10 +977,20 @@ function wErase() { clearTimeout(wAuto); wStrokes = []; if (wShown) wHide(); wPa
 function wUndo() { if (!wAnswers.length) return; wAnswers.pop(); wRender(); }
 
 // The book's letter in green over the drawing.
+// Lier les lettres: when the book writes the same letters several ways (لا five times, كا twice…), the card says which
+// one is asked (« Façon 2 sur 5 · page 7 »), and the correction shows all of them with the right one ringed.
+const bookPage = it => it.img < 54 ? 7 : it.img < 114 ? 8 : 9;
+const waysOf = it => WORD_CARDS.filter(c => lettersOf(c.w).map(x => L1(x, c.w)).join("") === lettersOf(it.w).map(x => L1(x, it.w)).join(""));
+function wayBadge(it) {
+  const ways = waysOf(it); if (ways.length < 2) return "";
+  return `<span class="way">Façon ${ways.indexOf(it) + 1} sur ${ways.length} · page ${bookPage(it)}</span>`;
+}
 function wReveal() {
   wShown = true;
   $("wCard").classList.add("shown");
   if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
+  const ways = wWords() ? waysOf(wDeck[wPos]) : [];
+  if (ways.length > 1) $("wCard").insertAdjacentHTML("beforeend", `<div class="ways" id="wWays">${ways.map(c => `<span class="${c === wDeck[wPos] ? "on" : ""}">${bookImg(c)}</span>`).join("")}</div>`);
   const c = $("wCard");
   c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
@@ -1000,7 +1015,7 @@ function wSwipe(c) {
     else { c.style.transform = ""; tint(c, 0); }
   };
 }
-function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordShow(wDeck[wPos]); const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
+function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordShow(wDeck[wPos]); const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wWays")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
 function wFly(ok) {
   const c = $("wCard"); if (!c || c.dataset.gone) return;   // a double tap answers once
   c.dataset.gone = 1; tint(c, ok ? 100 : -100);
