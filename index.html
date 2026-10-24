@@ -228,8 +228,9 @@
   .table th { font:600 11px system-ui, sans-serif; color:#6b665c; padding:4px; }
   .table td { border:1px solid #333; line-height:1.6; }
   .table td.n { color:#d6301f; font-size:18px; }
-  .words { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); direction:rtl; border:1px solid #333; }
-  .words div { border:1px solid #333; text-align:center; font-size:24px; line-height:1.7; }
+  .words { direction:rtl; border:1px solid #333; } .words > div { display:grid; }
+  .words > div > span { border:1px solid #333; text-align:center; font-size:24px; line-height:1.7; }
+  .bookpage { margin-bottom:14px; } .bookpage .pn { display:block; font:600 12px/1.6 system-ui, sans-serif; color:#6b665c; text-align:center; }
   @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } .enter { animation:none; } }
   /* The logo: three cards. In the top-right corner (Arabic reads from the right), hidden during a round. */
   .app { position:relative; }
@@ -481,19 +482,26 @@ const WORDS = ["بلب","كب","كا","بكت","تكث","با","نا","تا","ي
 // R red, G green, B blue, K black.
 const INK = { R: "#e8321f", G: "#47a23a", B: "#29a3e3", K: "#1d1d1b" }, INKS = Object.values(INK);
 const BOOK_INKS = Object.fromEntries("بلب GRG,كب RG,كا RK,بكت BRB,تكث BRB,با GK,نا RK,تا BK,يا KR,ثا BK,بس BG,يس BG,نس RG,تس BG,ثس BG,ثج BR,تح BG,نخ RK,يح KG,بج GR,يم KR,بم GR,نم GR,تم GR,ثم BR,بى RK,يى RK,نى RK,تى BK,ثى BK,نبل RGR,تنل KBR,بيل GKR,يتل KGR,ثثل KBR,نبن RGR,بنن GBR,تين BKR,يتن KBR,ثثن BGR,حث GB,خب KG,جت RB,تحت BGB,يجب BRG,بخت GKB,بة GB,يه KR,ته BR,نة RB,يهب KRG,بها GRK,بهم GBR,جد RG,خذ RB,جر RG,خز KG,ير KB,تز KG,سل GR,شل BR,صب BG,طب BG,ضا GK,ظا GK,عز RG,غر KB,صع BR,ضغ GK,بعد GRG,تغذ BKB,قو BR,فو BR,فقل KBR,قفل BGR,يف KG,حم GR,لم GR,تمت GRB".split(",").map(e => e.split(" ")));
-const inkOf = (w, i) => BOOK_INKS[w] ? INK[BOOK_INKS[w][i]] : INKS[i % INKS.length];
+// Lesson 2 as printed, page by page (7, 8, 9), row by row from the right: each cell is "text inks".
+const BOOK_PAGES = [
+  ["ا K|لا RK|لا RK|با GK|لا RK|ل R", "لا RK|ح G|لا RK|بلب GRG|ک R|ك R", "كب RG|كب RG|كا RK|كا RK|بكت BRB|تكث BRB", "ب G|ت B|ث B|ن R|ى K|با GK", "نا RK|تا BK|يا KR|ثا BK|بس BG|يس BG", "نس RG|تس BG|ثس BG|ثج BR|تح BG|نخ RK", "يح KG|بج GR|يم KR|بم GR|نم GR|تم GR", "ثم BR|بى RK|يى RK|نى RK|تى BK|ثى BK", "نبل RGR|تنل KBR|بيل GKR|يتل KGR|ثثل KBR|نبن RGR"],
+  ["بنن GBR|تين BKR|يتن KBR|ثثن BGR|ج R|ح G", "خ K|حث GB|خب KG|جت RB|تحت BGB|يجب BRG", "بخت GKB|ة B|ه R|بة GB|يه KR|ته BR", "نة RB|هـ RR|يهب KRG|بها GRK|بهم GBR|د G", "ذ B|جد RG|خذ RB|ر B|ز G|جر RG", "خز KG|ر B|ز G|ير KB|تز KG|س G", "ش B|سل GR|شل BR|ص B|ض G|ط B", "ظ G|صب BG|طب BG|ضا GK|ظا GK|ع R", "غ K|ء K|عز RG|غر KB|صع BR|ضغ GK", "بعد GRG|تغذ BKB|أ B|ؤ B|ئ B|ف G"],
+  ["ق B|و R|قو BR|فو BR|فقل KBR", "قفل BGR|يف KG|م R|ـم RR|حم GR", "لم GR|تم BR|تمت GRB"]
+];
+const bookCell = c => { const [t, k] = c.split(" "); return coloured(t, k); };
+const inkOf = (w, i, k = BOOK_INKS[w]) => k ? INK[k[i]] : INKS[i % INKS.length];
 // Amiri matches the book best, except for these words, which the book writes flat as Scheherazade does.
 const FLAT = new Set(["يم","يهب","بها","بهم","تمت"]);
 const wf = w => FLAT.has(w) ? ` style="font-family:'Scheherazade New', Amiri, serif"` : "";
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
 const inked = w => [...w].map((ch, i) => `<span style="color:${inkOf(w, i)}">${showLetter(ch)}</span>`).join(" ");
-function coloured(w) {
+function coloured(w, k) {
   const c = [...w];
   return c.map((ch, i) => {
     const before = i > 0 && joinsNext(c[i - 1]) && joinsPrev(ch) ? "‍" : "";
     const after = i < c.length - 1 && joinsNext(ch) && joinsPrev(c[i + 1]) ? "‍" : "";
-    return `<span style="color:${inkOf(w, i)}">${before}${ch}${after}</span>`;
+    return `<span style="color:${inkOf(w, i, k)}">${before}${ch}${after}</span>`;
   }).join("");
 }
 const WORD_CARDS = WORDS.map(w => ({ w, mini: `<div class="mini ar"><span class="w" lang="ar"${wf(w)}>${coloured(w)}</span></div>` }));
@@ -1073,7 +1081,8 @@ function openPage(n) {
       ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
         `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
       <h3>Les lettres dans les mots</h3>
-      <div class="words ar">${WORDS.map(w => `<div lang="ar"${wf(w)}>${coloured(w)}</div>`).join("")}</div>`;
+      ${BOOK_PAGES.map((pg, i) => `<div class="bookpage"><span class="pn">Page ${7 + i}</span><div class="words ar">${pg.map(r => `<div style="grid-template-columns:repeat(${r.split("|").length}, minmax(0, 1fr))">${r.split("|").map(c =>
+        `<span lang="ar"${wf(c.split(" ")[0])}>${bookCell(c)}</span>`).join("")}</div>`).join("")}</div></div>`).join("")}`;
   $("page").hidden = false;
   zoom(true);
 }
