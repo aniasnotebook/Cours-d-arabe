@@ -147,7 +147,6 @@
   .primary { min-height:56px; border-radius:16px; border:0; background:var(--accent); color:var(--on-accent); font-size:18px; font-weight:700; }
   .primary:disabled { opacity:.4; cursor:default; }
   .primary { display:flex; align-items:center; justify-content:center; gap:8px; } .primary .ic svg { width:22px; height:22px; display:block; }
-  .qrow { display:grid; grid-template-columns:1fr 2fr; gap:10px; } .qrow .secondary { min-height:56px; display:flex; align-items:center; justify-content:center; gap:6px; color:var(--ink); } .qrow .ic svg { width:20px; height:20px; display:block; }
   .secondary { min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-weight:600; }
   .formrow { display:flex; gap:6px; direction:rtl; font-size:26px; }
   .formrow span { min-width:50px; padding:0 4px; border-radius:8px; border:1px solid #e2dccf; text-align:center; color:#1d1d1b; }
@@ -182,6 +181,8 @@
   .wcard .edge { position:absolute; top:50%; width:4px; height:56px; margin-top:-28px; border-radius:2px; background:#e2dccf; pointer-events:none; }
   .wcard .say { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); white-space:nowrap; padding:6px 12px; border-radius:999px; font-size:14px; font-weight:700; pointer-events:none; }
   .wcard .say { background:#f3efe6; color:#6b665c; font-weight:600; }
+  .wcard .erase { position:absolute; top:10px; left:10px; z-index:2; width:40px; height:40px; border-radius:50%; border:1px solid #e2dccf; background:#fff; color:#6b665c; display:grid; place-items:center; padding:0; }
+  .wcard .erase svg { width:18px; height:18px; }
   .act.n { color:var(--ink); } .act.n span { border-color:var(--line); background:var(--surface); }
   .act.go2 { color:var(--ok); } .act.go2 span { border-color:var(--accent); background:var(--accent); color:var(--on-accent); }
   .act:disabled.n, .act:disabled.go2 { opacity:1; color:var(--faint); } .act:disabled span { border-color:var(--line); background:var(--line); color:var(--faint); }
@@ -659,7 +660,7 @@ function renderQuiz() {
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="letter" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <div class="q2">Où dans le mot ?</div>
       <div class="opts c3">${["ini","med","fin"].map(p => `<button class="opt" data-k="pos" data-v="${p}">${POS[p][0].toUpperCase() + POS[p].slice(1)}</button>`).join("")}</div>
-      <div class="qrow"><button class="secondary" id="qSkip"><span class="ic">${ICONS.skip}</span>Passer</button><button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button></div>`;
+      <div class="actions" id="qActions"></div>`;
   } else {
     const letters = [...new Set([...it.w].map(letterOf))];
     it.choices = it.choices || choicesFor(letters, Math.max(8, letters.length + 4));
@@ -667,10 +668,22 @@ function renderQuiz() {
     $("below").innerHTML = `<div class="q2">Tape chaque lettre présente dans le mot</div>
       <div class="opts c4">${it.choices.map(c => `<button class="opt ar" lang="ar" data-k="multi" data-v="${c}">${showLetter(c)}</button>`).join("")}</div>
       <p class="hint" style="text-align:left">Une lettre présente deux fois se tape une seule fois.</p>
-      <div class="qrow"><button class="secondary" id="qSkip"><span class="ic">${ICONS.skip}</span>Passer</button><button class="primary" id="check" disabled><span class="ic">${ICONS.verify}</span>Vérifier</button></div>`;
+      <div class="actions" id="qActions"></div>`;
     pick.multi = new Set();
   }
   $("below").querySelectorAll(".opt").forEach(b => b.onclick = () => choose(b));
+  qButtons();
+}
+// The same row as in every exercise: skip or to review on the left, back in the middle, go on the right.
+function qButtons() {
+  $("qActions").innerHTML = checked
+    ? `<span></span><button class="act u" id="qBack"><span>${ICONS.undo}</span>Retour</button>
+       <button class="act go2" id="check"><span>${ICONS.next}</span>${answers.length >= deck.length ? "Résultat" : "Suivante"}</button>`
+    : `<button class="act n" id="qSkip"><span>${ICONS.skip}</span>Passer</button>
+       <button class="act u" id="qBack" ${answers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
+       <button class="act go2" id="check" disabled><span>${ICONS.verify}</span>Vérifier</button>`;
+  $("qBack").onclick = () => { clearTimeout(quizAuto); undo(); };
+  if (checked) return;
   $("check").onclick = check;
   // Skipping counts the card as to review, and it leaves to the left.
   $("qSkip").onclick = () => { if (checked) return; checked = true; answers.push({ item: deck[pos], ok: false }); fly($("card"), false, render); };
@@ -720,9 +733,8 @@ function check() {
   $("nGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("nBad").textContent = `${bad} à revoir`;
   $("barFill").style.width = `${answers.length / deck.length * 100}%`;
+  qButtons();
   const btn = $("check");
-  $("qSkip").hidden = true; btn.parentNode.style.gridTemplateColumns = "1fr";
-  btn.textContent = answers.length >= deck.length ? "Voir le résultat" : "Suivant";
   // The next card comes by itself after time to read the correction.
   const next = () => { clearTimeout(quizAuto); if ($("play").hidden || pos !== answers.length - 1) return; btn.onclick = null; fly($("card"), ok, render); };
   btn.onclick = next;
@@ -783,6 +795,7 @@ function wRender() {
   $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("wBad").textContent = `${wAnswers.length - good} à revoir`;
   $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}<span class="line"></span>
+    <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span><span class="edge" style="left:6px"></span><span class="edge" style="right:6px"></span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
   $("wHint").innerHTML = wKind === "trace"
@@ -791,6 +804,7 @@ function wRender() {
   wButtons();
   wCanvas();
   wNameSwitch();
+  $("wErase").onclick = wErase;
 }
 function wNameSwitch() {
   const b = $("wName"); if (!b) return;
@@ -800,25 +814,28 @@ function wNameSwitch() {
 function wButtons() {
   const a = $("wActions");
   if (wKind === "trace") {
-    a.innerHTML = `<button class="act n" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.back}</span>Avant</button>
-      <button class="act u" id="wErase"><span>${ICONS.erase}</span>Effacer</button>
+    a.innerHTML = `<span></span>
+      <button class="act u" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wNext"><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
     $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = () => wGo(1);
   } else if (!wShown) {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
-      <button class="act u" id="wErase"><span>${ICONS.erase}</span>Effacer</button>
+      <button class="act u" id="wBack" ${wAnswers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="wCheck" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.verify}</span>Vérifier</button>`;
+    $("wBack").onclick = wUndo;
     $("wSkip").onclick = () => wAnswer(false);
     $("wCheck").onclick = wReveal;
   } else {
     a.innerHTML = `<button class="act m" id="wMiss"><span>${ICONS.x}</span>À revoir</button>
-      <button class="act u" id="wBack"><span>${ICONS.undo}</span>Retour</button>
+      <button class="act u" id="wBack" ${wAnswers.length ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act k" id="wOk"><span>${ICONS.check}</span>C’était juste</button>`;
     $("wMiss").onclick = () => wFly(false); $("wOk").onclick = () => wFly(true);
-    $("wBack").onclick = wHide;
+    $("wBack").onclick = wUndo;
   }
-  const e = $("wErase"); if (e) e.onclick = () => { clearTimeout(wAuto); wStrokes = []; wPaint(); wButtons(); };
 }
+// Effacer, on the card: clears the drawing (and hides the answer, to draw again).
+function wErase() { clearTimeout(wAuto); wStrokes = []; if (wShown) wHide(); wPaint(); wButtons(); }
+function wUndo() { if (!wAnswers.length) return; wAnswers.pop(); wRender(); }
 
 // The book's letter in green over the drawing.
 function wReveal() {
