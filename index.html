@@ -816,7 +816,7 @@ function wButtons() {
   if (wKind === "trace") {
     a.innerHTML = `<button class="act n" id="wSkip"><span>${ICONS.skip}</span>Passer</button>
       <button class="act u" id="wPrev" ${wPos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
-      <button class="act go2" id="wNext"><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
+      <button class="act go2" id="wNext" ${wStrokes.length ? "" : "disabled"}><span>${ICONS.next}</span>${wPos === wDeck.length - 1 ? "Fini" : "Suivante"}</button>`;
     $("wPrev").onclick = () => wGo(-1); $("wNext").onclick = wTraceNext;
     $("wSkip").onclick = () => { clearTimeout(wAuto); fly($("wCard"), true, () => wGo(1)); };
   } else if (!wShown) {
@@ -897,7 +897,7 @@ function wCanvas() {
   cv.onpointermove = e => { if (cur) { cur.push(at(e)); wPaint(); } };
   cv.onpointerup = cv.onpointercancel = e => {
     if (edge) { const dx = at(e)[0] - edge.x0; edge = null; if (Math.abs(dx) > 60) wGo(dx < 0 ? 1 : -1); return; }
-    if (cur && wKind === "test" && wStrokes.length === 1) wButtons();
+    if (cur && wStrokes.length === 1) wButtons();   // Vérifier / Suivante wake up with the first line
     // Tracing moves on by itself once the finger has rested a moment (time to add the dots first).
     // A tap or a dot alone does not count: the countdown starts once real lines are written.
     const ink = wStrokes.reduce((t, st) => t + st.slice(1).reduce((u, p, i) => u + Math.hypot(p[0] - st[i][0], p[1] - st[i][1]), 0), 0);
