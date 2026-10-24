@@ -764,7 +764,7 @@ function wRender() {
     ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span><span class="edge" style="left:6px"></span><span class="edge" style="right:6px"></span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
   $("wHint").innerHTML = wKind === "trace"
-    ? `Repasse sur ${wWords() ? "le mot" : "la lettre"} avec ton doigt<br>Pour changer, glisse depuis le bord de la carte`
+    ? `Repasse sur ${wWords() ? "le mot" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
     : wWords() ? "Écris ces lettres attachées, en un mot" : "Dessine la lettre de mémoire";
   wButtons();
   wCanvas();
@@ -795,7 +795,7 @@ function wButtons() {
     $("wMiss").onclick = () => wFly(false); $("wOk").onclick = () => wFly(true);
     $("wBack").onclick = wHide;
   }
-  const e = $("wErase"); if (e) e.onclick = () => { wStrokes = []; wPaint(); wButtons(); };
+  const e = $("wErase"); if (e) e.onclick = () => { clearTimeout(wAuto); wStrokes = []; wPaint(); wButtons(); };
 }
 
 // The book's letter in green over the drawing.
@@ -833,7 +833,14 @@ function wFly(ok) {
   setTimeout(() => wAnswer(ok), 300);
 }
 function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
-function wGo(d) { const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
+let wAuto = null;
+function wTraceNext() {
+  const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace") return;
+  c.style.transition = "transform .25s ease, opacity .25s ease";
+  c.style.transform = "translateX(-120%) rotate(-8deg)"; c.style.opacity = 0;
+  setTimeout(() => wGo(1), 260);
+}
+function wGo(d) { clearTimeout(wAuto); const n = wPos + d; if (n < 0) return; wPos = n; wRender(); }
 
 // Drawing with a finger, a pen or a mouse. In tracing, a swipe that starts at the card's edge changes letter.
 function wCanvas() {
@@ -842,6 +849,7 @@ function wCanvas() {
   let cur = null, edge = null;
   const at = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
   cv.onpointerdown = e => {
+    clearTimeout(wAuto);
     if (wShown) return;
     cv.setPointerCapture(e.pointerId);
     const [x, y] = at(e);
@@ -852,6 +860,8 @@ function wCanvas() {
   cv.onpointerup = cv.onpointercancel = e => {
     if (edge) { const dx = at(e)[0] - edge.x0; edge = null; if (Math.abs(dx) > 60) wGo(dx < 0 ? 1 : -1); return; }
     if (cur && wKind === "test" && wStrokes.length === 1) wButtons();
+    // Tracing moves on by itself once the finger has rested a moment (time to add the dots first).
+    if (cur && wKind === "trace") { clearTimeout(wAuto); wAuto = setTimeout(wTraceNext, 1500); }
     cur = null;
   };
   wPaint();
