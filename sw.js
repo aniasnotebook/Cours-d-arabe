@@ -1,5 +1,5 @@
 // Works offline once opened: the page is fetched fresh when there is a connection, the copy is used otherwise.
-const CACHE = "cours-arabe-v12";
+const CACHE = "cours-arabe-v13";
 const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
