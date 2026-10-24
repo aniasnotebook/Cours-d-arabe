@@ -501,7 +501,7 @@ const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}$
 const inkOf = (w, i, k) => k ? INK[k[i]] : INKS[i % INKS.length];
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
-const inked = (w, k) => [...w].map((ch, i) => ch === "ـ" ? "" : `<span style="color:${inkOf(w, i, k)}">${l1Show(ch, w)}</span>`).filter(Boolean).join(" ");
+const inked = (w, k, sep = " ") => [...w].map((ch, i) => ch === "ـ" ? "" : `<span style="color:${inkOf(w, i, k)}">${l1Show(ch, w)}</span>`).filter(Boolean).join(sep);
 const wordShow = it => bookImg(it, true);   // the word as asked: the book's writing in plain black
 const wordInk = it => bookImg(it);          // the answer: the book's writing in its colours
 // Lesson 2 practice: all 127 cells of pages 7 to 9, in the book's order, repeats and single letters included (the calligraphy differs).
@@ -837,7 +837,7 @@ let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes
 const wWords = () => mode === "wwords";
 const wLesson2 = () => mode === "wwords" || mode === "wforms";
 const wModel = it => wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
-  : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="font-size:min(64px, 15vw, 9vh); word-spacing:14px">${inked(it.w, it.k)}</span>`
+  : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:baseline; gap:0.35em; white-space:nowrap; font-size:min(${lettersOf(it.w).length > 3 ? 46 : 60}px, 14vw, 9vh)">${inked(it.w, it.k, "")}</span>`
   : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh)">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
