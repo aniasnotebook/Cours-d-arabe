@@ -192,6 +192,8 @@
   .wcard .prompt.swap .ar { line-height:1.3; }
   .wcard .prompt .tip { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; background:#f3efe6; color:#6b665c; font:600 12px/1.4 system-ui, sans-serif; }
   /* Writing the forms: the letter alone, and under it in red the place to write it in. */
+  .ya2 { display:inline-flex; align-items:baseline; gap:0.06em; white-space:nowrap; word-spacing:normal; direction:rtl; }
+  .ya2 i { font-style:normal; font-size:0.55em; opacity:.45; align-self:center; }
   .wcard .prompt .way { display:block; width:max-content; margin:4px auto 0; padding:3px 10px; border-radius:99px; background:#f3efe6; color:#6b665c; font:600 13px/1.3 system-ui, sans-serif; word-spacing:normal; direction:ltr; }
   .wcard .ways { position:absolute; left:0; right:0; bottom:54px; display:flex; justify-content:center; gap:6px; direction:rtl; pointer-events:none; }
   .wcard .ways span { width:46px; height:40px; border-radius:10px; display:grid; place-items:center; border:1px solid #e2dccf; opacity:.55; background:#fff; }
@@ -521,7 +523,7 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 // way of writing to a letter they know. A hamza on alif, waw or ya is the hamza (ء); the Persian kaf is kaf; ta marbuta
 // is read ta (ت). A ya is one chip "ى / ے" (either ya of lesson 1), except in the one cell with both ya (يى), where the
 // dotted one is ے and the round one is ى.
-const YA = "Y", YA_LABEL = `ى / <span class="yb">ے</span>`;
+const YA = "Y", YA_LABEL = `<span class="ya2">ى<i>/</i><span class="yb">ے</span></span>`;   // one unit: the two ya with a thin slash
 const L1 = (c, w = "") => /ي/.test(w) && /ى/.test(w) ? ({ "ي": "ے", "ى": "ى" })[c] || L1(c)
   : ({ "ک": "ك", "أ": "ء", "إ": "ء", "ؤ": "ء", "ئ": "ء", "ة": "ت", "ي": YA, "ى": YA })[c] || c;
 const l1Show = (c, w) => chipLabel(L1(c, w));
