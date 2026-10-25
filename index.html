@@ -679,13 +679,13 @@ function fly(c, right, then) {
   then = () => { if (c.isConnected && !c.closest(".screen").hidden) done(); };
   const s = right ? 1 : -1, still = !c.style.transform;
   const away = () => {
-    c.style.transition = "transform .38s cubic-bezier(.4,0,.7,1), opacity .38s ease-in";
+    c.style.transition = "transform .26s cubic-bezier(.4,0,.7,1), opacity .26s ease-in";
     c.style.transform = `translateX(${s * 150}%) rotate(${s * 22}deg)`; c.style.opacity = 0;
-    setTimeout(then, 400);
+    setTimeout(then, 270);
   };
   if (!still) return requestAnimationFrame(away);
-  c.style.transition = "transform .18s ease-out";
-  requestAnimationFrame(() => { c.style.transform = `translateX(${s * 16}%) rotate(${s * 5}deg)`; setTimeout(away, 180); });
+  c.style.transition = "transform .1s ease-out";
+  requestAnimationFrame(() => { c.style.transform = `translateX(${s * 16}%) rotate(${s * 5}deg)`; setTimeout(away, 100); });
 }
 
 // A row just rebuilt under the finger ignores taps for a moment: a double tap must not hit the new button.
@@ -1072,10 +1072,10 @@ function wCanvas() {
   cv.onpointerup = cv.onpointercancel = e => {
     if (edge) { const dx = at(e)[0] - edge.x0; edge = null; if (Math.abs(dx) > 60) wGo(dx < 0 ? 1 : -1); return; }
     if (cur && wStrokes.length === 1) wButtons();   // Vérifier / Suivante wake up with the first line
-    // Tracing moves on by itself once the finger has rested a moment (time to add the dots first).
+    // Tracing moves on by itself once the finger has rested a moment (time to add the dots first; longer between linked letters).
     // A tap or a dot alone does not count: the countdown starts once real lines are written.
     const ink = wStrokes.reduce((t, st) => t + st.slice(1).reduce((u, p, i) => u + Math.hypot(p[0] - st[i][0], p[1] - st[i][1]), 0), 0);
-    if (cur && wKind === "trace" && ink > 60) { clearTimeout(wAuto); wAuto = setTimeout(wTraceNext, 1500); }
+    if (cur && wKind === "trace" && ink > 60) { clearTimeout(wAuto); wAuto = setTimeout(wTraceNext, wWords() ? 2500 : 1500); }
     cur = null;
   };
   wPaint();
@@ -1209,7 +1209,8 @@ $("ptr").innerHTML = MARK;
 }
 // A reload comes back to the same place: the same screen, and in a round the same cards and answers so far.
 const pool = m => m === "letters" || m === "wletters" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : WORD_CARDS;
-function reloadHere() {
+// Where the user is, kept for a reload: the app's own, or the browser's (pull to refresh).
+function savePlace() {
   const screen = ["home","l1","l2","c1","cw","play","write","stats"].find(id => !$(id).hidden);
   if (screen) try {
     const P = pool(mode), ix = a => a.map(x => P.indexOf(x));
@@ -1217,8 +1218,9 @@ function reloadHere() {
       round: writing() ? { src: ix(wSource), deck: ix(wDeck), ans: wAnswers.map(a => [P.indexOf(a.item), a.ok, a.skip]), pos: wPos }
         : { src: ix(source), deck: ix(deck), ans: answers.map(a => [P.indexOf(a.item), a.ok, a.famOk, a.skip]) } }));
   } catch {}
-  location.reload();
 }
+function reloadHere() { savePlace(); location.reload(); }
+addEventListener("pagehide", savePlace);
 function backToPlace() {
   let p; try { p = JSON.parse(sessionStorage.getItem("place")); sessionStorage.removeItem("place"); } catch {}
   if (!p) return false;
@@ -1309,7 +1311,7 @@ function bindRand(box, lesson) {
 bindRand(document.querySelector('.randset[data-lesson="1"]'), 1);
 // Each choice screen goes from the easier way (left) to the harder one (right), with its level: one green bar, two orange
 // bars, or three red bars for the hardest of all (Lier les lettres · Me tester).
-const setLevel = (b, n) => { b.querySelector(".lvl")?.remove(); b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${n}"><span>${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>Niveau ${n}</span>`); };
+function setLevel(b, n) { b.querySelector(".lvl")?.remove(); b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${n}"><span>${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>Niveau ${n}</span>`); }
 document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) => setLevel(b, i + 1)));
 document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
 $("go1").onclick = () => show("c1");
