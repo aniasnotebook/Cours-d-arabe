@@ -492,6 +492,8 @@ const showLetter = c => endForm(letterOf(c));
 const formOf = (g, p) => p === "iso" ? endForm(g) : p === "ini" ? g + T : p === "med" ? T + g + T : T + endForm(g);
 const FORM_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","و","ه","ي"];
 const positions = g => joinsNext(g) ? ["iso","ini","med","fin"] : ["iso","fin"];
+// The places where a form looks the same: a letter that never joins the next one ends the same in the middle and at the end.
+const samePlaces = (g, p) => !joinsNext(g) && p !== "ini" ? ["med","fin"] : [p];
 // Letters that look alike, used as wrong choices so the question is not too easy.
 const LOOKALIKE = [["ب","ت","ث","ن","ي"],["ج","ح","خ"],["د","ذ"],["ر","ز"],["س","ش"],["ص","ض"],["ط","ظ"],["ع","غ"],["ف","ق"],["ك","ل"],["م","ه","و","ا"]];
 
@@ -760,9 +762,10 @@ function renderQuiz() {
   const it = deck[pos], chip = (k, v, label, ar) => `<button class="chip${ar ? " ar" : ""}" data-k="${k}" data-v="${v}"${ar ? ' lang="ar"' : ""}>${ar ? "" : ICONS.plus}${label}</button>`;
   if (mode === "forms") {
     it.choices = it.choices || choicesFor([it.g], 4);
+    pick.pos = new Set();
     $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="fhead"><span class="big ar" lang="ar">${formOf(it.g, it.p)}</span></span></span>
       <div class="grp"><span class="q">Quelle lettre ?</span><span class="chips letters">${it.choices.map(c => chip("letter", c, showLetter(c), true)).join("")}</span></div>
-      <div class="grp"><span class="q">Où dans le mot ?</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
+      <div class="grp"><span class="q">Où dans le mot ? Tape chaque place possible</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
   } else {
     const letters = [...new Set(lettersOf(it.w).map(c => L1(c, it.w)))];
     it.choices = it.choices || lessonChoices(letters, Math.max(8, letters.length + 4));
@@ -795,9 +798,10 @@ function qButtons() {
 function choose(b) {
   if (checked) return;
   const k = b.dataset.k, v = b.dataset.v;
-  if (k === "multi") { pick.multi.has(v) ? pick.multi.delete(v) : pick.multi.add(v); b.classList.toggle("on"); }
+  if (k === "multi" || k === "pos") { pick[k].has(v) ? pick[k].delete(v) : pick[k].add(v); b.classList.toggle("on");
+    if (k === "pos") b.innerHTML = (b.classList.contains("on") ? ICONS.check : ICONS.plus) + POS[v]; }
   else { pick[k] = v; $("card").querySelectorAll(`.chip[data-k="${k}"]`).forEach(o => { o.classList.toggle("on", o === b); if (k === "pos") o.innerHTML = (o === b ? ICONS.check : ICONS.plus) + POS[o.dataset.v]; }); }
-  $("check").disabled = mode === "forms" ? !(pick.letter && pick.pos) : !pick.multi.size;
+  $("check").disabled = mode === "forms" ? !(pick.letter && pick.pos.size) : !pick.multi.size;
 }
 
 function check() {
@@ -807,15 +811,16 @@ function check() {
   const ans = card.querySelector(".ans"), chips = card.querySelectorAll(".chip");
   chips.forEach(o => o.disabled = true);
   if (mode === "forms") {
-    ok = pick.letter === it.g && pick.pos === it.p;
-    ans.insertAdjacentHTML("beforeend", `<span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`);
+    const places = samePlaces(it.g, it.p);
+    ok = pick.letter === it.g && pick.pos.size === places.length && places.every(q => pick.pos.has(q));
+    ans.insertAdjacentHTML("beforeend", `<span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${q === it.p ? places.map(x => POS[x]).join(" / ") : POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`);
     // The book's ways of writing this form, in the book's order.
     const vs = formVersions(it);
     if (vs.length) ans.querySelector(".fhead").insertAdjacentHTML("beforeend", `<span class="fbook"><small>Dans le livre</small><span class="fstack">${vs.map(v => `<span>${formImg(v)}</span>`).join("")}</span></span>`);
     chips.forEach(o => {
-      const right = o.dataset.k === "letter" ? o.dataset.v === it.g : o.dataset.v === it.p, chosen = o.classList.contains("on");
-      o.className = "chip" + (o.dataset.k === "letter" ? " ar" : "") + (right ? " right" : chosen ? " wrong" : " off");
-      if (o.dataset.k === "pos") o.innerHTML = (right ? ICONS.check : "") + POS[o.dataset.v];
+      const right = o.dataset.k === "letter" ? o.dataset.v === it.g : places.includes(o.dataset.v), chosen = o.classList.contains("on");
+      o.className = "chip" + (o.dataset.k === "letter" ? " ar" : "") + (right && chosen ? " right" : right && o.dataset.k === "pos" ? " missed" : right ? " right" : chosen ? " wrong" : " off");
+      if (o.dataset.k === "pos") o.innerHTML = (right && chosen ? ICONS.check : "") + POS[o.dataset.v];
     });
     card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
   } else {
@@ -843,12 +848,15 @@ function check() {
   $("barFill").style.width = `${answers.length / deck.length * 100}%`;
   qButtons();
   const btn = $("check");
-  // The next card comes by itself after time to read the correction.
+  // The next card comes by itself after time to read the correction; a finger resting on the card holds it until lifted.
+  let held = false, due = false;
   const next = () => { clearTimeout(quizAuto); if ($("play").hidden || pos !== answers.length - 1) return;
     if (!$("page").hidden) { quizAuto = setTimeout(next, 1000); return; }   // the book page is open: wait
     btn.onclick = null; fly($("card"), ok, render); };
   btn.onclick = next;
-  quizAuto = setTimeout(next, 4000);
+  card.onpointerdown = () => { held = true; };
+  card.onpointerup = card.onpointercancel = card.onpointerleave = () => { if (!held) return; held = false; if (due) next(); };
+  quizAuto = setTimeout(() => held ? due = true : next(), 4000);
 }
 
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
