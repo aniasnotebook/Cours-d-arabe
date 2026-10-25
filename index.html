@@ -161,6 +161,7 @@
   .card.quiz.done .grp .q { display:none; }
   .card.quiz .fversions span { width:38px; height:32px; border-radius:8px; display:grid; place-items:center; background:#fff; border:1px solid #e2dccf; }
   .card.quiz .fversions span.on { border:2px solid #2f7d4f; }
+  .card.quiz .fversions span.font { font-size:20px; line-height:1; color:#1d1d1b; }
   .card.quiz .fversions img { max-height:24px; max-width:32px; }
   .card.quiz .formrow span { border:0; background:none; } .card.quiz .formrow span.on, .card.quiz .formrow span.on small { color:#2f7d4f; font-weight:800; }
   .lessonlink { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; text-decoration:none; }
@@ -584,7 +585,7 @@ function start(cards) {
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
   const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
   deck = random ? shuffle(source) : source.slice();
-  deck.forEach(i => { delete i.choices; const vs = mode === "forms" ? formVersions(i) : []; i.bv = vs.length ? vs[Math.floor(Math.random() * vs.length)] : null; });
+  deck.forEach(i => { delete i.choices; const vs = mode === "forms" ? formVersions(i) : []; const all = [null, ...vs]; i.bv = all[Math.floor(Math.random() * all.length)]; });   // null = the font's drawing, one more version
   answers = [];
   openRound();
 }
@@ -763,7 +764,7 @@ function renderQuiz() {
   const it = deck[pos], chip = (k, v, label, ar) => `<button class="chip${ar ? " ar" : ""}" data-k="${k}" data-v="${v}"${ar ? ' lang="ar"' : ""}>${ar ? "" : ICONS.plus}${label}</button>`;
   if (mode === "forms") {
     it.choices = it.choices || choicesFor([it.g], 4);
-    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big ar" lang="ar">${it.bv ? formImg(it.bv) : formOf(it.g, it.p)}</span>${it.bv ? `<span class="bookof">Écriture du livre · page ${bookPage({ img: it.bv[0] })}</span>` : ""}</span>
+    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big ar" lang="ar">${it.bv ? formImg(it.bv) : formOf(it.g, it.p)}</span><span class="bookof">${it.bv ? `Écriture du livre · page ${bookPage({ img: it.bv[0] })}` : "Écriture de l’app"}</span></span>
       <div class="grp"><span class="q">Quelle lettre ?</span><span class="chips letters">${it.choices.map(c => chip("letter", c, showLetter(c), true)).join("")}</span></div>
       <div class="grp"><span class="q">Où dans le mot ?</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
   } else {
@@ -815,7 +816,7 @@ function check() {
     // The book's versions of this form, in the book's order, the one shown ringed.
     const vs = formVersions(it);
     if (vs.length) card.classList.add("done");
-    if (vs.length) ans.insertAdjacentHTML("beforeend", `<span class="fversions">${vs.map(v => `<span class="${v === it.bv ? "on" : ""}">${formImg(v)}</span>`).join("")}</span>`);
+    if (vs.length) ans.insertAdjacentHTML("beforeend", `<span class="fversions"><span class="font ar${it.bv ? "" : " on"}" lang="ar">${formOf(it.g, it.p)}</span>${vs.map(v => `<span class="${v === it.bv ? "on" : ""}">${formImg(v)}</span>`).join("")}</span>`);
     chips.forEach(o => {
       const right = o.dataset.k === "letter" ? o.dataset.v === it.g : o.dataset.v === it.p, chosen = o.classList.contains("on");
       o.className = "chip" + (o.dataset.k === "letter" ? " ar" : "") + (right ? " right" : chosen ? " wrong" : " off");
