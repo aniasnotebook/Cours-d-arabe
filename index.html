@@ -980,17 +980,20 @@ function wUndo() { if (!wAnswers.length) return; wAnswers.pop(); wRender(); }
 // Lier les lettres: when the book writes the same letters several ways (لا five times, كا twice…), the card says which
 // one is asked (« Façon 2 sur 5 · page 7 »), and the correction shows all of them with the right one ringed.
 const bookPage = it => it.img < 54 ? 7 : it.img < 114 ? 8 : 9;
-const waysOf = it => WORD_CARDS.filter(c => lettersOf(c.w).map(x => L1(x, c.w)).join("") === lettersOf(it.w).map(x => L1(x, it.w)).join(""));
+// Cells printed exactly alike count as one way (the two با, two of the لا).
+const SAME = { 23: 3, 8: 4 };
+const wayOf = it => WORD_CARDS[SAME[it.img] ?? it.img];
+const waysOf = it => WORD_CARDS.filter(c => c.w === it.w && SAME[c.img] === undefined);
 function wayBadge(it) {
   const ways = waysOf(it); if (ways.length < 2) return "";
-  return `<span class="way">Façon ${ways.indexOf(it) + 1} sur ${ways.length} · page ${bookPage(it)}</span>`;
+  return `<span class="way">Façon ${ways.indexOf(wayOf(it)) + 1} sur ${ways.length} · page ${bookPage(it)}</span>`;
 }
 function wReveal() {
   wShown = true;
   $("wCard").classList.add("shown");
   if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
   const ways = wWords() ? waysOf(wDeck[wPos]) : [];
-  if (ways.length > 1) $("wCard").insertAdjacentHTML("beforeend", `<div class="ways" id="wWays">${ways.map(c => `<span class="${c === wDeck[wPos] ? "on" : ""}">${bookImg(c)}</span>`).join("")}</div>`);
+  if (ways.length > 1) $("wCard").insertAdjacentHTML("beforeend", `<div class="ways" id="wWays">${ways.map(c => `<span class="${c === wayOf(wDeck[wPos]) ? "on" : ""}">${bookImg(c)}</span>`).join("")}</div>`);
   const c = $("wCard");
   c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
