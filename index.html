@@ -153,16 +153,13 @@
   .card.quiz .note { font-size:12px; color:#6b665c; }
   @media (max-height:720px) { .card.quiz .big { font-size:12vh; } .card.quiz .big.word { font-size:11vh; } .card.quiz .chip.ar { height:42px; min-width:48px; font-size:24px; } .card.quiz .chip { height:36px; } }
   .card.quiz .ans .formrow { margin-top:.4em; }   /* room for a tall final tail (م ج ح ع غ) above the forms */
-  .card.quiz .big img.bookform { height:1em; width:auto; vertical-align:middle; }
-  .card.quiz .bookof { font:600 12px/1.3 system-ui, sans-serif; color:#6b665c; background:#f3efe6; border-radius:99px; padding:2px 10px; margin-top:-4px; }
-  .card.quiz .fversions { display:flex; gap:5px; justify-content:safe center; flex-wrap:nowrap; overflow-x:auto; max-width:100%; scrollbar-width:none; }
-  /* Correction of a book form: the big letter and the questions' titles shrink so the versions fit on a small phone. */
-  .card.quiz.done .big { font-size:min(110px, 26vw, 11vh); }
-  .card.quiz.done .grp .q { display:none; }
-  .card.quiz .fversions span { width:38px; height:32px; border-radius:8px; display:grid; place-items:center; background:#fff; border:1px solid #e2dccf; }
-  .card.quiz .fversions span.on { border:2px solid #2f7d4f; }
-  .card.quiz .fversions span.font { font-size:20px; line-height:1; color:#1d1d1b; }
-  .card.quiz .fversions img { max-height:24px; max-width:32px; }
+  /* Correction of a form: the book's ways of writing it, stacked on the right of the big letter. */
+  .card.quiz .fhead { display:flex; align-items:center; justify-content:center; gap:14px; direction:ltr; }
+  .card.quiz .fbook { display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .card.quiz .fbook small { font:600 11px/1.3 system-ui, sans-serif; color:#6b665c; }
+  .card.quiz .fstack { display:grid; grid-template-rows:repeat(4, 30px); grid-auto-flow:column; gap:4px; }
+  .card.quiz .fstack span { width:40px; border-radius:8px; display:grid; place-items:center; background:#fff; border:1px solid #e2dccf; }
+  .card.quiz .fstack img { max-height:22px; max-width:34px; }
   .card.quiz .formrow span { border:0; background:none; } .card.quiz .formrow span.on, .card.quiz .formrow span.on small { color:#2f7d4f; font-weight:800; }
   .lessonlink { flex:1; display:flex; align-items:center; justify-content:center; gap:8px; min-height:50px; border-radius:14px; border:1px solid var(--line); background:var(--surface); color:var(--ink); font-weight:600; text-decoration:none; }
   .lessonlink svg { width:16px; height:16px; }
@@ -468,8 +465,8 @@ const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش"
 const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
   "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
 // The same names in French letters, for writing from memory (the Arabic name holds the letter, so it would give it away).
-// A capital marks the heavy letter: ta / Ta, tha / Tha, ha / Ha.
-const FR_NAMES = ["alif","ba","ta","tha","jim","Ha","kha","dal","dhal","ra","za","sin","shin","sad","dad","Ta","Tha","ain","rain","fa",
+// A capital marks the heavy letter: ta / Ta, ha / Ha.
+const FR_NAMES = ["alif","ba","ta","tha","djim","Ha","kha","dal","dhal","ra","za","sin","shin","sad","dad","Ta","Dha","aïn","raïn","fa",
   "qaf","kaf","lam","mim","noun","waw","ha","hamza","ya","ya´"];
 // Emphatic letters: kha, sad, dad, ghayn, ta, za, qaf. Prolongation letters: alif, waw, both ya.
 const EMPH = ["خ","ص","ض","غ","ط","ظ","ق"], MADD = ["ا","و","ى","ے"];
@@ -575,17 +572,16 @@ const confetti = (burst, turn) => [0,40,80,120,160,200,240,280,320].map((a, i) =
 const PASSED = 0.8;
 
 // Les formes: the book's own writing of each form, cut out of the cells of pages 7 to 9 by its ink ("letter place":
-// [[cell, picture]]). A card whose form is in the book shows one of these, picked at random each round; the others stay
-// in the font. 57 of the 72 forms are in the book.
+// [[cell, picture]]). The card shows the font; the correction shows these beside it. 57 of the 72 forms are in the book.
 const FORM_BOOK = {"ل ini":[[1,"1_0.png"],[2,"2_2.png"],[4,"4_6.png"],[6,"6_8.png"],[8,"8_10.png"],[124,"124_175.png"]],"ا fin":[[1,"1_1.png"],[2,"2_3.png"],[3,"3_5.png"],[4,"4_7.png"],[6,"6_9.png"],[8,"8_11.png"],[14,"14_18.png"],[15,"15_20.png"],[23,"23_24.png"],[24,"24_26.png"],[25,"25_28.png"],[26,"26_30.png"],[27,"27_32.png"],[75,"75_123.png"],[99,"99_148.png"],[100,"100_150.png"]],"ب ini":[[3,"3_4.png"],[23,"23_23.png"],[28,"28_33.png"],[37,"37_51.png"],[39,"39_55.png"],[43,"43_63.png"],[50,"50_77.png"],[54,"54_87.png"],[66,"66_109.png"],[69,"69_112.png"],[75,"75_121.png"],[76,"76_124.png"]],"ل med":[[9,"9_12.png"]],"ك ini":[[12,"12_13.png"],[13,"13_15.png"],[14,"14_17.png"],[15,"15_19.png"]],"ب fin":[[12,"12_14.png"],[13,"13_16.png"],[62,"62_102.png"],[65,"65_108.png"],[74,"74_120.png"],[97,"97_144.png"],[98,"98_146.png"]],"ك med":[[16,"16_21.png"],[17,"17_22.png"]],"ن ini":[[24,"24_25.png"],[30,"30_37.png"],[35,"35_47.png"],[40,"40_57.png"],[45,"45_67.png"],[72,"72_117.png"]],"ت ini":[[25,"25_27.png"],[31,"31_39.png"],[34,"34_45.png"],[41,"41_59.png"],[46,"46_69.png"],[49,"49_74.png"],[55,"55_90.png"],[71,"71_115.png"],[88,"88_137.png"],[125,"125_177.png"],[126,"126_179.png"]],"ي ini":[[26,"26_29.png"],[29,"29_35.png"],[36,"36_49.png"],[38,"38_53.png"],[44,"44_65.png"],[51,"51_80.png"],[56,"56_93.png"],[65,"65_106.png"],[70,"70_113.png"],[74,"74_118.png"],[87,"87_135.png"],[120,"120_171.png"]],"ث ini":[[27,"27_31.png"],[32,"32_41.png"],[33,"33_43.png"],[42,"42_61.png"],[47,"47_71.png"],[52,"52_83.png"],[57,"57_96.png"]],"س fin":[[28,"28_34.png"],[29,"29_36.png"],[30,"30_38.png"],[31,"31_40.png"],[32,"32_42.png"]],"ج fin":[[33,"33_44.png"],[37,"37_52.png"]],"ح fin":[[34,"34_46.png"],[36,"36_50.png"]],"خ fin":[[35,"35_48.png"]],"م fin":[[38,"38_54.png"],[39,"39_56.png"],[40,"40_58.png"],[41,"41_60.png"],[42,"42_62.png"],[76,"76_126.png"],[123,"123_174.png"],[124,"124_176.png"],[125,"125_178.png"]],"ي fin":[[43,"43_64.png"],[44,"44_66.png"],[45,"45_68.png"],[46,"46_70.png"],[47,"47_72.png"]],"ب med":[[48,"48_73.png"],[53,"53_86.png"]],"ن med":[[49,"49_75.png"],[54,"54_88.png"]],"ل fin":[[49,"49_76.png"],[50,"50_79.png"],[51,"51_82.png"],[52,"52_85.png"],[91,"91_140.png"],[92,"92_142.png"],[118,"118_167.png"],[119,"119_170.png"]],"ي med":[[50,"50_78.png"],[55,"55_91.png"]],"ت med":[[51,"51_81.png"],[56,"56_94.png"]],"ث med":[[52,"52_84.png"],[57,"57_97.png"]],"ن fin":[[54,"54_89.png"],[55,"55_92.png"],[56,"56_95.png"],[57,"57_98.png"]],"ح ini":[[61,"61_99.png"],[123,"123_173.png"]],"ث fin":[[61,"61_100.png"]],"خ ini":[[62,"62_101.png"],[80,"80_129.png"],[84,"84_133.png"]],"ج ini":[[63,"63_103.png"],[79,"79_127.png"],[83,"83_131.png"]],"ت fin":[[63,"63_104.png"],[66,"66_111.png"],[126,"126_181.png"]],"ح med":[[64,"64_105.png"]],"ج med":[[65,"65_107.png"]],"خ med":[[66,"66_110.png"]],"ه fin":[[70,"70_114.png"],[71,"71_116.png"]],"ه med":[[74,"74_119.png"],[75,"75_122.png"],[76,"76_125.png"]],"د fin":[[79,"79_128.png"]],"ذ fin":[[80,"80_130.png"]],"ر fin":[[83,"83_132.png"],[87,"87_136.png"],[105,"105_154.png"]],"ز fin":[[84,"84_134.png"],[88,"88_138.png"],[104,"104_152.png"]],"س ini":[[91,"91_139.png"]],"ش ini":[[92,"92_141.png"]],"ص ini":[[97,"97_143.png"],[106,"106_155.png"]],"ط ini":[[98,"98_145.png"]],"ض ini":[[99,"99_147.png"],[107,"107_157.png"]],"ظ ini":[[100,"100_149.png"]],"ع ini":[[104,"104_151.png"]],"غ ini":[[105,"105_153.png"]],"ع fin":[[106,"106_156.png"]],"غ fin":[[107,"107_158.png"]],"ع med":[[108,"108_159.png"]],"غ med":[[109,"109_160.png"]],"ق ini":[[116,"116_161.png"],[119,"119_168.png"]],"و fin":[[116,"116_162.png"],[117,"117_164.png"]],"ف ini":[[117,"117_163.png"],[118,"118_165.png"]],"ق med":[[118,"118_166.png"]],"ف med":[[119,"119_169.png"]],"ف fin":[[120,"120_172.png"]],"م med":[[126,"126_180.png"]]};
 const formVersions = it => FORM_BOOK[`${it.g} ${it.p}`] || [];
-const formImg = (v, cls = "") => `<img class="bookform ${cls}" src="book/f/${v[1]}" alt="">`;
+const formImg = v => `<img src="book/f/${v[1]}" alt="">`;
 function start(cards) {
   if (writing()) return startWrite(cards);
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
   const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
   deck = random ? shuffle(source) : source.slice();
-  deck.forEach(i => { delete i.choices; const vs = mode === "forms" ? formVersions(i) : []; const all = [null, ...vs]; i.bv = all[Math.floor(Math.random() * all.length)]; });   // null = the font's drawing, one more version
+  deck.forEach(i => delete i.choices);
   answers = [];
   openRound();
 }
@@ -764,7 +760,7 @@ function renderQuiz() {
   const it = deck[pos], chip = (k, v, label, ar) => `<button class="chip${ar ? " ar" : ""}" data-k="${k}" data-v="${v}"${ar ? ' lang="ar"' : ""}>${ar ? "" : ICONS.plus}${label}</button>`;
   if (mode === "forms") {
     it.choices = it.choices || choicesFor([it.g], 4);
-    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="big ar" lang="ar">${it.bv ? formImg(it.bv) : formOf(it.g, it.p)}</span><span class="bookof">${it.bv ? `Écriture du livre · page ${bookPage({ img: it.bv[0] })}` : "Écriture de l’app"}</span></span>
+    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="fhead"><span class="big ar" lang="ar">${formOf(it.g, it.p)}</span></span></span>
       <div class="grp"><span class="q">Quelle lettre ?</span><span class="chips letters">${it.choices.map(c => chip("letter", c, showLetter(c), true)).join("")}</span></div>
       <div class="grp"><span class="q">Où dans le mot ?</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
   } else {
@@ -813,10 +809,9 @@ function check() {
   if (mode === "forms") {
     ok = pick.letter === it.g && pick.pos === it.p;
     ans.insertAdjacentHTML("beforeend", `<span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`);
-    // The book's versions of this form, in the book's order, the one shown ringed.
+    // The book's ways of writing this form, in the book's order.
     const vs = formVersions(it);
-    if (vs.length) card.classList.add("done");
-    if (vs.length) ans.insertAdjacentHTML("beforeend", `<span class="fversions"><span class="font ar${it.bv ? "" : " on"}" lang="ar">${formOf(it.g, it.p)}</span>${vs.map(v => `<span class="${v === it.bv ? "on" : ""}">${formImg(v)}</span>`).join("")}</span>`);
+    if (vs.length) ans.querySelector(".fhead").insertAdjacentHTML("beforeend", `<span class="fbook"><small>Dans le livre</small><span class="fstack">${vs.map(v => `<span>${formImg(v)}</span>`).join("")}</span></span>`);
     chips.forEach(o => {
       const right = o.dataset.k === "letter" ? o.dataset.v === it.g : o.dataset.v === it.p, chosen = o.classList.contains("on");
       o.className = "chip" + (o.dataset.k === "letter" ? " ar" : "") + (right ? " right" : chosen ? " wrong" : " off");
