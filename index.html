@@ -985,7 +985,9 @@ const bookPage = it => it.img < 54 ? 7 : it.img < 114 ? 8 : 9;
 // Cells printed exactly alike count as one way (the two با, two of the لا).
 const SAME = { 23: 3, 8: 4 };
 const wayOf = it => WORD_CARDS[SAME[it.img] ?? it.img];
-const waysOf = it => WORD_CARDS.filter(c => c.w === it.w && SAME[c.img] === undefined);
+// Ways are grouped by the lesson 1 letters the card asks for: ة is a way to write ta, هـ ha, ـم mim, أ ؤ ئ the hamza.
+const askKey = it => lettersOf(it.w).map(x => L1(x, it.w)).join("");
+const waysOf = it => WORD_CARDS.filter(c => askKey(c) === askKey(it) && SAME[c.img] === undefined);
 function wayBadge(it) {
   const ways = waysOf(it); if (ways.length < 2) return "";
   return `<span class="way">Façon ${ways.indexOf(wayOf(it)) + 1} sur ${ways.length} · page ${bookPage(it)}</span>`;
