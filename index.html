@@ -820,8 +820,10 @@ function check() {
     chips.forEach(o => {
       const right = o.dataset.k === "letter" ? o.dataset.v === it.g : places.includes(o.dataset.v), chosen = o.classList.contains("on");
       o.className = "chip" + (o.dataset.k === "letter" ? " ar" : "") + (right && chosen ? " right" : right && o.dataset.k === "pos" ? " missed" : right ? " right" : chosen ? " wrong" : " off");
-      if (o.dataset.k === "pos") o.innerHTML = (right && chosen ? ICONS.check : "") + POS[o.dataset.v];
+      if (o.dataset.k === "pos") o.innerHTML = (right && chosen ? ICONS.check : "") + POS[o.dataset.v]
+        + (right && !chosen ? `<span class="tag">oubliée</span>` : !right && chosen ? `<span class="tag">en trop</span>` : "");
     });
+    card.querySelector(".chips:not(.letters)").classList.add("tagged");
     card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
   } else {
     const want = new Set(lettersOf(it.w).map(c => L1(c, it.w)));
