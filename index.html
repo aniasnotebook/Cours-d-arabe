@@ -186,7 +186,7 @@
   .pick .lvl > span { display:inline-flex; align-items:flex-end; gap:2px; }
   .pick .lvl i { width:4px; border-radius:1px; background:var(--line); }
   .pick .lvl i:first-child { height:7px; } .pick .lvl i:nth-child(2) { height:11px; } .pick .lvl i:nth-child(3) { height:15px; }
-  .pick .lvl.l1 i.on { background:#2f7d4f; } .pick .lvl.l2 i.on { background:#c2410c; }
+  .pick .lvl.l1 i.on { background:#2f7d4f; } .pick .lvl.l2 i.on { background:#c2410c; } .pick .lvl.l3 i.on { background:#a3141a; }
   .ttl { text-align:center; margin:0; font-size:24px; font-weight:800; }
 
   /* Writing: the drawing sits on the card, over the letter in grey (tracing) or alone (testing). */
@@ -876,7 +876,7 @@ function openWriting(lesson) {
   $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Lier les lettres";
   $("cwBack").dataset.back = "l" + lesson;
   bindRand($("cwRand"), lesson);
-  $("pkA").dataset.w = "trace"; $("pkB").dataset.w = "test";
+  $("pkA").dataset.w = "trace"; $("pkB").dataset.w = "test"; setLevel($("pkB"), lesson === 1 ? 2 : 3);
   $("cwTraceName").textContent = "Tracer"; $("cwTestName").textContent = "Me tester";
   $("cwTraceText").textContent = lesson === 1 ? "Tu repasses sur la lettre grise. Pas de note, tu avances à ton rythme." : "Tu repasses sur les lettres liées, en gris. Pas de note.";
   $("cwTestText").textContent = lesson === 1 ? "Tu vois le nom en rouge, tu écris la lettre de mémoire, puis tu vérifies." : "Tu vois les lettres séparées, tu les écris liées, puis tu vérifies.";
@@ -903,7 +903,7 @@ function openChoice(which) {
   $("cwTitle").textContent = c.title;
   $("cwBack").dataset.back = "l2";
   bindRand($("cwRand"), 2);
-  $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write;
+  $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write; setLevel($("pkB"), 2);
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
   $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
   const top = `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:24px">${c.top}</span>`;
@@ -1307,9 +1307,10 @@ function bindRand(box, lesson) {
   input.checked = src.checked; input.onchange = () => { src.checked = input.checked; };
 }
 bindRand(document.querySelector('.randset[data-lesson="1"]'), 1);
-// Each choice screen goes from the easier way (left) to the harder one (right), with its level: one green bar, then two orange bars.
-document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) =>
-  b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${i + 1}"><span>${[0, 1, 2].map(k => `<i class="${k <= i ? "on" : ""}"></i>`).join("")}</span>Niveau ${i + 1}</span>`)));
+// Each choice screen goes from the easier way (left) to the harder one (right), with its level: one green bar, two orange
+// bars, or three red bars for the hardest of all (Lier les lettres · Me tester).
+const setLevel = (b, n) => { b.querySelector(".lvl")?.remove(); b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${n}"><span>${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>Niveau ${n}</span>`); };
+document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) => setLevel(b, i + 1)));
 document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
 $("go1").onclick = () => show("c1");
 document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
