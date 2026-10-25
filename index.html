@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex, nofollow">
-<meta name="viewport" id="vp" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" id="vp" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Cours d’arabe</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
@@ -1144,8 +1144,8 @@ const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 const lessonLinks = n => LESSON_PAGES[n].map((u, i, all) => `<a class="lessonlink" href="${u}" target="_blank" rel="noopener">Revoir la leçon${all.length > 1 ? ` · ${i + 1}/${all.length}` : ""} ${EXT}</a>`).join("");
 
 // ---------- Zoom: only the book's pages can be zoomed (pinch), the rest of the app stays at its size.
-const VP_FIXED = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover";
-const VP_ZOOM = "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover";
+const VP_FIXED = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
+const VP_ZOOM = "width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes";
 function zoom(on) { $("vp").setAttribute("content", on ? VP_ZOOM : VP_FIXED); }
 function closePage() { $("page").hidden = true; zoom(false); }
 // iPhone ignores the viewport's no-zoom, so pinching is stopped by hand outside the book's pages.
