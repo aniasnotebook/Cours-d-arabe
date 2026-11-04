@@ -32,6 +32,7 @@
          padding-block:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
          padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
   button { font:inherit; color:inherit; cursor:pointer; }
+  p, small, .askbox b, h2, .ttl { text-wrap:pretty; }   /* no single word left alone on a last line */
   button:focus-visible, a:focus-visible { outline:3px solid var(--accent); outline-offset:2px; }
   .app { width:100%; max-width:440px; height:100%; display:flex; flex-direction:column; }
   .screen { flex:1; min-height:0; display:flex; flex-direction:column; gap:14px; overflow:auto; }
@@ -527,6 +528,8 @@ const WORD_CARDS = BOOK_CELLS
   .map(it => ({ ...it, mini: `<div class="mini ar"><span class="w">${wordInk(it)}</span></div>` }));
 
 // ---------- Helpers
+// A number stays on the line of the word next to it (« page 7 », « 54 cases »): the spaces around it do not break.
+const nb = t => t.replace(/ (?=\d)|(?<=\d) /g, "\u00a0");
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
 // Séparer les lettres: the chips are always the 30 letters of lesson 1, as learned there, so the learner links the new
@@ -1020,7 +1023,7 @@ const askKey = it => lettersOf(it.w).map(x => L1(x, it.w)).join("");
 const waysOf = it => WORD_CARDS.filter(c => askKey(c) === askKey(it) && SAME[c.img] === undefined);
 function wayBadge(it) {
   const ways = waysOf(it); if (ways.length < 2) return "";
-  return `<span class="way">Façon ${ways.indexOf(wayOf(it)) + 1} sur ${ways.length} · page ${bookPage(it)}</span>`;
+  return `<span class="way">${nb(`Façon ${ways.indexOf(wayOf(it)) + 1} sur ${ways.length} · page ${bookPage(it)}`)}</span>`;
 }
 function wReveal() {
   wShown = true;
@@ -1126,17 +1129,17 @@ function showStats() {
   $("party").className = "party " + mood;
   $("party").innerHTML = (all ? confetti(0, 0) + confetti(.45, 20) : win ? confetti(0, 0) : "") + MARK;
   $("rTitle").textContent = title;
-  $("rSub").textContent = `${name} · ${seen < deck.length ? `arrêté après ${seen} sur ${n(deck.length)}` : n(deck.length)}`;
+  $("rSub").textContent = nb(`${name} · ${seen < deck.length ? `arrêté après ${seen} sur ${n(deck.length)}` : n(deck.length)}`);
   $("rTiles").innerHTML = `<span class="g"><b>${good}</b>${pl(good, right)}</span><span class="r"><b>${bad}</b>à revoir</span><span class="s"><b>${skipped}</b>${pl(skipped, "passée")}</span>`;
   $("rBar").innerHTML = seen ? [["g", good], ["r", bad], ["s", skipped]].map(([c, k]) => `<i class="${c}" style="width:${k / seen * 100}%"></i>`).join("") : "";
-  $("rLine").textContent = done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`;
+  $("rLine").textContent = nb(done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`);
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
-  $("famText").textContent = `Familles : ${done - famWrong} / ${done} justes`;
+  $("famText").textContent = nb(`Familles : ${done - famWrong} / ${done} justes`);
   $("lessonLinks").innerHTML = lessonLinks(mode === "letters" || mode === "wletters" ? 1 : 2);
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
-  $("review").textContent = `Revoir : ${n(toReview.length)}`;
+  $("review").textContent = nb(`Revoir : ${n(toReview.length)}`);
   // With nothing to review, starting again becomes the main (green) button.
   $("again").className = toReview.length ? "secondary" : "primary";
   $("review").onclick = () => start(toReview);
@@ -1297,8 +1300,8 @@ function pageBreak(done, d, src, finish) {
   const page = bookPage(d[done - 1]), next = bookPage(d[done]);
   if (page === next) return false;
   pausedAt = done;
-  $("askT").textContent = `Page ${page} terminée`;
-  $("askP").textContent = `Continuer avec la page ${next}, ou voir tes résultats\u00a0?`;
+  $("askT").textContent = nb(`Page ${page} terminée`);
+  $("askP").textContent = nb(`Continuer avec la page ${next}, ou voir tes résultats\u00a0?`);
   $("askNo").textContent = "Continuer"; $("askYes").textContent = "Résultats";
   $("ask").hidden = false;
   $("askNo").onclick = () => { $("ask").hidden = true; };
@@ -1313,8 +1316,8 @@ const forgetStop = src => { if (fullBook(src)) try { localStorage.removeItem(sto
 function fromPage(src, go) {
   let pg = 0; try { pg = fullBook(src) ? +localStorage.getItem(stopKey()) || 0 : 0; } catch {}
   if (!pg) return go(7);
-  $("askT").textContent = `Reprendre à la page ${pg}\u00a0?`;
-  $("askP").textContent = `Ton dernier tour s’est arrêté à la fin de la page ${pg - 1}. Recommencer repart de la page 7.`;
+  $("askT").textContent = nb(`Reprendre à la page ${pg}\u00a0?`);
+  $("askP").textContent = nb(`Ton dernier tour s’est arrêté à la fin de la page ${pg - 1}. Recommencer repart de la page 7.`);
   $("askNo").textContent = "Recommencer"; $("askYes").textContent = "Reprendre";
   $("ask").hidden = false;
   $("askNo").onclick = () => { $("ask").hidden = true; forgetStop(src); go(7); };
