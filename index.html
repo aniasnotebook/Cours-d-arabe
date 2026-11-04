@@ -583,10 +583,12 @@ function start(cards) {
   if (writing()) return startWrite(cards);
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
   const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
-  deck = deckOf(source, random);
-  deck.forEach(i => delete i.choices);
-  answers = [];
-  openRound();
+  fromPage(source, from => {
+    deck = deckOf(source, random, from);
+    deck.forEach(i => delete i.choices);
+    answers = [];
+    openRound();
+  });
 }
 function openRound() {
   $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : "Voir le livre";
@@ -599,9 +601,9 @@ let quizAuto = null;
 function render() {
   clearTimeout(quizAuto);
   pos = answers.length;
-  if (pos >= deck.length) return showStats();
+  if (pos >= deck.length) { forgetStop(source); return showStats(); }
   if (pos === 0) pausedAt = -1;
-  pageBreak(pos, deck.length, source, showStats);
+  pageBreak(pos, deck, source, showStats);
   shown = false; checked = false; guess = "none"; pick = {};
   const good = answers.filter(a => a.ok).length, bad = answers.filter(a => !a.ok && !a.skip).length;
   $("count").textContent = `${pos + 1} / ${deck.length}`;
@@ -933,9 +935,11 @@ function openChoice(which) {
 function startWrite(cards) {
   wSource = cards || (mode === "wforms" ? FORMS : wWords() ? WORD_CARDS : LETTERS);
   const random = wLesson2() ? $("rand2").checked : $("rand1").checked;
-  wDeck = deckOf(wSource, random);
-  wAnswers = []; wPos = 0;
-  openWriteRound();
+  fromPage(wSource, from => {
+    wDeck = deckOf(wSource, random, from);
+    wAnswers = []; wPos = 0;
+    openWriteRound();
+  });
 }
 function openWriteRound() {
   $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : wWords() || wKind === "split" ? "Voir le livre" : "Voir l’alphabet";
@@ -948,9 +952,9 @@ function openWriteRound() {
 function wRender() {
   clearTimeout(wAuto);
   if (wKind !== "trace") wPos = wAnswers.length;
-  if (wPos >= wDeck.length) return wKind !== "trace" ? showStats() : show("cw");
+  if (wPos >= wDeck.length) { forgetStop(wSource); return wKind !== "trace" ? showStats() : show("cw"); }
   if (wPos === 0) pausedAt = -1;
-  pageBreak(wPos, wDeck.length, wSource, () => wKind !== "trace" ? showStats() : show("cw"));
+  pageBreak(wPos, wDeck, wSource, () => wKind !== "trace" ? showStats() : show("cw"));
   wStrokes = []; wShown = false; wArabic = false;
   const it = wDeck[wPos], good = wAnswers.filter(a => a.ok).length;
   $("wCount").textContent = `${wPos + 1} / ${wDeck.length}`;
@@ -1280,28 +1284,41 @@ const roundStarted = () => !$("play").hidden ? answers.length > 0
 const ASK = { quit: ["Quitter le tour ?", "Ce que tu as fait dans ce tour ne sera pas gardé.", "Quitter"],
   restart: ["Recommencer le tour ?", "Le tour reprend depuis la première carte.", "Recommencer"],
   stop: ["Terminer le tour ?", "Tu verras tes résultats.", "Terminer"] };
-// The 127 cells of lesson 2 are long for one round: after each book page's worth of cards (54, then 60), a pause asks
-// whether to go on or see the results. In the book's order it names the page; in random order it counts the cards.
-const PAGE_BREAKS = [54, 114];
-// A round's cards. In random order the whole of lesson 2 is mixed page by page (7, then 8, then 9), so each pause ends a real page.
-function deckOf(src, random) {
-  if (!random) return src.slice();
-  if (src !== WORD_CARDS) return shuffle(src);
-  const ends = [...PAGE_BREAKS, src.length];
-  return ends.flatMap((end, i) => shuffle(src.slice(i ? ends[i - 1] : 0, end)));
+// The 127 cells of lesson 2 are long for one round: at the end of each book page (7, then 8), a pause asks whether to go
+// on or see the results. Random order mixes the cards page by page, so each pause ends a real page.
+const fullBook = src => src.length === WORD_CARDS.length && WORD_CARDS.includes(src[0]);
+function deckOf(src, random, from = 7) {
+  if (!fullBook(src)) return random ? shuffle(src) : src.slice();
+  return [7, 8, 9].filter(pg => pg >= from).flatMap(pg => { const cs = src.filter(c => bookPage(c) === pg); return random ? shuffle(cs) : cs; });
 }
 let pausedAt = -1;
-function pageBreak(done, total, src, finish) {
-  if (src !== WORD_CARDS || total !== WORD_CARDS.length || !PAGE_BREAKS.includes(done) || pausedAt === done) return false;
+function pageBreak(done, d, src, finish) {
+  if (!fullBook(src) || !done || done >= d.length || pausedAt === done) return false;
+  const page = bookPage(d[done - 1]), next = bookPage(d[done]);
+  if (page === next) return false;
   pausedAt = done;
-  const page = PAGE_BREAKS.indexOf(done) + 7;
   $("askT").textContent = `Page ${page} terminée`;
-  $("askP").textContent = `Continuer avec la page ${page + 1}, ou voir tes résultats\u00a0?`;
+  $("askP").textContent = `Continuer avec la page ${next}, ou voir tes résultats\u00a0?`;
   $("askNo").textContent = "Continuer"; $("askYes").textContent = "Résultats";
   $("ask").hidden = false;
   $("askNo").onclick = () => { $("ask").hidden = true; };
-  $("askYes").onclick = () => { $("ask").hidden = true; finish(); };
+  $("askYes").onclick = () => { $("ask").hidden = true; keepStop(src, next); finish(); };
   return true;
+}
+// A round stopped at a pause is remembered for its exercise: the next round of the whole lesson asks whether to go on
+// from the next page or start again from page 7.
+const stopKey = () => "stop:" + mode + (writing() ? ":" + wKind : "");
+const keepStop = (src, pg) => { try { localStorage.setItem(stopKey(), pg); } catch {} };
+const forgetStop = src => { if (fullBook(src)) try { localStorage.removeItem(stopKey()); } catch {} };
+function fromPage(src, go) {
+  let pg = 0; try { pg = fullBook(src) ? +localStorage.getItem(stopKey()) || 0 : 0; } catch {}
+  if (!pg) return go(7);
+  $("askT").textContent = `Reprendre à la page ${pg}\u00a0?`;
+  $("askP").textContent = `Ton dernier tour s’est arrêté à la fin de la page ${pg - 1}. Recommencer repart de la page 7.`;
+  $("askNo").textContent = "Recommencer"; $("askYes").textContent = "Reprendre";
+  $("ask").hidden = false;
+  $("askNo").onclick = () => { $("ask").hidden = true; forgetStop(src); go(7); };
+  $("askYes").onclick = () => { $("ask").hidden = true; go(pg); };
 }
 function askThen(kind, go) {
   if (!roundStarted()) return go();
