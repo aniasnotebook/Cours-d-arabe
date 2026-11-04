@@ -583,7 +583,7 @@ function start(cards) {
   if (writing()) return startWrite(cards);
   source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
   const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
-  deck = random ? shuffle(source) : source.slice();
+  deck = deckOf(source, random);
   deck.forEach(i => delete i.choices);
   answers = [];
   openRound();
@@ -933,7 +933,7 @@ function openChoice(which) {
 function startWrite(cards) {
   wSource = cards || (mode === "wforms" ? FORMS : wWords() ? WORD_CARDS : LETTERS);
   const random = wLesson2() ? $("rand2").checked : $("rand1").checked;
-  wDeck = random ? shuffle(wSource) : wSource.slice();
+  wDeck = deckOf(wSource, random);
   wAnswers = []; wPos = 0;
   openWriteRound();
 }
@@ -1283,13 +1283,20 @@ const ASK = { quit: ["Quitter le tour ?", "Ce que tu as fait dans ce tour ne ser
 // The 127 cells of lesson 2 are long for one round: after each book page's worth of cards (54, then 60), a pause asks
 // whether to go on or see the results. In the book's order it names the page; in random order it counts the cards.
 const PAGE_BREAKS = [54, 114];
+// A round's cards. In random order the whole of lesson 2 is mixed page by page (7, then 8, then 9), so each pause ends a real page.
+function deckOf(src, random) {
+  if (!random) return src.slice();
+  if (src !== WORD_CARDS) return shuffle(src);
+  const ends = [...PAGE_BREAKS, src.length];
+  return ends.flatMap((end, i) => shuffle(src.slice(i ? ends[i - 1] : 0, end)));
+}
 let pausedAt = -1;
 function pageBreak(done, total, src, finish) {
   if (src !== WORD_CARDS || total !== WORD_CARDS.length || !PAGE_BREAKS.includes(done) || pausedAt === done) return false;
   pausedAt = done;
-  const page = PAGE_BREAKS.indexOf(done) + 7, inOrder = !$("rand2").checked;
-  $("askT").textContent = inOrder ? `Page ${page} terminée` : `${done} cartes faites`;
-  $("askP").textContent = inOrder ? `Continuer avec la page ${page + 1}, ou voir tes résultats\u00a0?` : `Il en reste ${total - done}. Continuer, ou voir tes résultats\u00a0?`;
+  const page = PAGE_BREAKS.indexOf(done) + 7;
+  $("askT").textContent = `Page ${page} terminée`;
+  $("askP").textContent = `Continuer avec la page ${page + 1}, ou voir tes résultats\u00a0?`;
   $("askNo").textContent = "Continuer"; $("askYes").textContent = "Résultats";
   $("ask").hidden = false;
   $("askNo").onclick = () => { $("ask").hidden = true; };
