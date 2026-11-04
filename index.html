@@ -1168,7 +1168,7 @@ function openPage(n, part = "book") {
     : part === "forms" ? `<h3>Les formes des lettres</h3><p class="muted center" style="margin:-4px 0 8px; font-size:13px">Tableau fait par l’app pour s’entraîner : il n’est pas dans le livre.</p>
       <table class="table ar"><tr><th></th>${["iso","ini","med","fin"].map(p => `<th>${POS[p]}</th>`).join("")}</tr>
       ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
-        `<td lang="ar">${positions(g).includes(p) ? formOf(g, p) : ""}</td>`).join("")}</tr>`).join("")}</table>
+        `<td lang="ar">${formOf(g, positions(g).includes(p) ? p : p === "ini" ? "iso" : "fin")}</td>`).join("")}</tr>`).join("")}</table>
 ` : `${(() => { let n = 0; return BOOK_PAGES.map((pg, i) => `<div class="bookpage"><span class="pn">Page ${7 + i}</span><div class="words">${pg.map(r =>
         `<div style="grid-template-columns:repeat(${r.split("|").length}, minmax(0, 1fr))">${r.split("|").map(() => `<span>${bookImg(BOOK_CELLS[n++])}</span>`).join("")}</div>`).join("")}</div></div>`).join(""); })()}`;
   $("page").hidden = false;
