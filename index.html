@@ -1232,6 +1232,11 @@ function savePlace() {
 }
 function reloadHere() { savePlace(); location.reload(); }
 addEventListener("pagehide", savePlace);
+// Back without a reload (the app left open in the background): the saved place is old, drop it so a later restart cannot
+// bring back a round already played.
+const dropPlace = () => { try { sessionStorage.removeItem("place"); } catch {} };
+addEventListener("pageshow", dropPlace);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) dropPlace(); });
 function backToPlace() {
   let p; try { p = JSON.parse(sessionStorage.getItem("place")); sessionStorage.removeItem("place"); } catch {}
   if (!p) return false;
