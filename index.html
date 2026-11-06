@@ -697,7 +697,7 @@ function stopSound() {
   document.querySelectorAll(".spk.on").forEach(b => b.classList.remove("on"));
 }
 function openPron(g) {
-  $("pronHead").textContent = glyph(g);
+  $("pronHead").innerHTML = glyph(g);
   $("pronBody").innerHTML = [...PRON[g], "methode"].map(b => `<img src="book/pron/${b}.jpg" alt="">`).join("");
   $("pron").hidden = false; $("pronBody").scrollTop = 0;
 }
