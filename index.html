@@ -618,28 +618,36 @@ PRON["و"] = ["levres", "cavite"]; PRON["ى"] = PRON["ے"] = ["milieu", "cavite"
 // The player is loaded once a lesson 1 round opens, so a tap on the speaker starts it at once. It needs a connection.
 const SOUND_VIDEO = "pBOENnAxXGk";
 const SOUND_TAPS = [19.3,21.1,23.2,25.2,27.7,30.1,32.6,34.7,37.2,40.4,42.8,45.3,47.6,51.4,54.5,57.7,60.0,62.2,65.1,68.0,70.7,73.0,75.5,78.4,80.8,83.4,86.6,88.6,90.5,92.7,94.9];   // when each letter is said, then the end
-let ytP = null, ytReady = false, ytTimer = null;
+// To start without a wait, the video is warmed up once, muted (it plays a moment, then pauses), and each new card moves it,
+// still paused, to its letter: the tap then only unmutes and plays.
+let ytP = null, ytReady = false, ytTimer = null, ytWarm = 0;   // 0 not yet, 1 warming, 2 warm
+const soundAt = g => { const i = GLYPHS.indexOf(g); return i < 0 ? null : [Math.max(0, SOUND_TAPS[i] - 0.7), SOUND_TAPS[i + 1] - 0.2]; };
+function primeSound(g) {
+  const t = soundAt(g);
+  if (ytWarm === 2 && t && !$("ytBox").classList.contains("on")) ytP.seekTo(t[0], true);
+}
 function loadSound() {
   if (ytP || !navigator.onLine) return;
   ytP = true;
   window.onYouTubeIframeAPIReady = () => { ytP = new YT.Player("ytFrame", { videoId: SOUND_VIDEO, playerVars: { playsinline: 1, controls: 0, rel: 0, disablekb: 1, origin: location.origin },
-    events: { onReady: () => ytReady = true } }); };
+    events: { onReady: () => { ytReady = true; ytWarm = 1; ytP.mute(); ytP.playVideo(); },
+      onStateChange: e => { if (ytWarm === 1 && e.data === 1) { ytP.pauseVideo(); ytWarm = 2; if (mode === "letters" && deck[pos]) primeSound(deck[pos].g); } } } }); };
   const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.onerror = () => ytP = null; document.head.appendChild(sc);
 }
 function playSound(g, btn) {
-  const i = GLYPHS.indexOf(g);
-  if (!ytReady || i < 0) { loadSound(); const h = $("hint"); if (h) h.textContent = "Le son a besoin d’Internet : réessaie dans un instant."; return; }
+  const i = GLYPHS.indexOf(g), t = soundAt(g);
+  if (!ytReady || !t) { loadSound(); const h = $("hint"); if (h) h.textContent = "Le son a besoin d’Internet : réessaie dans un instant."; return; }
   const c = btn.closest(".card").getBoundingClientRect(), box = $("ytBox"), w = Math.min(240, c.width - 40);
   box.style.width = w + "px"; box.style.left = (c.left + (c.width - w) / 2) + "px"; box.style.top = (c.bottom - w * 9 / 16 - 16) + "px";
-  btn.classList.add("on");
-  const end = SOUND_TAPS[i + 1] - 0.2;
-  ytP.seekTo(Math.max(0, SOUND_TAPS[i] - 0.7), true); ytP.playVideo();
-  clearInterval(ytTimer); ytTimer = setInterval(() => { if (ytP.getCurrentTime() >= end) stopSound(); }, 100);
+  btn.classList.add("on"); box.classList.add("on");
+  if (Math.abs(ytP.getCurrentTime() - t[0]) > 0.3) ytP.seekTo(t[0], true);
+  ytWarm = 2; ytP.unMute(); ytP.setVolume(100); ytP.playVideo();
+  clearInterval(ytTimer); ytTimer = setInterval(() => { if (ytP.getCurrentTime() >= t[1]) stopSound(); }, 100);
 }
 function stopSound() {
   clearInterval(ytTimer);
   if (ytReady && ytP.getPlayerState && ytP.getPlayerState() === 1) ytP.pauseVideo();
-  $("ytBox").style.left = "-10000px";
+  $("ytBox").style.left = "-10000px"; $("ytBox").classList.remove("on");
   document.querySelectorAll(".spk.on").forEach(b => b.classList.remove("on"));
 }
 function openPron(g) {
@@ -717,6 +725,7 @@ function renderLetter() {
     paintFams();
   }));
   bindSwipe(c);
+  primeSound(deck[pos].g);
 }
 
 function paintFams() {
