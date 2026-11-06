@@ -247,9 +247,14 @@
   .askrow { display:flex; gap:10px; } .askrow button { flex:1; }
   #ask { z-index:30; }
   .scrim { touch-action:pan-x pan-y pinch-zoom; position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:center; justify-content:center; padding:16px; }
-  .card .pron { position:absolute; right:14px; top:12px; display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; font:600 13px system-ui, sans-serif; z-index:1; }
+  .card .tops { position:absolute; right:14px; top:12px; display:flex; gap:8px; z-index:1; }
+  .card .spk { width:44px; height:38px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; display:grid; place-items:center; padding:0; }
+  .card .spk svg { width:20px; height:20px; } .card .spk.on { background:#2f7d4f; border-color:#2f7d4f; color:#fff; }
+  .card.under .tops { visibility:hidden; }
+  #ytBox { position:fixed; left:-10000px; top:0; width:240px; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#000; z-index:5; box-shadow:0 4px 16px rgba(0,0,0,.25); }
+  #ytBox iframe { width:100%; height:100%; display:block; border:0; }
+  .card .pron { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; font:600 13px system-ui, sans-serif; z-index:1; }
   .card .pron svg { width:18px; height:18px; }
-  .card.under .pron { visibility:hidden; }
   .sheetwrap { align-items:flex-end; padding:0; }
   .psheet { width:100%; max-width:520px; max-height:88%; display:flex; flex-direction:column; background:var(--bg); border-radius:22px 22px 0 0; padding:12px 14px max(14px, env(safe-area-inset-bottom, 0px)); }
   .phead { display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; }
@@ -413,6 +418,7 @@
   </section>
 
   <!-- A round -->
+  <div id="ytBox" aria-hidden="true"><div id="ytFrame"></div></div>
   <section class="screen" id="play" hidden>
     <div class="top">
       <div class="left"><button class="ico" id="pBack" aria-label="Retour"></button><button class="ico home" aria-label="Accueil"></button></div>
@@ -463,6 +469,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const ICONS = {
+  speaker: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
   bulb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"/></svg>',
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
   restart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>',
@@ -583,7 +590,7 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = "none", pick = {}, checked = false;
 
-function show(id) { ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
+function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
 
 // ---------- The logo: a red card, a green card and the ba card, drawn so each card can move.
 const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
@@ -607,6 +614,34 @@ const PRON_BOX = { cavite: "ا و ي", gorge: "ء ه ع ح غ خ", arriere: "ق 
 const PRON = {};
 Object.entries(PRON_BOX).forEach(([box, ls]) => ls.split(" ").forEach(g => (PRON[g] = PRON[g] || []).push(box)));
 PRON["و"] = ["levres", "cavite"]; PRON["ى"] = PRON["ے"] = ["milieu", "cavite"]; delete PRON["ي"];
+// The letter's sound: the teacher reading page 6 on YouTube (the lesson's own video), played from that letter to the next.
+// The player is loaded once a lesson 1 round opens, so a tap on the speaker starts it at once. It needs a connection.
+const SOUND_VIDEO = "pBOENnAxXGk";
+const SOUND_TAPS = [19.3,21.1,23.2,25.2,27.7,30.1,32.6,34.7,37.2,40.4,42.8,45.3,47.6,51.4,54.5,57.7,60.0,62.2,65.1,68.0,70.7,73.0,75.5,78.4,80.8,83.4,86.6,88.6,90.5,92.7,94.9];   // when each letter is said, then the end
+let ytP = null, ytReady = false, ytTimer = null;
+function loadSound() {
+  if (ytP || !navigator.onLine) return;
+  ytP = true;
+  window.onYouTubeIframeAPIReady = () => { ytP = new YT.Player("ytFrame", { videoId: SOUND_VIDEO, playerVars: { playsinline: 1, controls: 0, rel: 0, disablekb: 1, origin: location.origin },
+    events: { onReady: () => ytReady = true } }); };
+  const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.onerror = () => ytP = null; document.head.appendChild(sc);
+}
+function playSound(g, btn) {
+  const i = GLYPHS.indexOf(g);
+  if (!ytReady || i < 0) { loadSound(); const h = $("hint"); if (h) h.textContent = "Le son a besoin d’Internet : réessaie dans un instant."; return; }
+  const c = btn.closest(".card").getBoundingClientRect(), box = $("ytBox"), w = Math.min(240, c.width - 40);
+  box.style.width = w + "px"; box.style.left = (c.left + (c.width - w) / 2) + "px"; box.style.top = (c.bottom - w * 9 / 16 - 16) + "px";
+  btn.classList.add("on");
+  const end = SOUND_TAPS[i + 1] - 0.2;
+  ytP.seekTo(Math.max(0, SOUND_TAPS[i] - 0.7), true); ytP.playVideo();
+  clearInterval(ytTimer); ytTimer = setInterval(() => { if (ytP.getCurrentTime() >= end) stopSound(); }, 100);
+}
+function stopSound() {
+  clearInterval(ytTimer);
+  if (ytReady && ytP.getPlayerState && ytP.getPlayerState() === 1) ytP.pauseVideo();
+  $("ytBox").style.left = "-10000px";
+  document.querySelectorAll(".spk.on").forEach(b => b.classList.remove("on"));
+}
 function openPron(g) {
   $("pronHead").textContent = glyph(g);
   $("pronBody").innerHTML = [...PRON[g], "methode"].map(b => `<img src="book/pron/${b}.jpg" alt="">`).join("");
@@ -624,6 +659,7 @@ function start(cards) {
   });
 }
 function openRound() {
+  if (mode === "letters") loadSound(); else stopSound();
   $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : "Voir le livre";
   $("peek").dataset.page = mode === "letters" ? 1 : 2;
   show("play");
@@ -643,6 +679,7 @@ function render() {
   $("barFill").style.width = `${pos / deck.length * 100}%`;
   $("nGood").textContent = mode === "letters" ? `${good} reconnue${good > 1 ? "s" : ""}` : `${good} juste${good > 1 ? "s" : ""}`;
   $("nBad").textContent = `${bad} à revoir`;
+  stopSound();
   if (mode === "letters") renderLetter(); else renderQuiz();
 }
 
@@ -655,7 +692,7 @@ function letterCard(l, id, cls) {
   return `<div class="card swipe ${cls} ${famQuiz ? "has-fams" : ""}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
     <span class="glyph ar" lang="ar">${glyph(l.g)}</span>
     <span class="arname ar" lang="ar">${l.ar}</span>
-    ${PRON[l.g] ? `<button class="pron" data-g="${l.g}">${ICONS.bulb}Prononciation</button>` : ""}
+    <span class="tops"><button class="spk" data-g="${l.g}" aria-label="Écouter">${ICONS.speaker}</button>${PRON[l.g] ? `<button class="pron" data-g="${l.g}">${ICONS.bulb}Prononciation</button>` : ""}</span>
     ${fams}
   </div>`;
 }
@@ -752,7 +789,7 @@ function undo() { if (answers.length) { answers.pop(); render(); } }
 // Swipe with a finger (touch events, which iPhone Safari handles best), a mouse, or two fingers on a trackpad.
 function bindSwipe(c) {
   let x0 = null, y0 = 0, dx = 0, dy = 0, onChip = false;
-  const begin = (x, y, t) => { onChip = !!t.closest(".chip, .pron"); x0 = x; y0 = y; dx = dy = 0; c.classList.remove("anim"); };
+  const begin = (x, y, t) => { onChip = !!t.closest(".chip, .pron, .spk"); x0 = x; y0 = y; dx = dy = 0; c.classList.remove("anim"); };
   const move = (x, y) => {
     if (x0 === null) return;
     dx = x - x0; dy = y - y0;
@@ -1392,7 +1429,11 @@ function setLevel(b, n) { b.querySelector(".lvl")?.remove(); b.querySelector(".p
 document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) => setLevel(b, i + 1)));
 document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
 $("go1").onclick = () => show("c1");
-document.addEventListener("click", e => { const b = e.target.closest(".pron"); if (b) { e.stopPropagation(); openPron(b.dataset.g); } }, true);
+document.addEventListener("click", e => {
+  const b = e.target.closest(".pron, .spk"); if (!b) return;
+  e.stopPropagation();
+  if (b.classList.contains("spk")) b.classList.contains("on") ? stopSound() : playSound(b.dataset.g, b); else openPron(b.dataset.g);
+}, true);
 $("pronX").onclick = () => $("pron").hidden = true;
 $("pron").onclick = e => { if (e.target === $("pron")) $("pron").hidden = true; };
 document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
