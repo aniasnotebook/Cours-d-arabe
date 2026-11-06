@@ -166,10 +166,13 @@
   .sign .smark { line-height:1; height:.5em; overflow:visible; }
   .sign .sring { border:2px dotted #d6301f; border-radius:50%; display:block; }
   .sign .safter { line-height:1.5; font-weight:600; align-self:center; }
+  .twins { display:inline-flex; gap:18px; align-items:flex-end; } .twins > span { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .twins small { font:600 11px system-ui, sans-serif; color:#6b665c; }
   @media (max-height:740px) { .card.quiz.signs .sigrow { padding:4px 12px; gap:0 12px; font-size:13px; } .card.quiz.signs .sigrow .ar { font-size:17px; line-height:1.5; } .card.quiz.signs .sigrow .ex { font-size:21px; }
     .card.quiz.signs.good .grp .q, .card.quiz.signs.bad .grp .q { display:none; } .card.quiz.signs .fstack { grid-template-rows:repeat(3, 26px); } .card.quiz.signs .fstack img { max-height:20px; }
     .card.quiz.signs .fbook small { display:none; } .card.quiz.signs .ans { gap:4px; } .card.quiz.signs.good .ans, .card.quiz.signs.bad .ans { margin:0; } }
-  @media (max-height:660px) { .card.quiz.signs .chip { height:32px; font-size:13px; } .card.quiz.signs .chips.wrap { gap:4px; } .card.quiz.signs .fstack { grid-template-rows:repeat(3, 22px); } .card.quiz.signs .fstack img { max-height:18px; } }
+  @media (max-height:700px) { .card.quiz.signs .sigrow { font-size:12px; line-height:1.3; } .card.quiz.signs .sigrow .snote { font-size:11px; line-height:1.25; } .card.quiz.signs .sigrow .ex { font-size:19px; } .card.quiz.signs .twins small { font-size:10px; } }
+ @media (max-height:660px) { .card.quiz.signs .chip { height:30px; font-size:13px; } .card.quiz.signs .sigrow { padding:3px 10px; } .card.quiz.signs .big { padding:6px 0 2px; } .card.quiz.signs .chips.wrap { gap:4px; } .card.quiz.signs .fstack { grid-template-rows:repeat(3, 22px); } .card.quiz.signs .fstack img { max-height:18px; } }
   /* Once answered, the correction takes the room: no empty space above, the book's ways in 3 rows, a tight table. */
   .card.quiz.signs.good .ans, .card.quiz.signs.bad .ans { margin:0; }
   .card.quiz.signs .big { font-size:16px; line-height:1; padding:14px 0 6px; }   /* the sign sets its own sizes */
@@ -179,6 +182,7 @@
   .card.quiz .chips.wrap .chip { justify-content:center; padding:0 6px; }
   .signmini { font-size:0; display:grid; place-items:center; }
   .sigrow { display:grid; grid-template-columns:auto 1fr; gap:4px 14px; align-items:center; background:#fff; border:1px solid #e2dccf; border-radius:14px; padding:10px 16px; text-align:left; font:14px/1.4 system-ui, sans-serif; color:#1d1d1b; max-width:310px; }
+  .sigrow .snote { grid-column:1 / -1; font-size:12px; color:#6b665c; margin-top:2px; }
   .sigrow .k { color:#6b665c; font-size:12px; font-weight:600; } .sigrow .ar { font-size:22px; line-height:1.6; font-weight:600; } .sigrow .ex { font-size:28px; }
   .card.quiz .nolink { font:600 12px/1.35 system-ui, sans-serif; color:#6b665c; background:#f3efe6; border-radius:10px; padding:4px 10px; text-align:center; max-width:300px; }
   .card.quiz .fhead { display:flex; align-items:center; justify-content:center; gap:14px; direction:ltr; }
@@ -716,11 +720,27 @@ const SIGNS = [
   { id: "waw", ar: "الوَاوُ السَّاكِنَةُ", fr: "Wâw soukoun", mark: "\u064F", after: "و", ex: "بُو", say: "« oû » long", read: "« oû » long : 2 temps" },
   { id: "ya", ar: "اليَاءُ السَّاكِنَةُ", fr: "Yâ soukoun", mark: "\u0650", under: true, after: "ي", ex: "بِي", say: "« î » long", read: "« î » long : 2 temps" },
   { id: "chedda", ar: "الشَّدَّةُ", fr: "Chedda", mark: "\u0651", ex: "رَبَّ", say: "lettre doublée", read: "lettre doublée : on appuie" },
-  { id: "soukoun", ar: "السُّكُونُ", fr: "Soukoun", mark: "\u0652", ex: "مِنْ", say: "pas de voyelle", read: "pas de voyelle : on s'arrête sur la lettre" },
+  { id: "soukoun", ar: "السُّكُونُ", fr: "Soukoun", mark: "\u0652", alt: "\u06E1", ex: "مِنْ", say: "pas de voyelle", read: "pas de voyelle : on s'arrête sur la lettre",
+    note: "Le soukoun se prononce sans voyelle ; la lettre non lue ne se prononce pas." },
+  // The Mushaf's small signs, under the sheet's table. The sheet gives their name and example; their reading is the
+  // Ḥafṣ rule, checked with the owner. Two look alike on the sheet (a small circle), so both are drawn twice: as on the
+  // sheet, and as in the Mushaf (soukoun ۡ, letter not read ۟). plain: a small letter written without the circle.
+  { id: "nonlue", fr: "Lettre non lue", mark: "\u0652", alt: "\u06DF", ex: "قَالُوا\u06DF", say: "ne se lit pas", read: "la lettre ne se prononce pas",
+    note: "Le soukoun se prononce sans voyelle ; la lettre non lue ne se prononce pas." },
+  { id: "iqlab", fr: "Petit mîm (iqlâb)", mark: "\u06E2", ex: "مِنۢ بَعْدِ", say: "n devient « m »", read: "le n se lit « m », avec le son du nez" },
+  { id: "madd", fr: "Signe de madd", mark: "\u0653", ex: "جَآءَ", say: "on allonge 4-5 temps", read: "on allonge : 4 à 5 temps" },
+  { id: "wawS", fr: "Wâw aṣ-ṣaghīra", plain: "\u06E5", ex: "لَهُۥ", say: "« oû » long", read: "« oû » long : 2 temps" },
+  { id: "yaS", fr: "Yâ aṣ-ṣaghīra", plain: "\u06E6", ex: "بِهِۦ", say: "« î » long", read: "« î » long : 2 temps" },
+  { id: "alifS", fr: "Alif aṣ-ṣaghīra", mark: "\u0670", ex: "ذَٰلِكَ", say: "« â » long", read: "« â » long : 2 temps" },
 ];
 SIGNS.forEach(s => s.mini = `<div class="mini signmini">${signHtml(s, 26)}</div>`);
 // The sign drawn as on the sheet: alone, a little above (or under) a red dotted circle, never touching it.
 function signHtml(s, size) {
+  if (s.plain) return `<span class="sign" lang="ar"><span class="safter" style="font-size:${size}px">${s.plain}</span></span>`;
+  if (s.alt && size >= 40) return `<span class="twins">${[[s.mark, "Fiche"], [s.alt, "Mushaf"]].map(([m, t]) => `<span>${oneSign({ ...s, mark: m }, Math.round(size * .8))}<small>${t}</small></span>`).join("")}</span>`;
+  return oneSign(s, size);
+}
+function oneSign(s, size) {
   const ring = Math.round(size * .6), mark = `<span class="smark" style="font-size:${size}px; ${s.under ? "margin-top:calc(-.66em + 6px); margin-bottom:.55em" : `margin-bottom:${-Math.round(size * .34) + (size < 40 ? 3 : 0)}px`}">\u00A0${s.mark}</span>`;
   const circle = `<span class="sring" style="width:${ring}px; height:${ring}px; border-width:${Math.max(2, Math.round(ring / 16))}px"></span>`;
   return `<span class="sign" lang="ar"><span class="scol">${s.under ? circle + mark : mark + circle}</span>${s.after ? `<span class="safter" style="font-size:${Math.round(size * .75)}px">${s.after}</span>` : ""}</span>`;
@@ -728,10 +748,13 @@ function signHtml(s, size) {
 const signWays = s => Array.from({ length: s.book || 0 }, (_, i) => `<span><img src="book/signs/${s.id}-${i + 1}.png" alt=""></span>`).join("");
 // Wrong choices: three other signs, the ones that look or sound alike first.
 const SIGN_NEAR = { fatha: ["fathatan","alif"], kasra: ["kasratan","ya"], damma: ["dammatan","waw"], fathatan: ["fatha","alif"], kasratan: ["kasra","ya"],
-  dammatan: ["damma","waw"], alif: ["fatha","fathatan"], waw: ["damma","dammatan"], ya: ["kasra","kasratan"], chedda: ["soukoun","fatha"], soukoun: ["chedda","damma"] };
-function signChoices(s) {
+  dammatan: ["damma","waw"], alif: ["fatha","fathatan"], waw: ["damma","dammatan"], ya: ["kasra","kasratan"], chedda: ["soukoun","fatha"], soukoun: ["nonlue","chedda"],
+  nonlue: ["soukoun","chedda"], iqlab: ["nonlue","soukoun"], madd: ["alif","alifS"], wawS: ["waw","damma"], yaS: ["ya","kasra"], alifS: ["alif","fatha"] };
+function signChoices(s, key = "fr") {
   const near = SIGN_NEAR[s.id].map(id => SIGNS.find(x => x.id === id)), rest = shuffle(SIGNS.filter(x => x !== s && !near.includes(x)));
-  return shuffle([s, ...near, ...rest].slice(0, 4));
+  const out = [s];
+  for (const x of [...near, ...rest]) if (out.length < 4 && !out.some(o => o[key] === x[key])) out.push(x);
+  return shuffle(out);
 }
 function start(cards) {
   if (writing()) return startWrite(cards);
@@ -923,7 +946,7 @@ document.addEventListener("wheel", e => {
 function renderQuiz() {
   const it = deck[pos], chip = (k, v, label, ar) => `<button class="chip${ar ? " ar" : ""}" data-k="${k}" data-v="${v}"${ar ? ' lang="ar"' : ""}>${ar ? "" : ICONS.plus}${label}</button>`;
   if (mode === "signs") {
-    it.choices = it.choices || { name: signChoices(it), say: signChoices(it) };
+    it.choices = it.choices || { name: signChoices(it), say: signChoices(it, "say") };
     $("stage").innerHTML = `<div class="card quiz signs enter" id="card"><span class="ans"><span class="fhead"><span class="big">${signHtml(it, innerHeight < 680 ? 48 : innerHeight < 740 ? 60 : 96)}</span></span></span>
       <div class="grp"><span class="q">Quel signe ?</span><span class="chips wrap">${it.choices.name.map(c => chip("name", c.id, c.fr)).join("")}</span></div>
       <div class="grp"><span class="q">Comment se lit-il ?</span><span class="chips wrap">${it.choices.say.map(c => chip("say", c.id, c.say)).join("")}</span></div></div>`;
@@ -980,10 +1003,11 @@ function check() {
   const ans = card.querySelector(".ans"), chips = card.querySelectorAll(".chip");
   chips.forEach(o => o.disabled = true);
   if (mode === "signs") {
-    ok = pick.name === it.id && pick.say === it.id;
+    const sayOf = id => SIGNS.find(x => x.id === id).say;
+    ok = pick.name === it.id && sayOf(pick.say) === it.say;
     if (it.book) ans.querySelector(".fhead").insertAdjacentHTML("beforeend", `<span class="fbook"><small>Dans le livre</small><span class="fstack">${signWays(it)}</span></span>`);
-    ans.insertAdjacentHTML("beforeend", `<span class="sigrow"><span class="k">Nom</span><span><span class="ar" lang="ar">${it.ar}</span> · <b>${it.fr}</b></span>
-      <span class="k">Exemple</span><span class="ar ex" lang="ar">${it.ex}</span><span class="k">Lecture</span><span>${it.read}</span></span>`);
+    ans.insertAdjacentHTML("beforeend", `<span class="sigrow"><span class="k">Nom</span><span>${it.ar ? `<span class="ar" lang="ar">${it.ar}</span> · ` : ""}<b>${it.fr}</b></span>
+      <span class="k">Exemple</span><span class="ar ex" lang="ar">${it.ex}</span><span class="k">Lecture</span><span>${it.read}</span>${it.note ? `<span class="snote">${it.note}</span>` : ""}</span>`);
     chips.forEach(o => {
       const right = o.dataset.v === it.id, chosen = o.classList.contains("on"), label = o.textContent;
       o.className = "chip" + (right && chosen ? " right" : right ? " missed" : chosen ? " wrong" : " off");
@@ -1057,7 +1081,7 @@ const wModel = it => wKind === "sign" ? `<span class="ar sfont" lang="ar" style=
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
 let wArabic = false;
-const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><span class="ar sfont" lang="ar">${it.ex.replace(/[\u064B-\u0652\u08F1]/g, "")}</span><b>${it.fr}</b></span>`
+const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><span class="ar sfont" lang="ar">${it.ex.replace(/[\u064B-\u0652\u0670\u06DF-\u06E6\u08F1]/g, "")}</span><b>${it.fr}</b></span>`
   : wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
   : wKind === "split" ? `<span class="prompt ar" lang="ar">${wordShow(it)}</span>`
   : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}${wayBadge(it)}</span>`
