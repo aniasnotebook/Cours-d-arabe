@@ -1333,7 +1333,6 @@ function backToPlace() {
   }
   return true;
 }
-if (!remembered()) show("gate"); else if (!backToPlace()) show("home");
 // The loader only shows if the Arabic font is still downloading after a moment (in practice, the first visit).
 { let ready = false;
   const done = () => { ready = true; $("loader").hidden = true; };
@@ -1470,6 +1469,8 @@ document.addEventListener("keydown", e => {
   else if (e.key === "Backspace") undo();
   else if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); }
 });
+// Start last, once everything above is set up (a reload can go straight back into a round).
+if (!remembered()) show("gate"); else if (!backToPlace()) show("home");
 </script>
 </body>
 </html>
