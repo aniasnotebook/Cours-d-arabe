@@ -648,11 +648,12 @@ PRON["و"] = ["levres", "cavite"]; PRON["ى"] = PRON["ے"] = ["milieu", "cavite"
 // The letter's sound: the teacher reading page 6 on YouTube (the lesson's own video), played from that letter to the next.
 // The player is loaded once a lesson 1 round opens, so a tap on the speaker starts it at once. It needs a connection.
 const SOUND_VIDEO = "pBOENnAxXGk";
-const SOUND_TAPS = [19.3,21.1,23.2,25.2,27.7,30.1,32.6,34.7,37.2,40.4,42.8,45.3,47.6,51.4,54.5,57.7,60.0,62.2,65.1,68.0,70.7,73.0,75.5,78.4,80.8,83.4,86.6,88.6,90.5,92.7,94.9];   // when each letter is said, then the end
+// Start and end of each letter in the video, set by ear on the test page (essai-son.html), in the order of GLYPHS.
+const SOUND_CLIPS = [[18.8,20.5],[20.6,22.6],[22.9,25.0],[25.1,27.1],[27.4,29.9],[29.4,32.2],[31.9,34.5],[34.0,37.0],[37.1,39.8],[39.7,42.0],[42.1,44.7],[44.6,47.4],[47.3,50.4],[50.9,53.9],[54.0,57.1],[57.2,59.0],[59.3,61.4],[61.5,64.5],[64.6,67.4],[67.7,69.5],[70.0,72.2],[72.5,74.9],[74.8,77.2],[77.7,80.0],[80.1,82.8],[82.7,85.2],[85.7,87.8],[87.9,89.9],[89.8,92.1],[92.0,94.7]];
 // To start without a wait, the video is warmed up once, muted (it plays a moment, then pauses), and each new card moves it,
 // still paused, to its letter: the tap then only unmutes and plays.
 let ytP = null, ytReady = false, ytTimer = null, ytWarm = 0;   // 0 not yet, 1 warming, 2 warm
-const soundAt = g => { const i = GLYPHS.indexOf(g); return i < 0 ? null : [Math.max(0, SOUND_TAPS[i] - 0.7), SOUND_TAPS[i + 1] - 0.2]; };
+const soundAt = g => { const i = GLYPHS.indexOf(g); return i < 0 ? null : SOUND_CLIPS[i]; };
 function primeSound(g) {
   const t = soundAt(g);
   if (ytWarm === 2 && t && !$("ytBox").classList.contains("on")) ytP.seekTo(t[0], true);
