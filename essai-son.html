@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Essai du son</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
+<style>
+  body { margin:0; background:#f3efe6; color:#1d1d1b; font:16px/1.4 system-ui,-apple-system,sans-serif; padding:16px; }
+  h1 { font-size:20px; margin:4px 0 4px; } p { margin:0 0 12px; color:#6b665c; font-size:14px; }
+  .pl { border-radius:14px; overflow:hidden; background:#000; aspect-ratio:16/9; }
+  .pl iframe, #pl { width:100%; height:100%; display:block; }
+  .grid { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-top:14px; direction:rtl; }
+  .grid button { height:58px; border-radius:14px; border:1px solid #e2dccf; background:#fff; font:700 30px/1 Amiri,serif; color:#1d1d1b; }
+  .grid button.on { background:#2f7d4f; color:#fff; border-color:#2f7d4f; }
+  #st { margin-top:12px; font-size:13px; color:#6b665c; min-height:1.4em; }
+</style>
+</head>
+<body>
+<h1>Essai : le son des lettres avec la vidéo</h1>
+<p>Tape une lettre : la vidéo de la leçon (page 6) part de cette lettre et s’arrête après. Les temps sont approximatifs pour l’instant.</p>
+<div class="pl"><div id="pl"></div></div>
+<div class="grid" id="g"></div>
+<div id="st"></div>
+<script>
+const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
+  "ق","ك","ل","م","ن","و","ه","ء","ى","ے"], AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
+  "قاف","كاف","لام","ميم","نون","واو","ها","همزة","يا","يا"];
+// A guess until the real times are known: 5 s of opening, then about 2.9 s per letter over the 95 s video.
+const START = 5, STEP = 2.9;
+const st = t => document.getElementById("st").textContent = t;
+let P = null, stopAt = null, timer = null;
+document.getElementById("g").innerHTML = GLYPHS.map((g, i) => `<button data-i="${i}" aria-label="${AR_NAMES[i]}">${g}</button>`).join("");
+document.getElementById("g").onclick = e => {
+  const b = e.target.closest("button"); if (!b || !P || !P.seekTo) return st("La vidéo n’est pas encore prête.");
+  document.querySelectorAll(".grid .on").forEach(x => x.classList.remove("on")); b.classList.add("on");
+  const t = START + +b.dataset.i * STEP; stopAt = t + STEP;
+  P.seekTo(t, true); P.playVideo();
+  clearInterval(timer); timer = setInterval(() => { if (P.getCurrentTime() >= stopAt) { P.pauseVideo(); clearInterval(timer); b.classList.remove("on"); } }, 100);
+};
+function onYouTubeIframeAPIReady() {
+  P = new YT.Player("pl", { videoId: "pBOENnAxXGk", playerVars: { playsinline: 1, rel: 0, origin: location.origin },
+    events: { onReady: () => st("Prête."), onError: e => st("Erreur de la vidéo : " + e.data + (e.data == 101 || e.data == 150 ? " (sa chaîne ne permet pas de la lire ailleurs que sur YouTube)" : "")) } });
+}
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
