@@ -709,7 +709,7 @@ const SIGNS = [
 SIGNS.forEach(s => s.mini = `<div class="mini signmini">${signHtml(s, 26)}</div>`);
 // The sign drawn as on the sheet: alone, a little above (or under) a red dotted circle, never touching it.
 function signHtml(s, size) {
-  const ring = Math.round(size * .6), mark = `<span class="smark" style="font-size:${size}px; ${s.under ? "margin-top:-.62em; margin-bottom:.55em" : "margin-bottom:-.42em"}">\u00A0${s.mark}</span>`;
+  const ring = Math.round(size * .6), mark = `<span class="smark" style="font-size:${size}px; ${s.under ? "margin-top:calc(-.66em + 6px); margin-bottom:.55em" : `margin-bottom:${-Math.round(size * .34) + (size < 40 ? 3 : 0)}px`}">\u00A0${s.mark}</span>`;
   const circle = `<span class="sring" style="width:${ring}px; height:${ring}px; border-width:${Math.max(2, Math.round(ring / 16))}px"></span>`;
   return `<span class="sign" lang="ar"><span class="scol">${s.under ? circle + mark : mark + circle}</span>${s.after ? `<span class="safter" style="font-size:${Math.round(size * .75)}px">${s.after}</span>` : ""}</span>`;
 }
@@ -1548,6 +1548,7 @@ $("pron").onclick = e => { if (e.target === $("pron")) $("pron").hidden = true; 
 document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
 $("goW1").onclick = () => openWriting(1);
 $("goS1").onclick = () => openChoice("signs");
+$("goS1").querySelector(".tile").innerHTML = signHtml(SIGNS[2], 24);   // a damma over the sheet's dotted circle
 $("goW2").onclick = () => openWriting(2);
 document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
   if (b.dataset.w === "choose") { mode = choiceOf; famQuiz = false; return start(); }
