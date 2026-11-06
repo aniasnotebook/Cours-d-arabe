@@ -105,7 +105,7 @@
   .card.has-fams { padding:12px 12px 14px; }
   .card.has-fams .glyph { margin-top:auto; }
   .card.has-fams .fams { position:static; margin-top:auto; }
-  .arname { position:absolute; top:12px; left:18px; color:#d6301f; font-size:32px; line-height:1.4; }
+  .arname { position:absolute; top:12px; left:0; right:0; text-align:center; color:#d6301f; font-size:32px; line-height:1.4; pointer-events:none; }
   .verdict { font-size:15px; font-weight:800; } .verdict.good { color:#2f7d4f; } .verdict.bad { color:#c2410c; }
   .hint { margin:0; text-align:center; font-size:13px; color:var(--muted); }
 
@@ -247,10 +247,10 @@
   .askrow { display:flex; gap:10px; } .askrow button { flex:1; }
   #ask { z-index:30; }
   .scrim { touch-action:pan-x pan-y pinch-zoom; position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:center; justify-content:center; padding:16px; }
-  .card .tops { position:absolute; right:14px; top:12px; display:flex; gap:8px; z-index:1; }
-  .wcard .tops { position:absolute; left:12px; top:12px; display:flex; gap:6px; z-index:3; }
-  .wcard .tops .spk, .wcard .tops .pron { width:40px; height:40px; padding:0; justify-content:center; }   /* icons only: the name stays clear */
-  .wcard .tops .pron span { display:none; }
+  /* Same place on every lesson 1 card: top left, icons only, so the name above the letter stays clear. */
+  .card .tops, .wcard .tops { position:absolute; left:12px; top:12px; display:flex; gap:6px; z-index:3; }
+  .tops .spk, .tops .pron { width:40px; height:40px; padding:0; justify-content:center; }
+  .tops .pron span { display:none; }
   .spk { width:44px; height:38px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; display:grid; place-items:center; padding:0; }
   .spk svg { width:20px; height:20px; } .spk.on { background:#2f7d4f; border-color:#2f7d4f; color:#fff; }
   .card.under .tops { visibility:hidden; }
