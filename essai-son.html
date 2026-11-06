@@ -9,6 +9,12 @@
 <style>
   body { margin:0; background:#f3efe6; color:#1d1d1b; font:16px/1.4 system-ui,-apple-system,sans-serif; padding:16px; }
   h1 { font-size:20px; margin:4px 0 4px; } p { margin:0 0 12px; color:#6b665c; font-size:14px; }
+  .duo { display:flex; gap:10px; align-items:stretch; }
+  .duo .pl { flex:1 1 auto; }
+  .duo.tap { position:sticky; top:0; z-index:6; background:#f3efe6; padding:6px 0; }
+  .duo.tap .pl { flex:0 0 58%; }
+  #next { flex:1; min-height:100px; border-radius:18px; background:#fff; border:3px solid #2f7d4f; color:#1d1d1b; font:700 52px/1 Amiri, serif; padding:6px; }
+  #next img { max-width:100%; max-height:90px; display:block; margin:auto; }
   .pl { border-radius:14px; overflow:hidden; background:#000; aspect-ratio:16/9; }
   .pl iframe, #pl { width:100%; height:100%; display:block; }
   .grid { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin-top:14px; direction:rtl; }
@@ -35,11 +41,10 @@
 <h1>Essai : le son avec la vidéo</h1>
 <div class="tabs" id="tabs"><button data-p="6" class="on">Page 6</button><button data-p="7">Page 7</button><button data-p="8">Page 8</button><button data-p="9">Page 9</button></div>
 <p>Tape une case : la vidéo du professeur part de la case et s’arrête après. Si ça commence ou finit mal, règle le début et la fin avec les boutons, ça rejoue tout de suite. Page 6 est réglée ; les autres pages sont approximatives tant qu’elles ne sont pas réglées.</p>
-<div class="pl"><div id="pl"></div></div>
+<div class="duo" id="duo"><div class="pl"><div id="pl"></div></div><button id="next" hidden></button></div>
 <div style="margin-top:12px;padding:12px;border-radius:14px;background:#fff;border:1px solid #e2dccf">
   <b>Régler les temps</b>
-  <p style="margin:6px 0 10px">Tape « Commencer » : la vidéo part du début. Le grand bouton montre la case suivante du cours : <b>tape-le au moment où le professeur la dit</b>. À la fin, copie le texte et envoie-le-moi.</p>
-  <button id="next" hidden style="display:block;width:100%;height:110px;padding:8px;margin:0 0 10px;border-radius:18px;background:#fff;border:3px solid #2f7d4f !important;color:#1d1d1b;font:700 52px/1 Amiri,serif"></button>
+  <p style="margin:6px 0 10px">Tape « Commencer » : la vidéo part du début. Le grand bouton à côté de la vidéo montre la case suivante du cours : <b>tape-le au moment où le professeur la dit</b>. À la fin, copie le texte et envoie-le-moi.</p>
   <button id="cal" style="height:44px;padding:0 16px;border-radius:99px;border:0;background:#2f7d4f;color:#fff;font:700 15px system-ui">Commencer</button>
   <button id="copy" hidden style="height:44px;padding:0 16px;border-radius:99px;border:1px solid #e2dccf;background:#fff;font:700 15px system-ui">Copier les temps</button>
   <pre id="out" style="white-space:pre-wrap;font-size:12px;margin:10px 0 0"></pre>
@@ -108,11 +113,12 @@ function drawGrid() {
 drawGrid();
 document.getElementById("tabs").onclick = e => { const b = e.target.closest("button"); if (!b) return;
   page = +b.dataset.p; document.querySelectorAll("#tabs button").forEach(x => x.classList.toggle("on", x === b));
-  calib = null; nextB.hidden = true; document.getElementById("out").textContent = ""; document.getElementById("copy").hidden = true;
+  calib = null; nextB.hidden = true; duo.classList.remove("tap"); document.getElementById("out").textContent = ""; document.getElementById("copy").hidden = true;
   clearInterval(timer); sel = null; showAdj(); drawGrid(); if (P && P.cueVideoById) { P.cueVideoById(VIDEOS[page]); setTimeout(() => { const d = P.getDuration(); if (d) STEP = (d - START) / items().length; }, 1500); } };
 let calib = null;
 const nextB = document.getElementById("next");
-const showNext = () => { const i = calib.length, all = items(); if (i >= all.length) { nextB.hidden = true; return st("Fini : copie les temps."); } nextB.hidden = false; nextB.innerHTML = all[i].html; };
+const duo = document.getElementById("duo");
+const showNext = () => { const i = calib.length, all = items(); if (i >= all.length) { nextB.hidden = true; duo.classList.remove("tap"); return st("Fini : copie les temps."); } nextB.hidden = false; duo.classList.add("tap"); nextB.innerHTML = all[i].html; };
 document.getElementById("cal").onclick = () => { if (!P || !P.seekTo) return st("La vidéo n’est pas encore prête.");
   clearInterval(timer); calib = []; P.seekTo(0, true); P.playVideo(); showNext(); st("Tape le grand bouton à chaque case."); };
 nextB.onclick = () => { if (!calib || calib.length >= items().length) return; calib.push((page === 6 ? GLYPHS[calib.length] : items()[calib.length].id) + " " + P.getCurrentTime().toFixed(1));
