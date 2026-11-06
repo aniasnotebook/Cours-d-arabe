@@ -248,13 +248,16 @@
   #ask { z-index:30; }
   .scrim { touch-action:pan-x pan-y pinch-zoom; position:fixed; inset:0; background:var(--scrim); z-index:10; display:flex; align-items:center; justify-content:center; padding:16px; }
   .card .tops { position:absolute; right:14px; top:12px; display:flex; gap:8px; z-index:1; }
-  .card .spk { width:44px; height:38px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; display:grid; place-items:center; padding:0; }
-  .card .spk svg { width:20px; height:20px; } .card .spk.on { background:#2f7d4f; border-color:#2f7d4f; color:#fff; }
+  .wcard .tops { position:absolute; left:12px; top:12px; display:flex; gap:6px; z-index:3; }
+  .wcard .tops .spk, .wcard .tops .pron { width:40px; height:40px; padding:0; justify-content:center; }   /* icons only: the name stays clear */
+  .wcard .tops .pron span { display:none; }
+  .spk { width:44px; height:38px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; display:grid; place-items:center; padding:0; }
+  .spk svg { width:20px; height:20px; } .spk.on { background:#2f7d4f; border-color:#2f7d4f; color:#fff; }
   .card.under .tops { visibility:hidden; }
   #ytBox { position:fixed; left:-10000px; top:0; width:240px; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#000; z-index:5; box-shadow:0 4px 16px rgba(0,0,0,.25); }
   #ytBox iframe { width:100%; height:100%; display:block; border:0; }
-  .card .pron { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; font:600 13px system-ui, sans-serif; z-index:1; }
-  .card .pron svg { width:18px; height:18px; }
+  .pron { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; font:600 13px system-ui, sans-serif; z-index:1; }
+  .pron svg { width:18px; height:18px; }
   .sheetwrap { align-items:flex-end; padding:0; }
   .psheet { width:100%; max-width:520px; max-height:88%; display:flex; flex-direction:column; background:var(--bg); border-radius:22px 22px 0 0; padding:12px 14px max(14px, env(safe-area-inset-bottom, 0px)); }
   .phead { display:flex; align-items:center; justify-content:space-between; padding-bottom:8px; }
@@ -634,11 +637,14 @@ function loadSound() {
       onStateChange: e => { if (ytWarm === 1 && e.data === 1) { ytP.pauseVideo(); ytWarm = 2; if (mode === "letters" && deck[pos]) primeSound(deck[pos].g); } } } }); };
   const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.onerror = () => ytP = null; document.head.appendChild(sc);
 }
+// The two buttons on a lesson 1 card: hear the letter, see how to pronounce it.
+const soundTops = g => `<span class="tops"><button class="spk" data-g="${g}" aria-label="Écouter">${ICONS.speaker}</button>${PRON[g] ? `<button class="pron" data-g="${g}" aria-label="Prononciation">${ICONS.bulb}<span>Prononciation</span></button>` : ""}</span>`;
 function playSound(g, btn) {
   const i = GLYPHS.indexOf(g), t = soundAt(g);
   if (!ytReady || !t) { loadSound(); const h = $("hint"); if (h) h.textContent = "Le son a besoin d’Internet : réessaie dans un instant."; return; }
-  const c = btn.closest(".card").getBoundingClientRect(), box = $("ytBox"), w = Math.min(240, c.width - 40);
-  box.style.width = w + "px"; box.style.left = (c.left + (c.width - w) / 2) + "px"; box.style.top = (c.bottom - w * 9 / 16 - 16) + "px";
+  // The small video sits low on the card; on a writing card, in its corner, to leave the letter to trace visible.
+  const wc = !!btn.closest(".wcard"), c = btn.closest(".card, .wcard").getBoundingClientRect(), box = $("ytBox"), w = wc ? 150 : Math.min(240, c.width - 40);
+  box.style.width = w + "px"; box.style.left = (wc ? c.right - w - 12 : c.left + (c.width - w) / 2) + "px"; box.style.top = (c.bottom - w * 9 / 16 - (wc ? 12 : 16)) + "px";
   btn.classList.add("on"); box.classList.add("on");
   if (Math.abs(ytP.getCurrentTime() - t[0]) > 0.3) ytP.seekTo(t[0], true);
   ytWarm = 2; ytP.unMute(); ytP.setVolume(100); ytP.playVideo();
@@ -700,7 +706,7 @@ function letterCard(l, id, cls) {
   return `<div class="card swipe ${cls} ${famQuiz ? "has-fams" : ""}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
     <span class="glyph ar" lang="ar">${glyph(l.g)}</span>
     <span class="arname ar" lang="ar">${l.ar}</span>
-    <span class="tops"><button class="spk" data-g="${l.g}" aria-label="Écouter">${ICONS.speaker}</button>${PRON[l.g] ? `<button class="pron" data-g="${l.g}">${ICONS.bulb}Prononciation</button>` : ""}</span>
+    ${soundTops(l.g)}
     ${fams}
   </div>`;
 }
@@ -1022,6 +1028,7 @@ function startWrite(cards) {
   });
 }
 function openWriteRound() {
+  if (mode === "wletters") loadSound(); else stopSound();
   $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : wWords() || wKind === "split" ? "Voir le livre" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
@@ -1041,7 +1048,8 @@ function wRender() {
   $("wBar").style.width = `${wPos / wDeck.length * 100}%`;
   $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("wBad").textContent = `${wAnswers.filter(a => !a.ok && !a.skip).length} à revoir`;
-  $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}<span class="line"></span>
+  stopSound();
+  $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}${mode === "wletters" && wKind === "trace" ? soundTops(it.g) : ""}<span class="line"></span>
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
@@ -1052,6 +1060,7 @@ function wRender() {
   wCanvas();
   wNameSwitch();
   $("wErase").onclick = wErase;
+  if (mode === "wletters") primeSound(it.g);
 }
 // What to write, under the card.
 const wTask = () => wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
@@ -1105,6 +1114,7 @@ function wayBadge(it) {
 function wReveal() {
   wShown = true;
   $("wCard").classList.add("shown");
+  if (mode === "wletters" && !$("wCard").querySelector(".tops")) $("wCard").insertAdjacentHTML("beforeend", soundTops(wDeck[wPos].g));   // after the answer, not before
   if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
   const ways = wWords() ? waysOf(wDeck[wPos]) : [];
   if (ways.length > 1) $("wCard").insertAdjacentHTML("beforeend", `<div class="ways" id="wWays">${ways.map(c => `<span class="${c === wayOf(wDeck[wPos]) ? "on" : ""}">${bookImg(c)}</span>`).join("")}</div>`);
@@ -1132,7 +1142,7 @@ function wSwipe(c) {
     else { c.style.transform = ""; tint(c, 0); }
   };
 }
-function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordShow(wDeck[wPos]); const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); $("wWays")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
+function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordShow(wDeck[wPos]); const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); if (wKind !== "trace") { stopSound(); c?.querySelector(".tops")?.remove(); } $("wWays")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
 function wFly(ok) {
   const c = $("wCard"); if (!c || c.dataset.gone) return;   // a double tap answers once
   c.dataset.gone = 1; tint(c, ok ? 100 : -100);
