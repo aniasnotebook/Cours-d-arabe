@@ -6,7 +6,7 @@
 <meta name="viewport" id="vp" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Cours d’arabe</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@500;600&display=swap">
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -159,6 +159,27 @@
   .card.quiz.tight .grp .q { display:none; }
   .card.quiz .nolink .s { display:none; }
   @media (max-height:660px) { .card.quiz .fstack { grid-template-rows:repeat(4, 24px); gap:3px; } .card.quiz .fstack img { max-height:18px; } .card.quiz .ans .formrow { margin-top:.2em; } .card.quiz.good .grp .q, .card.quiz.bad .grp .q { display:none; } .card.quiz .nolink .l { display:none; } .card.quiz .nolink .s { display:inline; } }   /* room for the label, the questions are answered */
+  /* Les signes: the sheet's own font (Noto Naskh Arabic), its red sign over a dotted circle. */
+  .sfont, .sign, .sigrow .ar { font-family:"Noto Naskh Arabic", serif; }
+  .sign { display:inline-flex; align-items:center; gap:.08em; color:#d6301f; direction:rtl; line-height:1; }
+  .sign .scol { display:inline-flex; flex-direction:column; align-items:center; }
+  .sign .smark { line-height:1; height:.5em; overflow:visible; }
+  .sign .sring { border:2px dotted #d6301f; border-radius:50%; display:block; }
+  .sign .safter { line-height:1.5; font-weight:600; align-self:center; }
+  @media (max-height:740px) { .card.quiz.signs .sigrow { padding:4px 12px; gap:0 12px; font-size:13px; } .card.quiz.signs .sigrow .ar { font-size:17px; line-height:1.5; } .card.quiz.signs .sigrow .ex { font-size:21px; }
+    .card.quiz.signs.good .grp .q, .card.quiz.signs.bad .grp .q { display:none; } .card.quiz.signs .fstack { grid-template-rows:repeat(3, 26px); } .card.quiz.signs .fstack img { max-height:20px; }
+    .card.quiz.signs .fbook small { display:none; } .card.quiz.signs .ans { gap:4px; } .card.quiz.signs.good .ans, .card.quiz.signs.bad .ans { margin:0; } }
+  @media (max-height:660px) { .card.quiz.signs .chip { height:32px; font-size:13px; } .card.quiz.signs .chips.wrap { gap:4px; } .card.quiz.signs .fstack { grid-template-rows:repeat(3, 22px); } .card.quiz.signs .fstack img { max-height:18px; } }
+  /* Once answered, the correction takes the room: no empty space above, the book's ways in 3 rows, a tight table. */
+  .card.quiz.signs.good .ans, .card.quiz.signs.bad .ans { margin:0; }
+  .card.quiz.signs .big { font-size:16px; line-height:1; padding:14px 0 6px; }   /* the sign sets its own sizes */
+  .card.quiz.signs .fstack { grid-template-rows:repeat(3, 30px); }
+  .card.quiz.signs .sigrow { gap:0 14px; padding:6px 14px; } .card.quiz.signs .sigrow .ar { line-height:1.45; }
+  .card.quiz .chips.wrap { display:grid; grid-template-columns:1fr 1fr; gap:6px; width:100%; max-width:340px; }   /* always 2 rows of 2 */
+  .card.quiz .chips.wrap .chip { justify-content:center; padding:0 6px; }
+  .signmini { font-size:0; display:grid; place-items:center; }
+  .sigrow { display:grid; grid-template-columns:auto 1fr; gap:4px 14px; align-items:center; background:#fff; border:1px solid #e2dccf; border-radius:14px; padding:10px 16px; text-align:left; font:14px/1.4 system-ui, sans-serif; color:#1d1d1b; max-width:310px; }
+  .sigrow .k { color:#6b665c; font-size:12px; font-weight:600; } .sigrow .ar { font-size:22px; line-height:1.6; font-weight:600; } .sigrow .ex { font-size:28px; }
   .card.quiz .nolink { font:600 12px/1.35 system-ui, sans-serif; color:#6b665c; background:#f3efe6; border-radius:10px; padding:4px 10px; text-align:center; max-width:300px; }
   .card.quiz .fhead { display:flex; align-items:center; justify-content:center; gap:14px; direction:ltr; }
   .card.quiz .fbook { display:flex; flex-direction:column; align-items:center; gap:3px; }
@@ -369,6 +390,7 @@
     <div class="label">Exercices</div>
     <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>Les 30 lettres · Les familles en plus</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:#d6301f; font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goS1"><span class="tile"><span class="sfont" lang="ar" style="font-size:22px; color:#d6301f">◌ُ</span></span><span class="t">Les signes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="1"></div>
   </section>
 
@@ -667,10 +689,42 @@ function openPron(g) {
   $("pronBody").innerHTML = [...PRON[g], "methode"].map(b => `<img src="book/pron/${b}.jpg" alt="">`).join("");
   $("pron").hidden = false; $("pronBody").scrollTop = 0;
 }
+// ---------- Les signes (lesson 1): the class's Fiche 1 table « Les voyelles et les signes de lecture », word for word.
+// mark: the sign alone, over or under the red dotted circle as the sheet draws it; after: the letter written next to it
+// (the long vowels); book: how many ways the book writes it (pages 10 and 11), cut into book/signs/<id>-<n>.png.
+// The dammatân is written with two small waws, as in the book (U+08F1), not with the font's joined damma.
+const SIGNS = [
+  { id: "fatha", ar: "الفَتْحَةُ", fr: "Fatha", mark: "\u064E", ex: "بَ", say: "« a »", read: "son court « a »", book: 5 },
+  { id: "kasra", ar: "الكَسْرَةُ", fr: "Kasra", mark: "\u0650", under: true, ex: "بِ", say: "« i »", read: "son court « i »", book: 5 },
+  { id: "damma", ar: "الضَّمَّةُ", fr: "Damma", mark: "\u064F", ex: "بُ", say: "« ou »", read: "son court « ou »", book: 5 },
+  { id: "fathatan", ar: "فَتْحَتَانِ", fr: "Fathatân", mark: "\u064B", ex: "بًا", say: "« an »", read: "« an » en fin de mot", book: 5 },
+  { id: "kasratan", ar: "كَسْرَتَانِ", fr: "Kasratân", mark: "\u064D", under: true, ex: "بٍ", say: "« in »", read: "« in » en fin de mot", book: 5 },
+  { id: "dammatan", ar: "ضَمَّتَانِ", fr: "Dammatân", mark: "\u08F1", ex: "ب\u08F1", say: "« oun »", read: "« oun » en fin de mot", book: 5 },
+  { id: "alif", ar: "الأَلِفُ السَّاكِنَةُ", fr: "Alif soukoun", mark: "\u064E", after: "ا", ex: "بَا", say: "« â »", read: "« â » long : 2 temps" },
+  { id: "waw", ar: "الوَاوُ السَّاكِنَةُ", fr: "Wâw soukoun", mark: "\u064F", after: "و", ex: "بُو", say: "« oû »", read: "« oû » long : 2 temps" },
+  { id: "ya", ar: "اليَاءُ السَّاكِنَةُ", fr: "Yâ soukoun", mark: "\u0650", under: true, after: "ي", ex: "بِي", say: "« î »", read: "« î » long : 2 temps" },
+  { id: "chedda", ar: "الشَّدَّةُ", fr: "Chedda", mark: "\u0651", ex: "رَبَّ", say: "on appuie", read: "lettre doublée : on appuie" },
+  { id: "soukoun", ar: "السُّكُونُ", fr: "Soukoun", mark: "\u0652", ex: "مِنْ", say: "on s’arrête", read: "pas de voyelle : on s'arrête sur la lettre" },
+];
+SIGNS.forEach(s => s.mini = `<div class="mini signmini">${signHtml(s, 26)}</div>`);
+// The sign drawn as on the sheet: alone, a little above (or under) a red dotted circle, never touching it.
+function signHtml(s, size) {
+  const ring = Math.round(size * .6), mark = `<span class="smark" style="font-size:${size}px; ${s.under ? "margin-top:-.62em; margin-bottom:.55em" : "margin-bottom:-.42em"}">\u00A0${s.mark}</span>`;
+  const circle = `<span class="sring" style="width:${ring}px; height:${ring}px; border-width:${Math.max(2, Math.round(ring / 16))}px"></span>`;
+  return `<span class="sign" lang="ar"><span class="scol">${s.under ? circle + mark : mark + circle}</span>${s.after ? `<span class="safter" style="font-size:${Math.round(size * .75)}px">${s.after}</span>` : ""}</span>`;
+}
+const signWays = s => Array.from({ length: s.book || 0 }, (_, i) => `<span><img src="book/signs/${s.id}-${i + 1}.png" alt=""></span>`).join("");
+// Wrong choices: three other signs, the ones that look or sound alike first.
+const SIGN_NEAR = { fatha: ["fathatan","alif"], kasra: ["kasratan","ya"], damma: ["dammatan","waw"], fathatan: ["fatha","alif"], kasratan: ["kasra","ya"],
+  dammatan: ["damma","waw"], alif: ["fatha","fathatan"], waw: ["damma","dammatan"], ya: ["kasra","kasratan"], chedda: ["soukoun","fatha"], soukoun: ["chedda","damma"] };
+function signChoices(s) {
+  const near = SIGN_NEAR[s.id].map(id => SIGNS.find(x => x.id === id)), rest = shuffle(SIGNS.filter(x => x !== s && !near.includes(x)));
+  return shuffle([s, ...near, ...rest].slice(0, 4));
+}
 function start(cards) {
   if (writing()) return startWrite(cards);
-  source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : WORD_CARDS);
-  const random = mode === "letters" ? $("rand1").checked : $("rand2").checked;
+  source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : mode === "signs" ? SIGNS : WORD_CARDS);
+  const random = mode === "letters" || mode === "signs" ? $("rand1").checked : $("rand2").checked;
   fromPage(source, from => {
     deck = deckOf(source, random, from);
     deck.forEach(i => delete i.choices);
@@ -680,7 +734,7 @@ function start(cards) {
 }
 function openRound() {
   if (mode === "letters") loadSound(); else stopSound();
-  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : "Voir le livre";
+  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir la fiche" : "Voir le livre";
   $("peek").dataset.page = mode === "letters" ? 1 : 2;
   show("play");
   render();
@@ -856,7 +910,12 @@ document.addEventListener("wheel", e => {
 // ---------- Lesson 2: choose, check, next
 function renderQuiz() {
   const it = deck[pos], chip = (k, v, label, ar) => `<button class="chip${ar ? " ar" : ""}" data-k="${k}" data-v="${v}"${ar ? ' lang="ar"' : ""}>${ar ? "" : ICONS.plus}${label}</button>`;
-  if (mode === "forms") {
+  if (mode === "signs") {
+    it.choices = it.choices || { name: signChoices(it), say: signChoices(it) };
+    $("stage").innerHTML = `<div class="card quiz signs enter" id="card"><span class="ans"><span class="fhead"><span class="big">${signHtml(it, innerHeight < 680 ? 48 : innerHeight < 740 ? 60 : 96)}</span></span></span>
+      <div class="grp"><span class="q">Quel signe ?</span><span class="chips wrap">${it.choices.name.map(c => chip("name", c.id, c.fr)).join("")}</span></div>
+      <div class="grp"><span class="q">Comment se lit-il ?</span><span class="chips wrap">${it.choices.say.map(c => chip("say", c.id, c.say)).join("")}</span></div></div>`;
+  } else if (mode === "forms") {
     it.choices = it.choices || choicesFor([it.g], 4);
     pick.pos = new Set();
     $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="fhead"><span class="big ar" lang="ar">${formOf(it.g, it.p)}</span></span></span>
@@ -896,8 +955,9 @@ function choose(b) {
   const k = b.dataset.k, v = b.dataset.v;
   if (k === "multi" || k === "pos") { pick[k].has(v) ? pick[k].delete(v) : pick[k].add(v); b.classList.toggle("on");
     if (k === "pos") b.innerHTML = (b.classList.contains("on") ? ICONS.check : ICONS.plus) + POS[v]; }
-  else { pick[k] = v; $("card").querySelectorAll(`.chip[data-k="${k}"]`).forEach(o => { o.classList.toggle("on", o === b); if (k === "pos") o.innerHTML = (o === b ? ICONS.check : ICONS.plus) + POS[o.dataset.v]; }); }
-  $("check").disabled = mode === "forms" ? !(pick.letter && pick.pos.size) : !pick.multi.size;
+  else { pick[k] = v; $("card").querySelectorAll(`.chip[data-k="${k}"]`).forEach(o => { o.classList.toggle("on", o === b);
+    if (mode === "signs") o.innerHTML = (o === b ? ICONS.check : ICONS.plus) + o.textContent; }); }
+  $("check").disabled = mode === "signs" ? !(pick.name && pick.say) : mode === "forms" ? !(pick.letter && pick.pos.size) : !pick.multi.size;
 }
 
 function check() {
@@ -906,7 +966,18 @@ function check() {
   let ok;
   const ans = card.querySelector(".ans"), chips = card.querySelectorAll(".chip");
   chips.forEach(o => o.disabled = true);
-  if (mode === "forms") {
+  if (mode === "signs") {
+    ok = pick.name === it.id && pick.say === it.id;
+    if (it.book) ans.querySelector(".fhead").insertAdjacentHTML("beforeend", `<span class="fbook"><small>Dans le livre</small><span class="fstack">${signWays(it)}</span></span>`);
+    ans.insertAdjacentHTML("beforeend", `<span class="sigrow"><span class="k">Nom</span><span><span class="ar" lang="ar">${it.ar}</span> · <b>${it.fr}</b></span>
+      <span class="k">Exemple</span><span class="ar ex" lang="ar">${it.ex}</span><span class="k">Lecture</span><span>${it.read}</span></span>`);
+    chips.forEach(o => {
+      const right = o.dataset.v === it.id, chosen = o.classList.contains("on"), label = o.textContent;
+      o.className = "chip" + (right && chosen ? " right" : right ? " missed" : chosen ? " wrong" : " off");
+      o.innerHTML = (right && chosen ? ICONS.check : "") + label;
+    });
+    card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
+  } else if (mode === "forms") {
     const places = samePlaces(it.g, it.p);
     ok = pick.letter === it.g && pick.pos.size === places.length && places.every(q => pick.pos.has(q));
     ans.insertAdjacentHTML("beforeend", `<span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${q === it.p ? places.map(x => POS[x]).join(" / ") : POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`);
@@ -962,17 +1033,19 @@ function check() {
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
 // Tracing: the letter is in grey under the drawing, no score. Testing: the red name (or the separate letters of a word),
 // a blank card, then the book's letter in green over the drawing, and the learner says if it was right.
-const writing = () => mode === "wletters" || mode === "wwords" || mode === "wforms";
+const writing = () => mode === "wletters" || mode === "wwords" || mode === "wforms" || mode === "wsigns";
 let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes = [], wShown = false;
 const wWords = () => mode === "wwords";
 const wLesson2 = () => mode === "wwords" || mode === "wforms";
-const wModel = it => wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
+const wModel = it => wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${it.ex}</span>`
+  : wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
   : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:baseline; gap:0.35em; white-space:nowrap; font-size:min(${lettersOf(it.w).length > 3 ? 46 : 60}px, 14vw, 9vh)">${inked(it.w, it.k, "")}</span>`
   : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh)">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
 let wArabic = false;
-const wPrompt = it => wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
+const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><span class="ar sfont" lang="ar">${it.ex.replace(/[\u064B-\u0652\u08F1]/g, "")}</span><b>${it.fr}</b></span>`
+  : wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
   : wKind === "split" ? `<span class="prompt ar" lang="ar">${wordShow(it)}</span>`
   : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}${wayBadge(it)}</span>`
   : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
@@ -1002,6 +1075,8 @@ const PV_PLACES = `<span style="display:flex; gap:3px">${["début","milieu","fin
 const CHOICE = {
   words: { title: "Séparer les lettres", write: "split", top: "بلب", tiles: ["ب","ت","ل","ن"],
     choose: "Tu vois une case du livre, tu tapes ses lettres.", text: "Tu vois une case du livre, tu écris ses lettres séparées, puis tu vérifies." },
+  signs: { title: "Les signes", write: "sign", lesson: 1,
+    choose: "Tu vois un signe, tu choisis son nom et comment il se lit.", text: "Tu vois la lettre et le nom du signe, tu l’écris, puis tu vérifies." },
   forms: { title: "Les formes", write: "form", top: "ـبـ", tiles: ["ب","ن"], places: true,
     choose: "Tu vois une forme, tu choisis la lettre et sa place.", text: "Tu vois une lettre et sa place, tu écris sa forme, puis tu vérifies." },
 };
@@ -1009,11 +1084,18 @@ function openChoice(which) {
   const c = CHOICE[which];
   choiceOf = which; mode = which;
   $("cwTitle").textContent = c.title;
-  $("cwBack").dataset.back = "l2";
-  bindRand($("cwRand"), 2);
+  $("cwBack").dataset.back = c.lesson === 1 ? "l1" : "l2";
+  bindRand($("cwRand"), c.lesson || 2);
   $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write; setLevel($("pkB"), 2);
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
   $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
+  if (which === "signs") {
+    const pill = (t, on) => `<span style="padding:2px 5px; border-radius:99px; font:700 8.5px/1.3 system-ui, sans-serif; ${on ? "background:#1d1d1b; color:#fff" : "border:1px solid #e2dccf; color:#1d1d1b"}">${t}</span>`;
+    $("pvTrace").innerHTML = `<span class="mc"><span style="display:flex; flex-direction:column; align-items:center; gap:6px">${signHtml(SIGNS[5], 34)}
+      <span style="display:flex; gap:3px">${pill("Damma")}${pill("Dammatân", 1)}</span><span style="display:flex; gap:3px">${pill("« ou »")}${pill("« oun »", 1)}</span></span></span>`;
+    $("pvTest").innerHTML = `<span class="mc"><span style="position:absolute; top:6px; left:0; right:0; display:flex; flex-direction:column; align-items:center"><span class="ar sfont" lang="ar" style="font-size:22px; line-height:1.4">ب</span><b style="font-size:10px; color:#d6301f">Dammatân</b></span><span style="font-size:28px; color:#b9b2a3; margin-top:26px">?</span><span style="position:absolute; left:12px; right:12px; top:70%; border-top:2px dashed #e2dccf"></span></span>`;
+    return show("cw");
+  }
   const top = `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:24px">${c.top}</span>`;
   // The preview of Choisir is a tiny version of the real card: the word or form, the round letter chips (one chosen), the places.
   $("pvTrace").innerHTML = `<span class="mc"><span style="display:flex; flex-direction:column; align-items:center; gap:7px">
@@ -1028,7 +1110,7 @@ function openChoice(which) {
 }
 
 function startWrite(cards) {
-  wSource = cards || (mode === "wforms" ? FORMS : wWords() ? WORD_CARDS : LETTERS);
+  wSource = cards || (mode === "wforms" ? FORMS : mode === "wsigns" ? SIGNS : wWords() ? WORD_CARDS : LETTERS);
   const random = wLesson2() ? $("rand2").checked : $("rand1").checked;
   fromPage(wSource, from => {
     wDeck = deckOf(wSource, random, from);
@@ -1038,7 +1120,7 @@ function startWrite(cards) {
 }
 function openWriteRound() {
   if (mode === "wletters") loadSound(); else stopSound();
-  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : wWords() || wKind === "split" ? "Voir le livre" : "Voir l’alphabet";
+  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : mode === "wsigns" ? "Voir la fiche" : wWords() || wKind === "split" ? "Voir le livre" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
   show("write");
@@ -1072,7 +1154,7 @@ function wRender() {
   if (mode === "wletters") primeSound(it.g);
 }
 // What to write, under the card.
-const wTask = () => wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
+const wTask = () => wKind === "sign" ? "Écris la lettre avec ce signe" : wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
   : wWords() ? "Écris ces lettres liées, d’un seul trait" : "Dessine la lettre de mémoire";
 function wNameSwitch() {
   const b = $("wName"); if (!b) return;
@@ -1212,11 +1294,11 @@ function showStats() {
   const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
-  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : "case";
+  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : mode === "signs" || mode === "wsigns" ? "signe" : "case";
   const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`, pl = (k, w) => `${w}${k > 1 ? "s" : ""}`;
   const bad = done - good, win = done && skipped <= done && good / done >= PASSED;
-  const name = writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
-  const fem = true, right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
+  const name = writing() && wKind === "sign" ? "Les signes · écrire" : mode === "signs" ? "Les signes · choisir" : writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
+  const fem = !(mode === "signs" || mode === "wsigns"), right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
   // Each score band has its own words and its own move of the logo; confetti from 80 %, twice for a perfect round.
   const all = good === seen && seen === deck.length, rate = done && skipped <= done ? good / done : 0;   // more skipped than answered: under 50 %
@@ -1231,7 +1313,7 @@ function showStats() {
   $("rLine").textContent = nb(done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`);
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = nb(`Familles : ${done - famWrong} / ${done} justes`);
-  $("lessonLinks").innerHTML = lessonLinks(mode === "letters" || mode === "wletters" ? 1 : 2);
+  $("lessonLinks").innerHTML = lessonLinks(["letters", "wletters", "signs", "wsigns"].includes(mode) ? 1 : 2);
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
@@ -1325,7 +1407,7 @@ $("ptr").innerHTML = MARK;
   });
 }
 // A reload comes back to the same place: the same screen, and in a round the same cards and answers so far.
-const pool = m => m === "letters" || m === "wletters" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : WORD_CARDS;
+const pool = m => m === "letters" || m === "wletters" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : m === "signs" || m === "wsigns" ? SIGNS : WORD_CARDS;
 // Where the user is, kept for a reload: the app's own, or the browser's (pull to refresh).
 function savePlace() {
   const screen = ["home","l1","l2","c1","cw","play","write","stats"].find(id => !$(id).hidden);
@@ -1347,15 +1429,15 @@ function backToPlace() {
   let p; try { p = JSON.parse(sessionStorage.getItem("place")); sessionStorage.removeItem("place"); } catch {}
   if (!p) return false;
   mode = p.mode; famQuiz = p.famQuiz; wKind = p.wKind;
-  if (p.screen === "cw") { p.back === "words" || p.back === "forms" ? openChoice(p.back) : openWriting(p.back === "l2" ? 2 : 1); return true; }
+  if (p.screen === "cw") { p.back === "words" || p.back === "forms" || p.back === "signs" ? openChoice(p.back) : openWriting(p.back === "l2" ? 2 : 1); return true; }
   if (!["play", "write", "stats"].includes(p.screen)) { show(p.screen); return true; }
   const P = pool(mode), r = p.round, at = i => P[i];
   if (writing()) {
-    wKind === "split" || wKind === "form" ? openChoice(wKind === "split" ? "words" : "forms") : openWriting(mode === "wwords" ? 2 : 1); mode = p.mode; wKind = p.wKind;
+    wKind === "split" || wKind === "form" || wKind === "sign" ? openChoice({ split: "words", form: "forms", sign: "signs" }[wKind]) : openWriting(mode === "wwords" ? 2 : 1); mode = p.mode; wKind = p.wKind;
     wSource = r.src.map(at); wDeck = r.deck.map(at); wAnswers = r.ans.map(([i, ok, skip]) => ({ item: at(i), ok, skip })); wPos = r.pos;
     if (p.screen === "stats") showStats(); else openWriteRound();
   } else {
-    if (mode === "words" || mode === "forms") openChoice(mode);   // so Retour from the round finds the choice screen
+    if (mode === "words" || mode === "forms" || mode === "signs") openChoice(mode);   // so Retour from the round finds the choice screen
     source = r.src.map(at); deck = r.deck.map(at); answers = r.ans.map(([i, ok, famOk, skip]) => ({ item: at(i), ok, famOk, skip }));
     if (p.screen === "stats") showStats(); else openRound();
   }
@@ -1465,27 +1547,29 @@ $("pronX").onclick = () => $("pron").hidden = true;
 $("pron").onclick = e => { if (e.target === $("pron")) $("pron").hidden = true; };
 document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
 $("goW1").onclick = () => openWriting(1);
+$("goS1").onclick = () => openChoice("signs");
 $("goW2").onclick = () => openWriting(2);
 document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
   if (b.dataset.w === "choose") { mode = choiceOf; famQuiz = false; return start(); }
   if (b.dataset.w === "split") mode = "wwords";
   if (b.dataset.w === "form") mode = "wforms";
+  if (b.dataset.w === "sign") mode = "wsigns";
   wKind = b.dataset.w; startWrite();
 });
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
 $("wRestart").innerHTML = ICONS.restart;
 $("wRestart").onclick = () => askThen("restart", () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource));
 $("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show("cw"));
-$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : "book");
+$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : mode === "wsigns" ? "fiche1" : "book");
 $("goForms").onclick = () => openChoice("forms");
 $("goWords").onclick = () => openChoice("words");
 $("restart").onclick = () => askThen("restart", () => start(source));
 $("pBack").innerHTML = $("wTopBack").innerHTML = ICONS.back;
-$("pBack").onclick = () => askThen("quit", () => show(mode === "letters" ? "c1" : mode === "words" || mode === "forms" ? "cw" : "l2"));
+$("pBack").onclick = () => askThen("quit", () => show(mode === "letters" ? "c1" : mode === "words" || mode === "forms" || mode === "signs" ? "cw" : "l2"));
 $("wTopBack").onclick = () => askThen("quit", () => show("cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = () => askThen("stop", showStats);
-$("peek").onclick = () => openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
+$("peek").onclick = () => mode === "signs" ? openPage(1, "fiche1") : openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
 $("again").onclick = () => start(source);
 $("page").onclick = closePage;
 
