@@ -257,6 +257,7 @@
   .phead .ico { width:44px; height:44px; }
   .pbody { overflow:auto; display:flex; flex-direction:column; gap:10px; }
   .pbody img { width:100%; display:block; border-radius:10px; }
+  .sheetpg { width:100%; display:block; border-radius:6px; }
   .paper { width:100%; max-width:520px; max-height:100%; overflow:auto; background:#fff; color:#1d1d1b; border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; }
   .paper .grid { gap:0; border:1px solid #333; }
   .paper .mini { border:1px solid #333; border-radius:0; }
@@ -1176,8 +1177,8 @@ function showStats() {
 }
 
 // The lesson in the online Qaida (one page for lesson 1, three for lesson 2, pages 7 to 9).
-// The class's two sheets for lesson 1 (PDF): the start of reading, and the points where each letter is pronounced.
-const SHEETS = `<a class="lbtn" href="book/fiche1.pdf" target="_blank" rel="noopener">Fiche 1</a><a class="lbtn" href="book/fiche1-articulation.pdf" target="_blank" rel="noopener">Articulation</a>`;
+// The class's two sheets for lesson 1, shown like the book's page: the start of reading, and where each letter is pronounced.
+const SHEETS = `<button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="fiche1-articulation">Articulation</button>`;
 const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95", "https://furqangroup.com/sa/pages/96"] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
 // The "Revoir la leçon" buttons (with the audio), on each lesson page and on the results.
@@ -1196,7 +1197,8 @@ document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("pag
 function openPage(n, part = "book") {
   $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span>`
     : `<span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span>`;
-  $("sheet").innerHTML = n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
+  $("sheet").innerHTML = part.startsWith("fiche1") ? [1, 2].map(i => `<img class="sheetpg" src="book/${part}-${i}.jpg" alt="">`).join("")
+    : n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
     : part === "forms" ? `<h3>Les formes des lettres</h3><p class="muted center" style="margin:-4px 0 8px; font-size:13px">Tableau fait par l’app pour s’entraîner : il n’est pas dans le livre.</p>
       <table class="table ar"><tr><th></th>${["iso","ini","med","fin"].map(p => `<th>${POS[p]}</th>`).join("")}</tr>
       ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
