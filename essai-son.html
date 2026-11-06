@@ -44,7 +44,7 @@
 <div class="duo" id="duo"><div class="pl"><div id="pl"></div></div><button id="next" hidden></button></div>
 <div style="margin-top:12px;padding:12px;border-radius:14px;background:#fff;border:1px solid #e2dccf">
   <b>Régler les temps</b>
-  <p style="margin:6px 0 10px">Tape « Commencer » : la vidéo part du début. Le grand bouton à côté de la vidéo montre la case suivante du cours : <b>tape-le au moment où le professeur la dit</b>. À la fin, copie le texte et envoie-le-moi.</p>
+  <p style="margin:6px 0 10px">Tape « Commencer » : la vidéo part du début. Le grand bouton à côté de la vidéo montre la case suivante du cours : <b>tape-le au moment où le professeur la dit</b>. Sur ordinateur, appuie sur la barre d’espace (Retour arrière pour annuler le dernier). À la fin, copie le texte et envoie-le-moi.</p>
   <button id="cal" style="height:44px;padding:0 16px;border-radius:99px;border:0;background:#2f7d4f;color:#fff;font:700 15px system-ui">Commencer</button>
   <button id="copy" hidden style="height:44px;padding:0 16px;border-radius:99px;border:1px solid #e2dccf;background:#fff;font:700 15px system-ui">Copier les temps</button>
   <pre id="out" style="white-space:pre-wrap;font-size:12px;margin:10px 0 0"></pre>
@@ -123,6 +123,12 @@ document.getElementById("cal").onclick = () => { if (!P || !P.seekTo) return st(
   clearInterval(timer); calib = []; P.seekTo(0, true); P.playVideo(); showNext(); st("Tape le grand bouton à chaque case."); };
 nextB.onclick = () => { if (!calib || calib.length >= items().length) return; calib.push((page === 6 ? GLYPHS[calib.length] : items()[calib.length].id) + " " + P.getCurrentTime().toFixed(1));
   document.getElementById("out").textContent = `Page ${page} : ` + calib.join(" · "); document.getElementById("copy").hidden = false; showNext(); };
+// On a computer: Space (or Enter, or the right arrow) taps the big button; Backspace takes back the last tap.
+addEventListener("keydown", e => {
+  if (!calib || nextB.hidden && e.key !== "Backspace") return;
+  if ([" ", "Enter", "ArrowRight"].includes(e.key)) { e.preventDefault(); nextB.click(); nextB.blur(); }
+  else if (e.key === "Backspace" && calib.length) { e.preventDefault(); calib.pop(); document.getElementById("out").textContent = `Page ${page} : ` + calib.join(" · "); showNext(); }
+});
 document.getElementById("copy").onclick = () => { navigator.clipboard?.writeText(document.getElementById("out").textContent); st("Copié."); };
 document.getElementById("g").onclick = e => {
   const b = e.target.closest("button"); if (!b || !P || !P.seekTo) return st("La vidéo n’est pas encore prête.");
