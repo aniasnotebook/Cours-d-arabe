@@ -715,8 +715,8 @@ const SIGNS = [
   { id: "alif", ar: "الأَلِفُ السَّاكِنَةُ", fr: "Alif soukoun", mark: "\u064E", after: "ا", ex: "بَا", say: "« â »", read: "« â » long : 2 temps" },
   { id: "waw", ar: "الوَاوُ السَّاكِنَةُ", fr: "Wâw soukoun", mark: "\u064F", after: "و", ex: "بُو", say: "« oû »", read: "« oû » long : 2 temps" },
   { id: "ya", ar: "اليَاءُ السَّاكِنَةُ", fr: "Yâ soukoun", mark: "\u0650", under: true, after: "ي", ex: "بِي", say: "« î »", read: "« î » long : 2 temps" },
-  { id: "chedda", ar: "الشَّدَّةُ", fr: "Chedda", mark: "\u0651", ex: "رَبَّ", say: "on appuie", read: "lettre doublée : on appuie" },
-  { id: "soukoun", ar: "السُّكُونُ", fr: "Soukoun", mark: "\u0652", ex: "مِنْ", say: "on s’arrête", read: "pas de voyelle : on s'arrête sur la lettre" },
+  { id: "chedda", ar: "الشَّدَّةُ", fr: "Chedda", mark: "\u0651", ex: "رَبَّ", say: "lettre doublée", read: "lettre doublée : on appuie" },
+  { id: "soukoun", ar: "السُّكُونُ", fr: "Soukoun", mark: "\u0652", ex: "مِنْ", say: "pas de voyelle", read: "pas de voyelle : on s'arrête sur la lettre" },
 ];
 SIGNS.forEach(s => s.mini = `<div class="mini signmini">${signHtml(s, 26)}</div>`);
 // The sign drawn as on the sheet: alone, a little above (or under) a red dotted circle, never touching it.
@@ -746,7 +746,7 @@ function start(cards) {
 }
 function openRound() {
   if (mode === "letters" || mode === "words") loadSound(currentSoundKey()); else stopSound();
-  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir la fiche" : "Voir le livre";
+  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir les signes" : "Voir le livre";
   $("peek").dataset.page = mode === "letters" ? 1 : 2;
   show("play");
   render();
@@ -1133,7 +1133,7 @@ function startWrite(cards) {
 }
 function openWriteRound() {
   if (mode === "wletters" || wWords() || mode === "wwords" || (writing() && wKind === "split")) loadSound(currentSoundKey()); else stopSound();
-  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : mode === "wsigns" ? "Voir la fiche" : wWords() || wKind === "split" ? "Voir le livre" : "Voir l’alphabet";
+  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : mode === "wsigns" ? "Voir les signes" : wWords() || wKind === "split" ? "Voir le livre" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
   show("write");
@@ -1338,7 +1338,7 @@ function showStats() {
 
 // The lesson in the online Qaida (one page for lesson 1, three for lesson 2, pages 7 to 9).
 // The class's two sheets for lesson 1, shown like the book's page: the start of reading, and where each letter is pronounced.
-const SHEETS = `<button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="fiche1-articulation">Articulation</button>`;
+const SHEETS = `<button class="lbtn" data-part="signs">Les signes</button><button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="fiche1-articulation">Articulation</button>`;
 const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95", "https://furqangroup.com/sa/pages/96"] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
 // The "Revoir la leçon" buttons (with the audio), on each lesson page and on the results.
@@ -1357,7 +1357,8 @@ document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("pag
 function openPage(n, part = "book") {
   $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span>`
     : `<span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span>`;
-  $("sheet").innerHTML = part.startsWith("fiche1") ? [1, 2].map(i => `<img class="sheetpg" src="book/${part}-${i}.jpg" alt="">`).join("")
+  $("sheet").innerHTML = part === "signs" ? `<img class="sheetpg" src="book/fiche1-signes.jpg" alt="Les voyelles et les signes de lecture">`
+    : part.startsWith("fiche1") ? [1, 2].map(i => `<img class="sheetpg" src="book/${part}-${i}.jpg" alt="">`).join("")
     : n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
     : part === "forms" ? `<h3>Les formes des lettres</h3><p class="muted center" style="margin:-4px 0 8px; font-size:13px">Tableau fait par l’app pour s’entraîner : il n’est pas dans le livre.</p>
       <table class="table ar"><tr><th></th>${["iso","ini","med","fin"].map(p => `<th>${POS[p]}</th>`).join("")}</tr>
@@ -1574,7 +1575,7 @@ document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; 
 $("wRestart").innerHTML = ICONS.restart;
 $("wRestart").onclick = () => askThen("restart", () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource));
 $("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show("cw"));
-$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : mode === "wsigns" ? "fiche1" : "book");
+$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : mode === "wsigns" ? "signs" : "book");
 $("goForms").onclick = () => openChoice("forms");
 $("goWords").onclick = () => openChoice("words");
 $("restart").onclick = () => askThen("restart", () => start(source));
@@ -1583,7 +1584,7 @@ $("pBack").onclick = () => askThen("quit", () => show(mode === "letters" ? "c1" 
 $("wTopBack").onclick = () => askThen("quit", () => show("cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = () => askThen("stop", showStats);
-$("peek").onclick = () => mode === "signs" ? openPage(1, "fiche1") : openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
+$("peek").onclick = () => mode === "signs" ? openPage(1, "signs") : openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
 $("again").onclick = () => start(source);
 $("page").onclick = closePage;
 
