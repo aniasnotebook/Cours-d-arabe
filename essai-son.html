@@ -23,6 +23,13 @@
 <div class="pl"><div id="pl"></div></div>
 <div class="grid" id="g"></div>
 <div id="st"></div>
+<div style="margin-top:18px;padding:12px;border-radius:14px;background:#fff;border:1px solid #e2dccf">
+  <b>Régler les temps</b>
+  <p style="margin:6px 0 10px">Tape « Commencer » : la vidéo part du début. Puis tape <b>chaque lettre au moment où le professeur la dit</b>, dans l’ordre. À la fin, copie le texte et envoie-le-moi.</p>
+  <button id="cal" style="height:44px;padding:0 16px;border-radius:99px;border:0;background:#2f7d4f;color:#fff;font:700 15px system-ui">Commencer</button>
+  <button id="copy" hidden style="height:44px;padding:0 16px;border-radius:99px;border:1px solid #e2dccf;background:#fff;font:700 15px system-ui">Copier les temps</button>
+  <pre id="out" style="white-space:pre-wrap;font-size:12px;margin:10px 0 0"></pre>
+</div>
 <script>
 const GLYPHS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
   "ق","ك","ل","م","ن","و","ه","ء","ى","ے"], AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال","ذال","را","زا","سين","شين","صاد","ضاد","طا","ظا","عين","غين","فا",
@@ -32,8 +39,14 @@ const START = 5, STEP = 2.9;
 const st = t => document.getElementById("st").textContent = t;
 let P = null, stopAt = null, timer = null;
 document.getElementById("g").innerHTML = GLYPHS.map((g, i) => `<button data-i="${i}" aria-label="${AR_NAMES[i]}">${g}</button>`).join("");
+let calib = null;
+document.getElementById("cal").onclick = () => { if (!P || !P.seekTo) return st("La vidéo n’est pas encore prête.");
+  clearInterval(timer); calib = []; P.seekTo(0, true); P.playVideo(); st("Réglage : tape chaque lettre quand tu l’entends."); };
+document.getElementById("copy").onclick = () => { navigator.clipboard?.writeText(document.getElementById("out").textContent); st("Copié."); };
 document.getElementById("g").onclick = e => {
   const b = e.target.closest("button"); if (!b || !P || !P.seekTo) return st("La vidéo n’est pas encore prête.");
+  if (calib) { calib.push(b.textContent + " " + P.getCurrentTime().toFixed(1)); b.classList.add("on");
+    document.getElementById("out").textContent = calib.join(" · "); document.getElementById("copy").hidden = false; return; }
   document.querySelectorAll(".grid .on").forEach(x => x.classList.remove("on")); b.classList.add("on");
   const t = START + +b.dataset.i * STEP; stopAt = t + STEP;
   P.seekTo(t, true); P.playVideo();
