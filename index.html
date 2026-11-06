@@ -112,7 +112,7 @@
   /* Family labels sit on the card: black when chosen, green or orange once the card is turned. */
   .fams { position:absolute; left:12px; right:12px; bottom:14px; display:flex; flex-direction:column; align-items:center; gap:8px; }
   .fams .q { font-size:13px; font-weight:600; color:#6b665c; }
-  .fams .chips { display:flex; gap:8px; }
+  .fams .chips { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
   .chip { display:flex; align-items:center; gap:6px; height:40px; padding:0 14px; border-radius:999px; border:1px dashed #b9b2a3; background:#fff; color:#6b665c; font-size:14px; font-weight:600; }
   .chip svg { width:16px; height:16px; }
   .chip.on { border:2px solid #1d1d1b; background:#1d1d1b; color:#fff; font-weight:700; }
@@ -156,6 +156,10 @@
   @media (max-height:720px) { .card.quiz .big { font-size:12vh; } .card.quiz .big.word { font-size:11vh; } .card.quiz .chip.ar { height:42px; min-width:48px; font-size:24px; } .card.quiz .chip { height:36px; } }
   .card.quiz .ans .formrow { margin-top:.4em; }   /* room for a tall final tail (م ج ح ع غ) above the forms */
   /* Correction of a form: the book's ways of writing it, stacked on the right of the big letter. */
+  .card.quiz.tight .grp .q { display:none; }
+  .card.quiz .nolink .s { display:none; }
+  @media (max-height:660px) { .card.quiz .fstack { grid-template-rows:repeat(4, 24px); gap:3px; } .card.quiz .fstack img { max-height:18px; } .card.quiz .ans .formrow { margin-top:.2em; } .card.quiz.good .grp .q, .card.quiz.bad .grp .q { display:none; } .card.quiz .nolink .l { display:none; } .card.quiz .nolink .s { display:inline; } }   /* room for the label, the questions are answered */
+  .card.quiz .nolink { font:600 12px/1.35 system-ui, sans-serif; color:#6b665c; background:#f3efe6; border-radius:10px; padding:4px 10px; text-align:center; max-width:300px; }
   .card.quiz .fhead { display:flex; align-items:center; justify-content:center; gap:14px; direction:ltr; }
   .card.quiz .fbook { display:flex; flex-direction:column; align-items:center; gap:3px; }
   .card.quiz .fbook small { font:600 11px/1.3 system-ui, sans-serif; color:#6b665c; }
@@ -386,10 +390,10 @@
   <section class="screen mid" id="c1" hidden>
     <div class="toprow"><button class="ico back" aria-label="Retour à la leçon 1" data-back="l1"></button><button class="ico home" aria-label="Accueil"></button></div>
     <h2 class="ttl">Reconnaître les lettres</h2>
-    <p class="center" style="margin:0 auto; max-width:30ch">Veux-tu ajouter une question sur les lettres emphatiques et de prolongation&nbsp;?</p>
+    <p class="center" style="margin:0 auto; max-width:30ch">Veux-tu ajouter une question sur les lettres emphatiques, de prolongation et non liantes&nbsp;?</p>
     <div class="picks">
-      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>Non <i>›</i></b><small>Juste les lettres : tu indiques si tu la reconnais.</small></button>
-      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:8px; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.3">ج</span><span style="position:absolute; left:6px; right:6px; bottom:8px; display:flex; flex-direction:column; gap:4px; font-size:9px; font-weight:700; text-align:center"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span></span></span></span><b>Oui <i>›</i></b><small>Sur chaque carte, tu indiques aussi si elle est emphatique ou de prolongation.</small></button>
+      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>Non <i>›</i></b><small>Juste les lettres : tu indiques si tu la reconnais.</small></button>
+      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:14px; left:0; right:0; text-align:center; font-size:40px; line-height:1.3">ج</span><span style="position:absolute; left:6px; right:6px; bottom:8px; display:flex; flex-direction:column; gap:4px; font-size:9px; font-weight:700; text-align:center"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Non liante</span></span></span></span><b>Oui <i>›</i></b><small>Sur chaque carte, tu indiques aussi si elle est emphatique, de prolongation ou non liante.</small></button>
     </div>
     <div class="settings randset" data-lesson="1"><label><span><b>Lettres aléatoires</b></span><input type="checkbox"></label></div>
   </section>
@@ -499,11 +503,13 @@ const AR_NAMES = ["ألف","با","تا","ثا","جيم","حا","خا","دال",
 const FR_NAMES = ["alif","ba","ta","tha","djim","Ha","kha","dal","dhal","ra","za","sin","shin","sad","dad","Ta","Dha","aïn","raïn","fa",
   "qaf","kaf","lam","mim","noun","waw","ha","hamza","ya","ya´"];
 // Emphatic letters: kha, sad, dad, ghayn, ta, za, qaf. Prolongation letters: alif, waw, both ya.
-const EMPH = ["خ","ص","ض","غ","ط","ظ","ق"], MADD = ["ا","و","ى","ے"];
-const FAM = { emph:"Emphatique", madd:"Prolongation" };
+// The 6 letters that never join the next one, as the class's Fiche 1 lists them. A letter can be in two families (ا, و).
+const EMPH = ["خ","ص","ض","غ","ط","ظ","ق"], MADD = ["ا","و","ى","ے"], NOLINK = ["ا","د","ذ","ر","ز","و"];
+const FAM = { emph:"Emphatique", madd:"Prolongation", nolink:"Non liante" };
+const FAM_OF = { emph: "emphatique", madd: "de prolongation", nolink: "non liante" };
 const glyph = g => g === "ے" ? `<span class="yb">ے</span>` : g;
 
-const LETTERS = GLYPHS.map((g, i) => ({ g, ar: AR_NAMES[i], fr: FR_NAMES[i], fam: EMPH.includes(g) ? "emph" : MADD.includes(g) ? "madd" : "none",
+const LETTERS = GLYPHS.map((g, i) => ({ g, ar: AR_NAMES[i], fr: FR_NAMES[i], fams: [EMPH.includes(g) && "emph", MADD.includes(g) && "madd", NOLINK.includes(g) && "nolink"].filter(Boolean),
   mini: `<div class="mini ar"><span class="n" lang="ar">${AR_NAMES[i]}</span><span class="g" lang="ar">${glyph(g)}</span></div>` }));
 
 // ---------- Lesson 2: joined letters (book pages 7 to 9).
@@ -591,7 +597,7 @@ function choicesFor(letters, n) {
 
 // ---------- State
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
-let shown = false, famQuiz = false, guess = "none", pick = {}, checked = false;
+let shown = false, famQuiz = false, guess = new Set(), pick = {}, checked = false;
 
 function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
 
@@ -687,7 +693,7 @@ function render() {
   if (pos >= deck.length) { forgetStop(source); return showStats(); }
   if (pos === 0) pausedAt = -1;
   pageBreak(pos, deck, source, showStats);
-  shown = false; checked = false; guess = "none"; pick = {};
+  shown = false; checked = false; guess = new Set(); pick = {};
   const good = answers.filter(a => a.ok).length, bad = answers.filter(a => !a.ok && !a.skip).length;
   $("count").textContent = `${pos + 1} / ${deck.length}`;
   $("barFill").style.width = `${pos / deck.length * 100}%`;
@@ -701,8 +707,8 @@ function render() {
 function letterCard(l, id, cls) {
   const fams = famQuiz ? `<div class="fams" data-fams>
       <span class="q">Cette lettre est :</span>
-      <span class="chips">${["emph","madd"].map(f => `<button class="chip" data-f="${f}">${ICONS.plus}${FAM[f]}</button>`).join("")}</span>
-      <span class="note">Rien de sélectionné = ni l’une ni l’autre</span></div>` : "";
+      <span class="chips">${["emph","madd","nolink"].map(f => `<button class="chip" data-f="${f}">${ICONS.plus}${FAM[f]}</button>`).join("")}</span>
+      <span class="note">Une ou plusieurs. Rien de sélectionné = aucune des trois</span></div>` : "";
   return `<div class="card swipe ${cls} ${famQuiz ? "has-fams" : ""}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
     <span class="glyph ar" lang="ar">${glyph(l.g)}</span>
     <span class="arname ar" lang="ar">${l.ar}</span>
@@ -727,26 +733,27 @@ function renderLetter() {
   c.querySelectorAll(".chip").forEach(b => b.addEventListener("click", e => {
     e.stopPropagation();
     if (shown) return;
-    guess = guess === b.dataset.f ? "none" : b.dataset.f;
+    guess.has(b.dataset.f) ? guess.delete(b.dataset.f) : guess.add(b.dataset.f);
     paintFams();
   }));
   bindSwipe(c);
   primeSound(deck[pos].g);
 }
 
+const famRight = l => guess.size === l.fams.length && l.fams.every(f => guess.has(f));
 function paintFams() {
   const c = $("card"), l = deck[pos];
   if (!c || !famQuiz) return;
   c.querySelectorAll(".chip").forEach(b => {
     const f = b.dataset.f;
-    b.className = "chip " + (!shown ? (guess === f ? "on" : "")
-      : f === l.fam ? (guess === f ? "right" : "wrong") : guess === f ? "wrong" : "off");
-    b.innerHTML = (!shown && guess === f) || (shown && f === l.fam) ? ICONS.check + FAM[f] : (shown ? "" : ICONS.plus) + FAM[f];
+    const is = l.fams.includes(f), chose = guess.has(f);
+    b.className = "chip " + (!shown ? (chose ? "on" : "") : is ? (chose ? "right" : "wrong") : chose ? "wrong" : "off");
+    b.innerHTML = (!shown && chose) || (shown && is) ? ICONS.check + FAM[f] : (shown ? "" : ICONS.plus) + FAM[f];
   });
   const box = c.querySelector("[data-fams]");
   let res = box.querySelector(".res");
   if (shown) {
-    const ok = guess === l.fam, what = l.fam === "none" ? "ni emphatique ni de prolongation" : l.fam === "emph" ? "lettre emphatique" : "lettre de prolongation";
+    const ok = famRight(l), what = l.fams.length ? "lettre " + l.fams.map(f => FAM_OF[f]).join(" et ") : "aucune des trois";
     if (!res) { res = document.createElement("span"); box.appendChild(res); }
     res.className = "res " + (ok ? "good" : "bad");
     res.textContent = `${ok ? "Juste" : "À revoir"} : ${what}`;
@@ -797,7 +804,7 @@ function answer(ok) {
   tint(c, ok ? 100 : -100);
   c.classList.remove("anim");
   const l = deck[pos];
-  fly(c, ok, () => { answers.push({ item: l, ok, famOk: guess === l.fam }); render(); });
+  fly(c, ok, () => { answers.push({ item: l, ok, famOk: famRight(l) }); render(); });
 }
 function undo() { if (answers.length) { answers.pop(); render(); } }
 
@@ -903,6 +910,8 @@ function check() {
     const places = samePlaces(it.g, it.p);
     ok = pick.letter === it.g && pick.pos.size === places.length && places.every(q => pick.pos.has(q));
     ans.insertAdjacentHTML("beforeend", `<span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${q === it.p ? places.map(x => POS[x]).join(" / ") : POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`);
+    // The class's word for these 6: they join the letter before, never the one after (Fiche 1).
+    if (NOLINK.includes(it.g)) { card.classList.add("tight"); ans.insertAdjacentHTML("beforeend", `<span class="nolink"><span class="l">Lettre non liante : elle s’attache à la lettre d’avant, mais jamais à celle qui la suit.</span><span class="s">Non liante : jamais attachée à la lettre qui suit.</span></span>`); }
     // The book's ways of writing this form, in the book's order.
     const vs = formVersions(it);
     if (vs.length) ans.querySelector(".fhead").insertAdjacentHTML("beforeend", `<span class="fbook"><small>Dans le livre</small><span class="fstack">${vs.map(v => `<span>${formImg(v)}</span>`).join("")}</span></span>`);
