@@ -681,11 +681,9 @@ const soundTops = g => `<span class="tops"><button class="spk" data-g="${g}" ari
 function playSound(g, btn) {
   const s = soundAt(g), t = s && s.t;
   if (!ytReady || !t) { loadSound(); const h = $("hint"); if (h) h.textContent = "Le son a besoin d’Internet : réessaie dans un instant."; return; }
-  // The small video sits low on the card; on a writing card, in its corner, to leave the letter to trace visible.
-  // On a lesson 2 box card, top right, clear of the letters to tap.
-  const wc = !!btn.closest(".wcard"), qz = !!btn.closest(".card.quiz"), c = btn.closest(".card, .wcard").getBoundingClientRect(), box = $("ytBox"), w = wc || qz ? 150 : Math.min(240, c.width - 40);
-  box.style.width = w + "px"; box.style.left = (wc || qz ? c.right - w - 12 : c.left + (c.width - w) / 2) + "px";
-  box.style.top = (qz ? c.top + 12 : c.bottom - w * 9 / 16 - (wc ? 12 : 16)) + "px";
+  // The small video: same size and place on every card, its top right corner (the letter stays clear).
+  const c = btn.closest(".card, .wcard").getBoundingClientRect(), box = $("ytBox"), w = 150;
+  box.style.width = w + "px"; box.style.left = (c.right - w - 12) + "px"; box.style.top = (c.top + 12) + "px";
   btn.classList.add("on"); box.classList.add("on");
   ytWarm = 2; ytP.unMute(); ytP.setVolume(100);
   if (s.v !== ytVid) { ytVid = s.v; ytP.loadVideoById({ videoId: s.v, startSeconds: t[0] }); }
