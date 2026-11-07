@@ -746,7 +746,7 @@ function armEnd() { clearTimeout(ytEnd); const left = ytEndAt - ytP.getCurrentTi
 const autoOn = () => { try { return localStorage.getItem("autoSound") === "1"; } catch (e) { return false; } };
 let autoT = 0;
 function autoSound() {
-  if (!writing() || wKind !== "trace" || !autoOn() || $("write").hidden) return;
+  if (!writing() || wKind !== "trace" || !autoOn() || $("write").hidden || !$("ask").hidden) return;
   const b = $("wCard")?.querySelector(".spk"); if (!b || !soundAt(b.dataset.g)) return;
   if (ytReady && ytWarm === 2) playSound(b.dataset.g, b); else loadSound(b.dataset.g);   // not ready yet: it plays once warm
 }
@@ -1278,7 +1278,8 @@ function wRender() {
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" || wKind === "sign" ? `<span class="model guide">${wModel(it, true)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
-  clearTimeout(autoT); autoT = setTimeout(autoSound, 450);   // after the card has slid in, so the small video lands in its corner
+  clearTimeout(autoT); autoT = setTimeout(autoSound, 450);
+  if (wAskSound && $("ask").hidden) { wAskSound = false; askSound(autoSound); }   // after the card has slid in, so the small video lands in its corner
   $("wHint").innerHTML = wKind === "trace"
     ? `Repasse sur ${wWords() ? "les lettres liées" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
     : wTask();
@@ -1696,9 +1697,10 @@ document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
   if (b.dataset.w === "form") mode = "wforms";
   if (b.dataset.w === "sign") mode = "wsigns";
   wKind = b.dataset.w;
-  if (wKind === "trace") askSound(() => startWrite()); else startWrite();
+  wAskSound = wKind === "trace"; startWrite();
 });
-// Before Tracer: with or without the sound of each card, the learner listens while tracing (asked like the page breaks).
+// Tracer asks on its first card: with or without the sound of each card, the learner listens while tracing (asked like the page breaks).
+let wAskSound = false;
 function askSound(go) {
   $("askT").textContent = "Écouter chaque lettre\u00a0?";
   $("askP").textContent = "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
@@ -1709,7 +1711,7 @@ function askSound(go) {
 }
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
 $("wRestart").innerHTML = ICONS.restart;
-$("wRestart").onclick = () => askThen("restart", () => { const go = () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource); wKind === "trace" ? (stopSound(), askSound(go)) : go(); });   // Tracer asks for the sound again
+$("wRestart").onclick = () => askThen("restart", () => { const go = () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource); wAskSound = wKind === "trace"; go(); });   // Tracer asks for the sound again
 $("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show("cw"));
 $("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : mode === "wsigns" ? "signs" : "book");
 $("goForms").onclick = () => openChoice("forms");
