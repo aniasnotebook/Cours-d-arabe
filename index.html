@@ -201,6 +201,12 @@
   .sways .sgrid span:last-child:nth-child(odd) { grid-column:1 / -1; }
   .sways .sgrid img { max-height:42px; max-width:40px; }
   @media (max-height:700px) { .sways .sgrid { grid-template-columns:repeat(2, 38px); } .sways .sgrid span { height:38px; } .sways .sgrid img { max-height:32px; max-width:32px; } .sways small { display:none; } }
+  /* Room under the letter for the two writings: guide and answer both sit a little higher. */
+  .wcard.two .model { bottom:150px; } .wcard.two .line { top:auto; bottom:42%; }
+  .wcard.two .model .ar { font-size:min(130px, 32vw, 15vh) !important; }
+  @media (max-height:700px) { .wcard.two .model { bottom:130px; top:70px; } .wcard .ways.twoways b { font-size:28px; } .wcard .ways.twoways { bottom:52px; } }
+  .wcard .ways.twoways { gap:10px; bottom:60px; } .wcard .ways.twoways span { width:auto; height:auto; padding:4px 12px 2px; opacity:1; display:flex; flex-direction:column; align-items:center; }
+  .wcard .ways.twoways b { font-size:38px; line-height:1.5; color:#2f7d4f; font-weight:500; } .wcard .ways.twoways small { font:600 11px system-ui, sans-serif; color:#6b665c; }
   .sigrow .snote { grid-column:1 / -1; font-size:12px; color:#6b665c; margin-top:2px; }
   .sigrow .k { color:#6b665c; font-size:12px; font-weight:600; } .sigrow .ar { font-size:22px; line-height:1.6; font-weight:600; } .sigrow .ex { font-size:28px; }
   .card.quiz .nolink { font:600 12px/1.35 system-ui, sans-serif; color:#6b665c; background:#f3efe6; border-radius:10px; padding:4px 10px; text-align:center; max-width:300px; }
@@ -758,7 +764,7 @@ const SIGNS = [
 ];
 // Écrire: the letter is given in grey, the learner adds the sign in its place; the answer is the same letter with it.
 const SIGN_WRITE = { fatha: ["ب", "بَ"], kasra: ["ب", "بِ"], damma: ["ب", "بُ"], fathatan: ["ب", "بً"], kasratan: ["ب", "بٍ"], dammatan: ["ب", "ب\u08F1"],
-  alif: ["ب", "بَا"], waw: ["ب", "بُو"], ya: ["ب", "بِي"], chedda: ["ب", "بّ"], soukoun: ["ب", "بْ"], nonlue: ["ا", "ا\u06DF"],
+  alif: ["ب", "بَا"], waw: ["ب", "بُو"], ya: ["ب", "بِي"], chedda: ["ب", "بّ"], soukoun: ["ب", "بْ"], nonlue: ["ا", "ا\u0652"],
   iqlab: ["ن", "ن\u06E2"], madd: ["ا", "آ"], wawS: ["هُ", "هُۥ"], yaS: ["هِ", "هِۦ"], alifS: ["ذ", "ذٰ"] };
 SIGNS.forEach(s => s.mini = `<div class="mini signmini">${signHtml(s, 26)}</div>`);
 // The sign drawn as on the sheet: alone, a little above (or under) a red dotted circle, never touching it.
@@ -1230,7 +1236,7 @@ function wRender() {
   $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("wBad").textContent = `${wAnswers.filter(a => !a.ok && !a.skip).length} à revoir`;
   stopSound();
-  $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}${mode === "wletters" && wKind === "trace" ? soundTops(it.g) : it.w !== undefined ? cellSpeaker(it) : ""}<span class="line"></span>
+  $("wStage").innerHTML = `<div class="wcard enter${wKind === "sign" && it.alt ? " two" : ""}" id="wCard">${wPrompt(it)}${mode === "wletters" && wKind === "trace" ? soundTops(it.g) : it.w !== undefined ? cellSpeaker(it) : ""}<span class="line"></span>
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" || wKind === "sign" ? `<span class="model guide">${wModel(it, true)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
@@ -1300,7 +1306,10 @@ function wReveal() {
   const ways = wWords() ? waysOf(wDeck[wPos]) : [];
   if (ways.length > 1) $("wCard").insertAdjacentHTML("beforeend", `<div class="ways" id="wWays">${ways.map(c => `<span class="${c === wayOf(wDeck[wPos]) ? "on" : ""}">${bookImg(c)}</span>`).join("")}</div>`);
   const c = $("wCard");
-  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre</span>`);
+  // Soukoun and letter not read: the two ways, as on the sheet and as in the Mushaf.
+  const sg = wKind === "sign" && wDeck[wPos], alt = sg && sg.alt && SIGN_WRITE[sg.id][1].replace(sg.mark, sg.alt);
+  if (alt) c.insertAdjacentHTML("beforeend", `<div class="ways twoways" id="wWays"><span class="on"><b class="ar sfont" lang="ar">${SIGN_WRITE[sg.id][1]}</b><small>Fiche</small></span><span><b class="ar sfont" lang="ar">${alt}</b><small>Mushaf</small></span></div>`);
+  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "sign" ? "la lettre de la fiche" : `${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre`}</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
   wButtons();
   wSwipe(c);
