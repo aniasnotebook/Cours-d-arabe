@@ -185,6 +185,9 @@
   .card.quiz.signs .big { font-size:16px; line-height:1; padding:14px 0 6px; }   /* the sign sets its own sizes */
   .card.quiz.signs .fstack { grid-template-rows:repeat(3, 30px); }
   .card.quiz.signs .sigrow { gap:0 14px; padding:6px 14px; } .card.quiz.signs .sigrow .ar { line-height:1.45; }
+  .card.quiz.famq .ans .arname { position:static; font-size:30px; line-height:1.2; }
+  .card.quiz.famq .big { font-size:min(130px, 30vw, 14vh); line-height:1.3; }
+  .card.quiz .famres { font:700 14px system-ui, sans-serif; } .famres.good { color:#2f7d4f; } .famres.bad { color:#c2410c; }
   .card.quiz .chips.wrap { display:grid; grid-template-columns:1fr 1fr; gap:6px; width:100%; max-width:340px; }   /* always 2 rows of 2 */
   .card.quiz .chips.wrap .chip { justify-content:center; padding:0 6px; }
   .signmini { font-size:0; display:grid; place-items:center; }
@@ -399,7 +402,7 @@
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span></div>
     <div class="label">Exercices</div>
-    <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>Les 30 lettres · Les familles en plus</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>M’évaluer · Les familles</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:#d6301f; font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goS1"><span class="tile"><span class="sfont" lang="ar" style="font-size:22px; color:#d6301f">◌ُ</span></span><span class="t">Les signes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="1"></div>
@@ -423,10 +426,10 @@
   <section class="screen mid" id="c1" hidden>
     <div class="toprow"><button class="ico back" aria-label="Retour à la leçon 1" data-back="l1"></button><button class="ico home" aria-label="Accueil"></button></div>
     <h2 class="ttl">Reconnaître les lettres</h2>
-    <p class="center" style="margin:0 auto; max-width:30ch">Veux-tu ajouter une question sur les lettres emphatiques, de prolongation et non liantes&nbsp;?</p>
+    <p class="muted center">Comment veux-tu t’entraîner&nbsp;?</p>
     <div class="picks">
-      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>Non <i>›</i></b><small>Juste les lettres : tu indiques si tu la reconnais.</small></button>
-      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:22px; left:0; right:0; text-align:center; font-size:34px; line-height:1.2">ج</span><span style="position:absolute; left:8px; right:8px; bottom:7px; display:flex; flex-direction:column; gap:3px; font-size:8.5px; font-weight:700; text-align:center; line-height:1.2"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Non liante</span></span></span></span><b>Oui <i>›</i></b><small>Sur chaque carte, tu indiques aussi si elle est emphatique, de prolongation ou non liante.</small></button>
+      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>M’évaluer <i>›</i></b><small>Pour chaque lettre, tu dis toi-même si tu la reconnais ou si elle est à revoir. Pas de correction.</small></button>
+      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:22px; left:0; right:0; text-align:center; font-size:34px; line-height:1.2">ج</span><span style="position:absolute; left:8px; right:8px; bottom:7px; display:flex; flex-direction:column; gap:3px; font-size:8.5px; font-weight:700; text-align:center; line-height:1.2"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Non liante</span></span></span></span><b>Les familles <i>›</i></b><small>Pour chaque lettre, tu choisis ses familles, puis tu vérifies.</small></button>
     </div>
     <div class="settings randset" data-lesson="1"><label><span><b>Lettres aléatoires</b></span><input type="checkbox"></label></div>
   </section>
@@ -765,8 +768,8 @@ function signChoices(s, key = "fr") {
 }
 function start(cards) {
   if (writing()) return startWrite(cards);
-  source = cards || (mode === "letters" ? LETTERS : mode === "forms" ? FORMS : mode === "signs" ? SIGNS : WORD_CARDS);
-  const random = mode === "letters" || mode === "signs" ? $("rand1").checked : $("rand2").checked;
+  source = cards || (mode === "letters" || mode === "fams" ? LETTERS : mode === "forms" ? FORMS : mode === "signs" ? SIGNS : WORD_CARDS);
+  const random = ["letters", "fams", "signs"].includes(mode) ? $("rand1").checked : $("rand2").checked;
   fromPage(source, from => {
     deck = deckOf(source, random, from);
     deck.forEach(i => delete i.choices);
@@ -775,9 +778,9 @@ function start(cards) {
   });
 }
 function openRound() {
-  if (mode === "letters" || mode === "words") loadSound(currentSoundKey()); else stopSound();
-  $("peek").textContent = mode === "letters" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir les signes" : "Voir le livre";
-  $("peek").dataset.page = mode === "letters" ? 1 : 2;
+  if (mode === "letters" || mode === "fams" || mode === "words") loadSound(currentSoundKey()); else stopSound();
+  $("peek").textContent = mode === "letters" || mode === "fams" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir les signes" : "Voir le livre";
+  $("peek").dataset.page = mode === "letters" || mode === "fams" ? 1 : 2;
   show("play");
   render();
 }
@@ -859,7 +862,8 @@ function paintFams() {
 }
 
 // The red name is always shown, as in the book; turning the card only checks the family.
-const SWIPE_HINT = "Glisse à droite si tu la reconnais, à gauche si c’est à revoir";
+// Lesson 1, level 1: the learner judges alone, there is no correction.
+const SWIPE_HINT = "Tu t’évalues toi-même : glisse à droite si tu la reconnais, à gauche si elle est à revoir";
 function flip() {
   if (!famQuiz) return;
   shown = !shown;
@@ -953,7 +957,12 @@ document.addEventListener("wheel", e => {
 // ---------- Lesson 2: choose, check, next
 function renderQuiz() {
   const it = deck[pos], chip = (k, v, label, ar) => `<button class="chip${ar ? " ar" : ""}" data-k="${k}" data-v="${v}"${ar ? ' lang="ar"' : ""}>${ar ? "" : ICONS.plus}${label}</button>`;
-  if (mode === "signs") {
+  if (mode === "fams") {
+    $("stage").innerHTML = `<div class="card quiz famq enter" id="card">${soundTops(it.g)}<span class="ans"><span class="arname ar" lang="ar">${it.ar}</span><span class="big ar" lang="ar">${glyph(it.g)}</span></span>
+      <div class="grp"><span class="q">Cette lettre est :</span><span class="chips wrap">${["emph", "madd", "nolink", "none"].map(f => chip("fam", f, f === "none" ? "Aucune des trois" : FAM[f])).join("")}</span>
+      <span class="note">Une ou plusieurs</span></div></div>`;
+    pick.fam = new Set();
+  } else if (mode === "signs") {
     it.choices = it.choices || { name: signChoices(it), say: signChoices(it, "say") };
     $("stage").innerHTML = `<div class="card quiz signs enter" id="card"><span class="ans"><span class="fhead"><span class="big">${signHtml(it, innerHeight < 620 ? 40 : innerHeight < 680 ? 48 : innerHeight < 740 ? 60 : 96)}</span></span></span>
       <div class="grp"><span class="q">Quel signe ?</span><span class="chips wrap">${it.choices.name.map(c => chip("name", c.id, c.fr)).join("")}</span></div>
@@ -997,11 +1006,15 @@ function qButtons() {
 function choose(b) {
   if (checked) return;
   const k = b.dataset.k, v = b.dataset.v;
-  if (k === "multi" || k === "pos") { pick[k].has(v) ? pick[k].delete(v) : pick[k].add(v); b.classList.toggle("on");
+  if (k === "fam") {   // several families, or « aucune » alone
+    if (v === "none") pick.fam = pick.fam.has("none") ? new Set() : new Set(["none"]); else { pick.fam.delete("none"); pick.fam.has(v) ? pick.fam.delete(v) : pick.fam.add(v); }
+    $("card").querySelectorAll('.chip[data-k="fam"]').forEach(o => { const on = pick.fam.has(o.dataset.v); o.classList.toggle("on", on);
+      o.innerHTML = (on ? ICONS.check : ICONS.plus) + (o.dataset.v === "none" ? "Aucune des trois" : FAM[o.dataset.v]); });
+  } else if (k === "multi" || k === "pos") { pick[k].has(v) ? pick[k].delete(v) : pick[k].add(v); b.classList.toggle("on");
     if (k === "pos") b.innerHTML = (b.classList.contains("on") ? ICONS.check : ICONS.plus) + POS[v]; }
   else { pick[k] = v; $("card").querySelectorAll(`.chip[data-k="${k}"]`).forEach(o => { o.classList.toggle("on", o === b);
     if (mode === "signs") o.innerHTML = (o === b ? ICONS.check : ICONS.plus) + o.textContent; }); }
-  $("check").disabled = mode === "signs" ? !(pick.name && pick.say) : mode === "forms" ? !(pick.letter && pick.pos.size) : !pick.multi.size;
+  $("check").disabled = mode === "fams" ? !pick.fam.size : mode === "signs" ? !(pick.name && pick.say) : mode === "forms" ? !(pick.letter && pick.pos.size) : !pick.multi.size;
 }
 
 function check() {
@@ -1010,7 +1023,19 @@ function check() {
   let ok;
   const ans = card.querySelector(".ans"), chips = card.querySelectorAll(".chip");
   chips.forEach(o => o.disabled = true);
-  if (mode === "signs") {
+  if (mode === "fams") {
+    const want = it.fams.length ? it.fams : ["none"];
+    ok = pick.fam.size === want.length && want.every(f => pick.fam.has(f));
+    chips.forEach(o => {
+      const right = want.includes(o.dataset.v), chosen = pick.fam.has(o.dataset.v), label = o.dataset.v === "none" ? "Aucune des trois" : FAM[o.dataset.v];
+      o.className = "chip" + (right && chosen ? " right" : right ? " missed" : chosen ? " wrong" : " off");
+      o.innerHTML = (right && chosen ? ICONS.check : "") + label;
+    });
+    card.querySelector(".note").remove();
+    const what = it.fams.length ? "lettre " + it.fams.map(f => FAM_OF[f]).join(" et ") : "aucune des trois familles";
+    ans.insertAdjacentHTML("beforeend", `<span class="famres ${ok ? "good" : "bad"}">${what[0].toUpperCase() + what.slice(1)}</span>`);
+    card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
+  } else if (mode === "signs") {
     const sayOf = id => SIGNS.find(x => x.id === id).say;
     ok = pick.name === it.id && sayOf(pick.say) === it.say;
     if (it.book) ans.querySelector(".fhead").insertAdjacentHTML("beforeend", `<span class="fbook"><small>Dans le livre</small><span class="fstack">${signWays(it)}</span></span>`);
@@ -1339,10 +1364,10 @@ function showStats() {
   const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
-  const unit = mode === "letters" || mode === "wletters" ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : mode === "signs" || mode === "wsigns" ? "signe" : "case";
+  const unit = ["letters", "fams", "wletters"].includes(mode) ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : mode === "signs" || mode === "wsigns" ? "signe" : "case";
   const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`, pl = (k, w) => `${w}${k > 1 ? "s" : ""}`;
   const bad = done - good, win = done && skipped <= done && good / done >= PASSED;
-  const name = writing() && wKind === "sign" ? "Les signes · écrire" : mode === "signs" ? "Les signes · choisir" : writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
+  const name = writing() && wKind === "sign" ? "Les signes · écrire" : mode === "signs" ? "Les signes · choisir" : writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres · m’évaluer", fams: "Reconnaître les lettres · les familles", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
   const fem = !(mode === "signs" || mode === "wsigns"), right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
   // Each score band has its own words and its own move of the logo; confetti from 80 %, twice for a perfect round.
@@ -1358,7 +1383,7 @@ function showStats() {
   $("rLine").textContent = nb(done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`);
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = nb(`Familles : ${done - famWrong} / ${done} justes`);
-  $("lessonLinks").innerHTML = lessonLinks(["letters", "wletters", "signs", "wsigns"].includes(mode) ? 1 : 2);
+  $("lessonLinks").innerHTML = lessonLinks(["letters", "fams", "wletters", "signs", "wsigns"].includes(mode) ? 1 : 2);
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
@@ -1455,7 +1480,7 @@ $("ptr").innerHTML = MARK;
   });
 }
 // A reload comes back to the same place: the same screen, and in a round the same cards and answers so far.
-const pool = m => m === "letters" || m === "wletters" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : m === "signs" || m === "wsigns" ? SIGNS : WORD_CARDS;
+const pool = m => m === "letters" || m === "fams" || m === "wletters" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : m === "signs" || m === "wsigns" ? SIGNS : WORD_CARDS;
 // Where the user is, kept for a reload: the app's own, or the browser's (pull to refresh).
 function savePlace() {
   const screen = ["home","l1","l2","c1","cw","play","write","stats"].find(id => !$(id).hidden);
@@ -1593,7 +1618,7 @@ document.addEventListener("click", e => {
 }, true);
 $("pronX").onclick = () => $("pron").hidden = true;
 $("pron").onclick = e => { if (e.target === $("pron")) $("pron").hidden = true; };
-document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = "letters"; famQuiz = b.dataset.fam === "1"; start(); });
+document.querySelectorAll("[data-fam]").forEach(b => b.onclick = () => { mode = b.dataset.fam === "1" ? "fams" : "letters"; famQuiz = false; start(); });
 $("goW1").onclick = () => openWriting(1);
 $("goS1").onclick = () => openChoice("signs");
 $("goS1").querySelector(".tile").innerHTML = signHtml(SIGNS[2], 24);   // a damma over the sheet's dotted circle
@@ -1614,7 +1639,7 @@ $("goForms").onclick = () => openChoice("forms");
 $("goWords").onclick = () => openChoice("words");
 $("restart").onclick = () => askThen("restart", () => start(source));
 $("pBack").innerHTML = $("wTopBack").innerHTML = ICONS.back;
-$("pBack").onclick = () => askThen("quit", () => show(mode === "letters" ? "c1" : mode === "words" || mode === "forms" || mode === "signs" ? "cw" : "l2"));
+$("pBack").onclick = () => askThen("quit", () => show(mode === "letters" || mode === "fams" ? "c1" : mode === "words" || mode === "forms" || mode === "signs" ? "cw" : "l2"));
 $("wTopBack").onclick = () => askThen("quit", () => show("cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = () => askThen("stop", showStats);
