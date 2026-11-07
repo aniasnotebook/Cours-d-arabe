@@ -203,7 +203,9 @@
   @media (max-height:700px) { .sways .sgrid { grid-template-columns:repeat(2, 38px); } .sways .sgrid span { height:38px; } .sways .sgrid img { max-height:32px; max-width:32px; } .sways small { display:none; } }
   /* Room under the letter for the two writings: guide and answer both sit a little higher. */
 
-  .wcard.two .model .ar { font-size:min(120px, 28vw, 15vh) !important; } .wcard .model .onetwo { position:relative; display:inline-block; } .wcard .model .onetwo .marks { position:absolute; left:50%; transform:translateX(-50%); top:-.05em; font-size:.55em; line-height:1; white-space:nowrap; } .wcard .model .onetwo .marks .sl { position:relative; top:-.75em; }
+  .wcard.two .model .ar { font-size:min(120px, 28vw, 15vh) !important; } .wcard .model .onetwo { position:relative; display:inline-block; } .wcard .model .onetwo .marks { position:absolute; left:50%; transform:translateX(-50%); top:.12em; display:flex; align-items:center; gap:.06em; direction:ltr; }
+  .wcard .model .onetwo.tall .marks { top:-.12em; }   /* above the alif's top */
+  .wcard .model .onetwo .marks .sl { font:300 .22em/1 system-ui, sans-serif; font-style:normal; color:#2f7d4f; opacity:.6; margin:0; }
   .wcard .model .sl { font:300 0.4em/1 system-ui, sans-serif; font-style:normal; margin:0 .15em; vertical-align:middle; opacity:.6; }
 
   .wcard .ways.twoways { gap:10px; bottom:60px; } .wcard .ways.twoways span { width:auto; height:auto; padding:4px 12px 2px; opacity:1; display:flex; flex-direction:column; align-items:center; }
@@ -1137,7 +1139,9 @@ const wLesson2 = () => mode === "wwords" || mode === "wforms";
 const signWrite = (it, guide) => { const [b, f] = SIGN_WRITE[it.id], one = guide ? b : f;
   if (!it.alt) return one;
   // Soukoun and letter not read: one letter; the answer shows its two marks above it, « sheet / Mushaf », like the two ya.
-  return guide ? b : `<span class="onetwo">${b}<span class="marks" dir="ltr"><bdi>\u00A0${it.mark}</bdi><i class="sl">/</i><bdi>\u00A0${it.alt}</bdi></span></span>`; };   // sheet left, Mushaf right, as in Choisir   // soukoun, letter not read: « sheet / Mushaf », like the two ya
+  // The marks are the sheet's own drawings (book/sg/mk-*.png), the same on every phone, with a real « / » between.
+  const mk = (n, h) => `<img src="book/sg/mk-${n}.png" alt="" style="height:${h}em">`, M = it.id === "soukoun" ? ["soukoun", "soukounM"] : ["nonlue", "nonlueM"];
+  return guide ? b : `<span class="onetwo${b === "ا" ? " tall" : ""}">${b}<span class="marks">${mk(M[0], .16)}<i class="sl">/</i>${mk(M[1], it.id === "soukoun" ? .17 : .2)}</span></span>`; };   // sheet left, Mushaf right, as in Choisir   // soukoun, letter not read: « sheet / Mushaf », like the two ya
 const wModel = (it, guide) => wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(170px, 40vw, 21vh)">${signWrite(it, guide)}</span>`
   : wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
   : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:baseline; gap:0.35em; white-space:nowrap; font-size:min(${lettersOf(it.w).length > 3 ? 46 : 60}px, 14vw, 9vh)">${inked(it.w, it.k, "")}</span>`
