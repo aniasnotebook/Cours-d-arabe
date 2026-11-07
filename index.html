@@ -476,7 +476,7 @@
       <button class="pick" data-w="trace" id="pkA"><span class="pv" id="pvTrace"></span><b><span id="cwTraceName">Tracer</span> <i>›</i></b><small id="cwTraceText"></small></button>
       <button class="pick" data-w="test" id="pkB"><span class="pv" id="pvTest"></span><b><span id="cwTestName">Me tester</span> <i>›</i></b><small id="cwTestText"></small></button>
     </div>
-    <div class="settings randset" id="cwRand"><label><span><b></b></span><input type="checkbox"></label><label id="cwAuto"><span><b>Son automatique</b><small>Pour Tracer : le son de chaque carte se lance tout seul</small></span><input type="checkbox"></label></div>
+    <div class="settings randset" id="cwRand"><label><span><b></b></span><input type="checkbox"></label></div>
   </section>
 
   <!-- Writing round -->
@@ -1190,7 +1190,7 @@ function openWriting(lesson) {
   mode = lesson === 1 ? "wletters" : "wwords";
   $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Lier les lettres";
   $("cwBack").dataset.back = "l" + lesson;
-  bindRand($("cwRand"), lesson); $("cwAuto").hidden = false;
+  bindRand($("cwRand"), lesson);
   $("pkA").dataset.w = "trace"; $("pkB").dataset.w = "test"; setLevel($("pkB"), lesson === 1 ? 2 : 3);
   $("cwTraceName").textContent = "Tracer"; $("cwTestName").textContent = "Me tester";
   $("cwTraceText").textContent = lesson === 1 ? "Entraîne-toi à l’écriture en traçant sur les lettres grises." : "Entraîne-toi à lier les lettres en traçant sur les lettres grises.";
@@ -1219,7 +1219,7 @@ function openChoice(which) {
   choiceOf = which; mode = which;
   $("cwTitle").textContent = c.title;
   $("cwBack").dataset.back = c.lesson === 1 ? "l1" : "l2";
-  bindRand($("cwRand"), c.lesson || 2); $("cwAuto").hidden = true;
+  bindRand($("cwRand"), c.lesson || 2);
   $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write; setLevel($("pkB"), 2);
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
   $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
@@ -1672,7 +1672,6 @@ function bindRand(box, lesson) {
   input.checked = src.checked; input.onchange = () => { src.checked = input.checked; };
 }
 bindRand(document.querySelector('.randset[data-lesson="1"]'), 1);
-{ const a = $("cwAuto").querySelector("input"); a.checked = autoOn(); a.onchange = () => { try { localStorage.setItem("autoSound", a.checked ? "1" : "0"); } catch (e) {} if (a.checked) loadSound(); }; }
 // Each choice screen goes from the easier way (left) to the harder one (right), with its level: one green bar, two orange
 // bars, or three red bars for the hardest of all (Lier les lettres · Me tester).
 function setLevel(b, n) { b.querySelector(".lvl")?.remove(); b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${n}"><span>${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>Niveau ${n}</span>`); }
@@ -1696,8 +1695,18 @@ document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
   if (b.dataset.w === "split") mode = "wwords";
   if (b.dataset.w === "form") mode = "wforms";
   if (b.dataset.w === "sign") mode = "wsigns";
-  wKind = b.dataset.w; startWrite();
+  wKind = b.dataset.w;
+  if (wKind === "trace") askSound(() => startWrite()); else startWrite();
 });
+// Before Tracer: with or without the sound of each card, the learner listens while tracing (asked like the page breaks).
+function askSound(go) {
+  $("askT").textContent = mode === "wwords" ? "Écouter chaque case\u00a0?" : "Écouter chaque lettre\u00a0?";
+  $("askP").textContent = "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
+  $("askNo").textContent = "Sans le son"; $("askYes").textContent = "Avec le son";
+  $("ask").hidden = false;
+  const set = on => { $("ask").hidden = true; try { localStorage.setItem("autoSound", on ? "1" : "0"); } catch (e) {} if (on) loadSound(); go(); };
+  $("askNo").onclick = () => set(false); $("askYes").onclick = () => set(true);
+}
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
 $("wRestart").innerHTML = ICONS.restart;
 $("wRestart").onclick = () => askThen("restart", () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource));
