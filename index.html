@@ -1403,7 +1403,8 @@ function showStats() {
   $("rLine").textContent = nb(done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`);
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = nb(`Familles : ${done - famWrong} / ${done} justes`);
-  $("lessonLinks").innerHTML = lessonLinks(["letters", "fams", "wletters", "signs", "wsigns"].includes(mode) ? 1 : 2);
+  // The online lesson page is the alphabet: no help for the signs, so no link after them.
+  $("lessonLinks").innerHTML = mode === "signs" || mode === "wsigns" ? "" : lessonLinks(["letters", "fams", "wletters"].includes(mode) ? 1 : 2);
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
