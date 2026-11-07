@@ -1195,9 +1195,9 @@ function openChoice(which) {
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
   $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
   if (which === "signs") {
-    const pill = (t, on) => `<span style="padding:2px 5px; white-space:nowrap; border-radius:99px; font:700 8.5px/1.3 system-ui, sans-serif; ${on ? "background:#1d1d1b; color:#fff" : "border:1px solid #e2dccf; color:#1d1d1b"}">${t}</span>`;
+    const pill = (t, on) => `<span style="padding:2px 4px; white-space:nowrap; border-radius:99px; font:700 7.5px/1.3 system-ui, sans-serif; ${on ? "background:#1d1d1b; color:#fff" : "border:1px solid #e2dccf; color:#1d1d1b"}">${t}</span>`;
     $("pvTrace").innerHTML = `<span class="mc"><span style="display:flex; flex-direction:column; align-items:center; gap:6px">${signHtml(SIGNS[5], 34)}
-      <span style="display:flex; gap:3px">${pill("Damma")}${pill("Dammatân", 1)}</span><span style="display:flex; gap:3px">${pill("« ou » court")}${pill("« oun »", 1)}</span></span></span>`;
+      <span style="display:flex; gap:3px">${pill("Damma")}${pill("Dammatân", 1)}</span><span style="display:flex; gap:3px">${pill("« ou »")}${pill("« oun »", 1)}</span></span></span>`;
     $("pvTest").innerHTML = `<span class="mc"><b style="position:absolute; top:8px; left:0; right:0; text-align:center; font-size:10px; color:#d6301f">Dammatân</b><span class="ar sfont" lang="ar" style="font-size:44px; color:#d9d3c5; margin-top:14px">ب</span><span style="position:absolute; top:46px; left:50%; font-size:18px; color:#b9b2a3">?</span></span>`;
     return show("cw");
   }
