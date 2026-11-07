@@ -112,7 +112,7 @@ function play(i) {
   const [t, end] = clip(i); stopAt = end;
   document.querySelectorAll(".grid .on").forEach(x => x.classList.remove("on")); const b = document.querySelector(`#g button[data-i="${i}"]`); b?.classList.add("on");
   P.unMute(); P.seekTo(t, true); P.playVideo();   // same cut as the app: mute, then pause, checked every 50 ms
-  clearInterval(timer); timer = setInterval(() => { if (P.getCurrentTime() >= stopAt) { P.mute(); P.pauseVideo(); clearInterval(timer); b?.classList.remove("on"); } }, 50);
+  clearInterval(timer); let fresh = false; timer = setInterval(() => { const ct = P.getCurrentTime(); if (!fresh) { if (ct < t - 0.3 || ct >= stopAt) return; fresh = true; } if (ct >= stopAt) { P.mute(); P.pauseVideo(); clearInterval(timer); b?.classList.remove("on"); } }, 50);
 }
 document.getElementById("pageacts").onclick = e => { const b = e.target.closest("button"); if (b) document.getElementById("adj").onclick({ target: b }); };
 document.getElementById("adj").onclick = e => {
