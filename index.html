@@ -174,7 +174,7 @@
   .card.quiz.signs { overflow-y:auto; }
   @media (max-height:620px) { .card.quiz.signs .grp .q { display:none; } .card.quiz.signs .sigrow .ex { font-size:17px; } }
   .twins { display:inline-flex; gap:18px; align-items:flex-end; } .twins > span { display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .twins small { font:600 11px system-ui, sans-serif; color:#6b665c; }
+  .twins i { font:400 0.9em/1 system-ui, sans-serif; font-style:normal; color:#b9b2a3; align-self:center; font-size:22px; }
   @media (max-height:740px) { .card.quiz.signs .sigrow { padding:4px 12px; gap:0 12px; font-size:13px; } .card.quiz.signs .sigrow .ar { font-size:17px; line-height:1.5; } .card.quiz.signs .sigrow .ex { font-size:21px; }
     .card.quiz.signs.good .grp .q, .card.quiz.signs.bad .grp .q { display:none; } .card.quiz.signs .fstack { grid-template-rows:repeat(3, 26px); } .card.quiz.signs .fstack img { max-height:20px; }
     .card.quiz.signs .fbook small { display:none; } .card.quiz.signs .ans { gap:4px; } .card.quiz.signs.good .ans, .card.quiz.signs.bad .ans { margin:0; } }
@@ -202,9 +202,9 @@
   .sways .sgrid img { max-height:42px; max-width:40px; }
   @media (max-height:700px) { .sways .sgrid { grid-template-columns:repeat(2, 38px); } .sways .sgrid span { height:38px; } .sways .sgrid img { max-height:32px; max-width:32px; } .sways small { display:none; } }
   /* Room under the letter for the two writings: guide and answer both sit a little higher. */
-  .wcard.two .model { bottom:150px; } .wcard.two .line { top:auto; bottom:42%; }
-  .wcard.two .model .ar { font-size:min(130px, 32vw, 15vh) !important; }
-  @media (max-height:700px) { .wcard.two .model { bottom:130px; top:70px; } .wcard .ways.twoways b { font-size:28px; } .wcard .ways.twoways { bottom:52px; } }
+
+  .wcard.two .model .ar { font-size:min(120px, 28vw, 15vh) !important; } .wcard .model .sl { font:300 0.4em/1 system-ui, sans-serif; font-style:normal; margin:0 .15em; vertical-align:middle; opacity:.6; }
+
   .wcard .ways.twoways { gap:10px; bottom:60px; } .wcard .ways.twoways span { width:auto; height:auto; padding:4px 12px 2px; opacity:1; display:flex; flex-direction:column; align-items:center; }
   .wcard .ways.twoways b { font-size:38px; line-height:1.5; color:#2f7d4f; font-weight:500; } .wcard .ways.twoways small { font:600 11px system-ui, sans-serif; color:#6b665c; }
   .sigrow .snote { grid-column:1 / -1; font-size:12px; color:#6b665c; margin-top:2px; }
@@ -771,8 +771,8 @@ SIGNS.forEach(s => s.mini = `<div class="mini signmini">${signHtml(s, 26)}</div>
 function signHtml(s, size) {
   if (s.alt && size >= 40) {
     // As on the sheet, and as in the Mushaf: the sheet's Mushaf soukoun; for the letter not read, its oval zero over the sheet's circle.
-    const mushaf = signImg(s.id === "soukoun" ? "soukounM" : "nonlueM", Math.round(size * .8));
-    return `<span class="twins"><span>${signImg(s.id, Math.round(size * .8))}<small>Fiche</small></span><span>${mushaf}<small>Mushaf</small></span></span>`;
+    const mushaf = signImg(s.id === "soukoun" ? "soukounM" : "nonlueM", size);
+    return `<span class="twins">${signImg(s.id, size)}<i>/</i>${mushaf}</span>`;
   }
   return `<span class="sign" lang="ar">${signImg(s.id, s.plain ? size * 1.4 : size)}</span>`;
 }
@@ -1133,7 +1133,9 @@ const writing = () => mode === "wletters" || mode === "wwords" || mode === "wfor
 let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes = [], wShown = false;
 const wWords = () => mode === "wwords";
 const wLesson2 = () => mode === "wwords" || mode === "wforms";
-const wModel = (it, guide) => wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(170px, 40vw, 21vh)">${SIGN_WRITE[it.id][guide ? 0 : 1]}</span>`
+const signWrite = (it, guide) => { const [b, f] = SIGN_WRITE[it.id], one = guide ? b : f;
+  return it.alt ? `<span dir="ltr"><bdi>${one}</bdi><i class="sl">/</i><bdi>${guide ? b : f.replace(it.mark, it.alt)}</bdi></span>` : one; };   // sheet left, Mushaf right, as in Choisir   // soukoun, letter not read: « sheet / Mushaf », like the two ya
+const wModel = (it, guide) => wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(170px, 40vw, 21vh)">${signWrite(it, guide)}</span>`
   : wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
   : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:baseline; gap:0.35em; white-space:nowrap; font-size:min(${lettersOf(it.w).length > 3 ? 46 : 60}px, 14vw, 9vh)">${inked(it.w, it.k, "")}</span>`
   : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh)">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
@@ -1307,8 +1309,6 @@ function wReveal() {
   if (ways.length > 1) $("wCard").insertAdjacentHTML("beforeend", `<div class="ways" id="wWays">${ways.map(c => `<span class="${c === wayOf(wDeck[wPos]) ? "on" : ""}">${bookImg(c)}</span>`).join("")}</div>`);
   const c = $("wCard");
   // Soukoun and letter not read: the two ways, as on the sheet and as in the Mushaf.
-  const sg = wKind === "sign" && wDeck[wPos], alt = sg && sg.alt && SIGN_WRITE[sg.id][1].replace(sg.mark, sg.alt);
-  if (alt) c.insertAdjacentHTML("beforeend", `<div class="ways twoways" id="wWays"><span class="on"><b class="ar sfont" lang="ar">${SIGN_WRITE[sg.id][1]}</b><small>Fiche</small></span><span><b class="ar sfont" lang="ar">${alt}</b><small>Mushaf</small></span></div>`);
   c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "sign" ? "la lettre de la fiche" : `${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre`}</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
   wButtons();
