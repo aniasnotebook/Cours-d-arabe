@@ -476,7 +476,7 @@
       <button class="pick" data-w="trace" id="pkA"><span class="pv" id="pvTrace"></span><b><span id="cwTraceName">Tracer</span> <i>›</i></b><small id="cwTraceText"></small></button>
       <button class="pick" data-w="test" id="pkB"><span class="pv" id="pvTest"></span><b><span id="cwTestName">Me tester</span> <i>›</i></b><small id="cwTestText"></small></button>
     </div>
-    <div class="settings randset" id="cwRand"><label><span><b></b></span><input type="checkbox"></label></div>
+    <div class="settings randset" id="cwRand"><label><span><b></b></span><input type="checkbox"></label><label id="cwAuto"><span><b>Son automatique</b><small>Pour Tracer : le son de chaque carte se lance tout seul</small></span><input type="checkbox"></label></div>
   </section>
 
   <!-- Writing round -->
@@ -718,7 +718,7 @@ function loadSound(k) {
   ytP = true; ytVid = (soundAt(k || "ا") || { v: SOUND_VIDEOS[6] }).v;
   window.onYouTubeIframeAPIReady = () => { ytP = new YT.Player("ytFrame", { videoId: ytVid, playerVars: { playsinline: 1, controls: 0, rel: 0, disablekb: 1, origin: location.origin },
     events: { onReady: () => { ytReady = true; ytWarm = 1; ytP.mute(); ytP.playVideo(); },
-      onStateChange: e => { if (e.data === 1 && ytEndAt) armEnd(); if (ytWarm === 1 && e.data === 1) { ytP.pauseVideo(); ytWarm = 2; const k = currentSoundKey(); if (k) primeSound(k); } } } }); };
+      onStateChange: e => { if (e.data === 1 && ytEndAt) armEnd(); if (ytWarm === 1 && e.data === 1) { ytP.pauseVideo(); ytWarm = 2; const k = currentSoundKey(); if (k) primeSound(k); setTimeout(autoSound, 100); } } } }); };
   const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.onerror = () => ytP = null; document.head.appendChild(sc);
 }
 const currentSoundKey = () => { const it = writing() ? wDeck[wPos] : deck[pos]; return !it ? null : it.w !== undefined ? "c" + it.img : it.g && !it.p ? it.g : null; };
@@ -742,6 +742,14 @@ function playSound(g, btn) {
 }
 let ytEnd = 0, ytEndAt = 0;
 function armEnd() { clearTimeout(ytEnd); const left = ytEndAt - ytP.getCurrentTime(); ytEnd = setTimeout(stopSound, Math.max(0, left * 1000)); }
+// Tracer with « Son automatique »: each card plays its own sound, the learner listens while tracing.
+const autoOn = () => { try { return localStorage.getItem("autoSound") === "1"; } catch (e) { return false; } };
+let autoT = 0;
+function autoSound() {
+  if (!writing() || wKind !== "trace" || !autoOn() || $("write").hidden) return;
+  const b = $("wCard")?.querySelector(".spk"); if (!b || !soundAt(b.dataset.g)) return;
+  if (ytReady && ytWarm === 2) playSound(b.dataset.g, b); else loadSound(b.dataset.g);   // not ready yet: it plays once warm
+}
 function stopSound() {
   clearInterval(ytTimer); clearTimeout(ytEnd); ytEndAt = 0;
   // Mute first: a pause takes a moment to reach the video, the sound must not run on into the next letter.
@@ -1182,7 +1190,7 @@ function openWriting(lesson) {
   mode = lesson === 1 ? "wletters" : "wwords";
   $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Lier les lettres";
   $("cwBack").dataset.back = "l" + lesson;
-  bindRand($("cwRand"), lesson);
+  bindRand($("cwRand"), lesson); $("cwAuto").hidden = false;
   $("pkA").dataset.w = "trace"; $("pkB").dataset.w = "test"; setLevel($("pkB"), lesson === 1 ? 2 : 3);
   $("cwTraceName").textContent = "Tracer"; $("cwTestName").textContent = "Me tester";
   $("cwTraceText").textContent = lesson === 1 ? "Entraîne-toi à l’écriture en traçant sur les lettres grises." : "Entraîne-toi à lier les lettres en traçant sur les lettres grises.";
@@ -1211,7 +1219,7 @@ function openChoice(which) {
   choiceOf = which; mode = which;
   $("cwTitle").textContent = c.title;
   $("cwBack").dataset.back = c.lesson === 1 ? "l1" : "l2";
-  bindRand($("cwRand"), c.lesson || 2);
+  bindRand($("cwRand"), c.lesson || 2); $("cwAuto").hidden = true;
   $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write; setLevel($("pkB"), 2);
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
   $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
@@ -1270,6 +1278,7 @@ function wRender() {
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" || wKind === "sign" ? `<span class="model guide">${wModel(it, true)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
+  clearTimeout(autoT); autoT = setTimeout(autoSound, 450);   // after the card has slid in, so the small video lands in its corner
   $("wHint").innerHTML = wKind === "trace"
     ? `Repasse sur ${wWords() ? "les lettres liées" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
     : wTask();
@@ -1663,6 +1672,7 @@ function bindRand(box, lesson) {
   input.checked = src.checked; input.onchange = () => { src.checked = input.checked; };
 }
 bindRand(document.querySelector('.randset[data-lesson="1"]'), 1);
+{ const a = $("cwAuto").querySelector("input"); a.checked = autoOn(); a.onchange = () => { try { localStorage.setItem("autoSound", a.checked ? "1" : "0"); } catch (e) {} if (a.checked) loadSound(); }; }
 // Each choice screen goes from the easier way (left) to the harder one (right), with its level: one green bar, two orange
 // bars, or three red bars for the hardest of all (Lier les lettres · Me tester).
 function setLevel(b, n) { b.querySelector(".lvl")?.remove(); b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${n}"><span>${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>Niveau ${n}</span>`); }
