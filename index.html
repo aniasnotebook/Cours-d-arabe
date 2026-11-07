@@ -1700,7 +1700,7 @@ document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
 });
 // Before Tracer: with or without the sound of each card, the learner listens while tracing (asked like the page breaks).
 function askSound(go) {
-  $("askT").textContent = mode === "wwords" ? "Écouter chaque case\u00a0?" : "Écouter chaque lettre\u00a0?";
+  $("askT").textContent = "Écouter chaque lettre\u00a0?";
   $("askP").textContent = "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
   $("askNo").textContent = "Sans le son"; $("askYes").textContent = "Avec le son";
   $("ask").hidden = false;
@@ -1709,7 +1709,7 @@ function askSound(go) {
 }
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
 $("wRestart").innerHTML = ICONS.restart;
-$("wRestart").onclick = () => askThen("restart", () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource));
+$("wRestart").onclick = () => askThen("restart", () => { const go = () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource); wKind === "trace" ? (stopSound(), askSound(go)) : go(); });   // Tracer asks for the sound again
 $("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show("cw"));
 $("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : mode === "wsigns" ? "signs" : "book");
 $("goForms").onclick = () => openChoice("forms");
