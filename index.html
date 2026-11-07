@@ -103,7 +103,8 @@
   .card.good { border-color:#2f7d4f; } .card.bad { border-color:#c2410c; }
   .glyph { font-size:min(150px, 34vw, 18vh); line-height:1.25; position:relative; }
   .card.has-fams { padding:12px 12px 14px; }
-  .card.has-fams .glyph { margin-top:auto; }
+  .card.has-fams .glyph { margin-top:auto; font-size:min(130px, 30vw, 14vh); padding-top:28px; }   /* clear of the red name */
+  @media (max-height:700px) { .card.has-fams .fams .note { font-size:11px; } .card.has-fams .fams { gap:6px; } .card.has-fams .glyph { font-size:12vh; padding-top:22px; } }
   .card.has-fams .fams { position:static; margin-top:auto; }
   .arname { position:absolute; top:12px; left:0; right:0; text-align:center; color:#d6301f; font-size:32px; line-height:1.4; pointer-events:none; }
   .verdict { font-size:15px; font-weight:800; } .verdict.good { color:#2f7d4f; } .verdict.bad { color:#c2410c; }
@@ -119,6 +120,8 @@
   .chip.right { border:2px solid #2f7d4f; background:#e3f1e7; color:#2f7d4f; font-weight:700; }
   .chip.wrong { border:2px solid #c2410c; background:#fdebe1; color:#c2410c; font-weight:700; }
   .chip.off { border:1px solid #e2dccf; color:#b9b2a3; }
+  .fams .tapcheck { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:99px; background:#f3efe6; color:#1d1d1b; font:600 13px system-ui, sans-serif; }
+  .fams .tapcheck svg { width:14px; height:14px; }
   .fams .note { font-size:12px; color:#6b665c; }
   .fams .res { font-size:13px; font-weight:700; } .fams .res.good { color:#2f7d4f; } .fams .res.bad { color:#c2410c; }
 
@@ -801,7 +804,8 @@ function letterCard(l, id, cls) {
   const fams = famQuiz ? `<div class="fams" data-fams>
       <span class="q">Cette lettre est :</span>
       <span class="chips">${["emph","madd","nolink"].map(f => `<button class="chip" data-f="${f}">${ICONS.plus}${FAM[f]}</button>`).join("")}</span>
-      <span class="note">Une ou plusieurs. Rien de sélectionné = aucune des trois</span></div>` : "";
+      <span class="note">Une ou plusieurs. Rien de sélectionné = aucune des trois</span>
+      <span class="tapcheck">${ICONS.check}Tape la carte pour vérifier</span></div>` : "";
   return `<div class="card swipe ${cls} ${famQuiz ? "has-fams" : ""}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
     <span class="glyph ar" lang="ar">${glyph(l.g)}</span>
     <span class="arname ar" lang="ar">${l.ar}</span>
@@ -813,7 +817,7 @@ function letterCard(l, id, cls) {
 function renderLetter() {
   const next = deck[pos + 1];
   $("stage").innerHTML = (next ? letterCard(next, "", "under") : "") + letterCard(deck[pos], "card", "");
-  $("below").innerHTML = `<p class="hint" id="hint">${famQuiz ? "Tape la carte pour vérifier la famille. " : ""}${SWIPE_HINT}</p>
+  $("below").innerHTML = `<p class="hint" id="hint">${SWIPE_HINT}</p>
     <div class="actions">
       <button class="act m" id="bMiss"><span>${ICONS.x}</span>À revoir</button>
       <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
@@ -850,8 +854,8 @@ function paintFams() {
     if (!res) { res = document.createElement("span"); box.appendChild(res); }
     res.className = "res " + (ok ? "good" : "bad");
     res.textContent = `${ok ? "Juste" : "À revoir"} : ${what}`;
-    box.querySelector(".note").hidden = true;
-  } else if (res) { res.remove(); box.querySelector(".note").hidden = false; }
+    box.querySelector(".note").hidden = box.querySelector(".tapcheck").hidden = true;
+  } else if (res) { res.remove(); box.querySelector(".note").hidden = box.querySelector(".tapcheck").hidden = false; }
 }
 
 // The red name is always shown, as in the book; turning the card only checks the family.
