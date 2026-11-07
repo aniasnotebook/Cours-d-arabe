@@ -754,6 +754,7 @@ function autoSound() {
   if (ytReady && ytWarm === 2) playSound(b.dataset.g, b); else loadSound(b.dataset.g);   // not ready yet: it plays once warm
 }
 function stopSound() {
+  if ($("ytBox").classList.contains("on") && $("wCard")) $("wCard").dataset.heard = 1;   // this card's sound has played
   clearInterval(ytTimer); clearTimeout(ytEnd); clearTimeout(ytLast); ytEndAt = 0;
   // Mute first: a pause takes a moment to reach the video, the sound must not run on into the next letter.
   if (ytReady && ytP.getPlayerState) { ytP.mute(); if ([1, 3].includes(ytP.getPlayerState())) ytP.pauseVideo(); }
@@ -1281,7 +1282,7 @@ function wRender() {
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" || wKind === "sign" ? `<span class="model guide">${wModel(it, true)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
-  clearTimeout(autoT); autoT = setTimeout(autoSound, 450);
+  clearTimeout(autoT); autoT = setTimeout(autoSound, 450); wCardT0 = Date.now();
   if (wAskSound && $("ask").hidden) { wAskSound = false; askSound(autoSound); }   // after the card has slid in, so the small video lands in its corner
   $("wHint").innerHTML = wKind === "trace"
     ? `Repasse sur ${wWords() ? "les lettres liées" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
@@ -1380,11 +1381,14 @@ function wFly(ok) {
   fly(c, ok, () => wAnswer(ok));
 }
 function wAnswer(ok) { wAnswers.push({ item: wDeck[wPos], ok }); wRender(); }
-let wAuto = null;
+let wAuto = null, wCardT0 = 0;
 function wTraceNext() {
   clearTimeout(wAuto);
   const c = $("wCard"); if (!c || $("write").hidden || wKind !== "trace" || c.dataset.gone) return;
   if (!$("page").hidden) { wAuto = setTimeout(wTraceNext, 1000); return; }
+  // The card waits for its sound: while it plays, and with « Avec le son » until it has played (6 s at most if it can't start).
+  const sp = c.querySelector(".spk"), waitSound = autoOn() && sp && soundAt(sp.dataset.g) && !c.dataset.heard && Date.now() - wCardT0 < 6000;
+  if ($("ytBox").classList.contains("on") || waitSound) { wAuto = setTimeout(wTraceNext, 300); return; }
   c.dataset.gone = 1;
   fly(c, true, () => wGo(1));
 }
@@ -1709,7 +1713,7 @@ function askSound(go) {
   $("askP").textContent = "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
   $("askNo").textContent = "Sans le son"; $("askYes").textContent = "Avec le son";
   $("ask").hidden = false;
-  const set = on => { $("ask").hidden = true; try { localStorage.setItem("autoSound", on ? "1" : "0"); } catch (e) {} if (on) loadSound(); go(); };
+  const set = on => { $("ask").hidden = true; wCardT0 = Date.now(); try { localStorage.setItem("autoSound", on ? "1" : "0"); } catch (e) {} if (on) loadSound(); go(); };
   $("askNo").onclick = () => set(false); $("askYes").onclick = () => set(true);
 }
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
