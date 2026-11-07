@@ -169,7 +169,7 @@
   .sign .smark { line-height:1; height:.5em; overflow:visible; }
   .sign .sring { border:2px dotted #d6301f; border-radius:50%; display:block; }
   .sign .safter { line-height:1.5; font-weight:600; align-self:center; }
-  .sign.plain .safter { line-height:1; }
+  .sgimg { display:block; }
   /* Safety net on very short windows: the answered card scrolls inside instead of hiding its last buttons. */
   .card.quiz.signs { overflow-y:auto; }
   @media (max-height:620px) { .card.quiz.signs .grp .q { display:none; } .card.quiz.signs .sigrow .ex { font-size:17px; } }
@@ -256,7 +256,7 @@
   .wcard .ways span { width:46px; height:40px; border-radius:10px; display:grid; place-items:center; border:1px solid #e2dccf; opacity:.55; background:#fff; }
   .wcard .ways span.on { border:2px solid #2f7d4f; background:#e3f1e7; opacity:1; }
   .wcard .ways img { height:30px; width:auto; }
-  .wcard .prompt.pform { display:flex; flex-direction:column; align-items:center; line-height:1.2; }
+  .wcard .prompt.pform { display:flex; flex-direction:column; align-items:center; gap:4px; line-height:1.7; }   /* tall letters (ح ج ع) keep clear of the place below */
   .wcard .prompt.pform b { color:#d6301f; font:700 17px/1.3 system-ui, sans-serif; }
   .wcard .prompt.sep { color:#1d1d1b; font-size:40px; word-spacing:16px; }
   .wcard .model { position:absolute; left:0; right:0; top:84px; bottom:44px; display:grid; place-items:center; pointer-events:none; line-height:1.4; }
@@ -437,8 +437,8 @@
     <h2 class="ttl">Reconnaître les lettres</h2>
     <p class="muted center">Comment veux-tu t’entraîner&nbsp;?</p>
     <div class="picks">
-      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>M’évaluer <i>›</i></b><small>Jeu de mémoire pour noter les lettres que tu maîtrises et celles que tu ne maîtrises pas encore, en auto-évaluation.</small></button>
-      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:22px; left:0; right:0; text-align:center; font-size:34px; line-height:1.2">ج</span><span style="position:absolute; left:8px; right:8px; bottom:7px; display:flex; flex-direction:column; gap:3px; font-size:8.5px; font-weight:700; text-align:center; line-height:1.2"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Non liante</span></span></span></span><b>Les familles <i>›</i></b><small>Pour chaque lettre, tu choisis ses familles, puis tu vérifies.</small></button>
+      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>M’évaluer <i>›</i></b><small>Indique les lettres que tu maîtrises et celles que tu ne maîtrises pas encore, en auto-évaluation.</small></button>
+      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:22px; left:0; right:0; text-align:center; font-size:34px; line-height:1.2">ج</span><span style="position:absolute; left:8px; right:8px; bottom:7px; display:flex; flex-direction:column; gap:3px; font-size:8.5px; font-weight:700; text-align:center; line-height:1.2"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Non liante</span></span></span></span><b>Les familles <i>›</i></b><small>Pour chaque lettre, tu choisis ses familles.</small></button>
     </div>
     <div class="settings randset" data-lesson="1"><label><span><b>Lettres aléatoires</b></span><input type="checkbox"></label></div>
   </section>
@@ -724,6 +724,10 @@ function openPron(g) {
   $("pronBody").innerHTML = [...PRON[g], "methode"].map(b => `<img src="book/pron/${b}.jpg" alt="">`).join("");
   $("pron").hidden = false; $("pronBody").scrollTop = 0;
 }
+// The sheet's own drawing of each sign (cut from the PDF at 600 dpi, red on transparent): same on every phone,
+// whatever its fonts. [width, height] in pixels; the dotted circle is ~92 px wide, drawn at 0.6 × size.
+const SIGN_IMG = {"nonlueM":[86,126],"nonlue":[86,115],"kasra":[86,112],"chedda":[86,118],"ya":[180,142],"yaS":[49,27],"fatha":[86,113],"madd":[86,107],"soukoun":[86,116],"waw":[162,140],"iqlab":[86,129],"kasratan":[86,111],"soukounM":[86,117],"alifS":[86,130],"fathatan":[86,122],"damma":[86,122],"alif":[119,127],"dammatan":[86,122],"wawS":[31,40]};
+const signImg = (id, size) => { const [w, h] = SIGN_IMG[id], k = size * .6 / 92; return `<img class="sgimg" src="book/sg/${id}.png" alt="" style="width:${Math.round(w * k)}px; height:${Math.round(h * k)}px">`; };
 // ---------- Les signes (lesson 1): the class's Fiche 1 table « Les voyelles et les signes de lecture », word for word.
 // mark: the sign alone, over or under the red dotted circle as the sheet draws it; after: the letter written next to it
 // (the long vowels); book: how many ways the book writes it (pages 10 and 11), cut into book/signs/<id>-<n>.png.
@@ -752,12 +756,19 @@ const SIGNS = [
   { id: "yaS", fr: "Yâ aṣ-ṣaghīra", plain: "\u06E6", ex: "بِهِۦ", say: "« î » long", read: "« î » long : 2 temps" },
   { id: "alifS", fr: "Alif aṣ-ṣaghīra", mark: "\u0670", ex: "ذَٰلِكَ", say: "« â » long", read: "« â » long : 2 temps" },
 ];
+// Écrire: the letter is given in grey, the learner adds the sign in its place; the answer is the same letter with it.
+const SIGN_WRITE = { fatha: ["ب", "بَ"], kasra: ["ب", "بِ"], damma: ["ب", "بُ"], fathatan: ["ب", "بً"], kasratan: ["ب", "بٍ"], dammatan: ["ب", "ب\u08F1"],
+  alif: ["ب", "بَا"], waw: ["ب", "بُو"], ya: ["ب", "بِي"], chedda: ["ب", "بّ"], soukoun: ["ب", "بْ"], nonlue: ["ا", "ا\u06DF"],
+  iqlab: ["ن", "ن\u06E2"], madd: ["ا", "آ"], wawS: ["هُ", "هُۥ"], yaS: ["هِ", "هِۦ"], alifS: ["ذ", "ذٰ"] };
 SIGNS.forEach(s => s.mini = `<div class="mini signmini">${signHtml(s, 26)}</div>`);
 // The sign drawn as on the sheet: alone, a little above (or under) a red dotted circle, never touching it.
 function signHtml(s, size) {
-  if (s.plain) return `<span class="sign plain" lang="ar"><span class="safter" style="font-size:${size}px">${s.plain}</span></span>`;
-  if (s.alt && size >= 40) return `<span class="twins">${[[s.mark, "Fiche"], [s.alt, "Mushaf"]].map(([m, t]) => `<span>${oneSign({ ...s, mark: m }, Math.round(size * .8))}<small>${t}</small></span>`).join("")}</span>`;
-  return oneSign(s, size);
+  if (s.alt && size >= 40) {
+    // As on the sheet, and as in the Mushaf: the sheet's Mushaf soukoun; for the letter not read, its oval zero over the sheet's circle.
+    const mushaf = signImg(s.id === "soukoun" ? "soukounM" : "nonlueM", Math.round(size * .8));
+    return `<span class="twins"><span>${signImg(s.id, Math.round(size * .8))}<small>Fiche</small></span><span>${mushaf}<small>Mushaf</small></span></span>`;
+  }
+  return `<span class="sign" lang="ar">${signImg(s.id, s.plain ? size * 1.4 : size)}</span>`;
 }
 function oneSign(s, size) {
   const ring = Math.round(size * .6), mark = `<span class="smark" style="font-size:${size}px; ${s.under ? "margin-top:calc(-.66em + 6px); margin-bottom:.55em" : `margin-bottom:${-Math.round(size * .34) + (size < 40 ? 3 : 0)}px`}">\u00A0${s.mark}</span>`;
@@ -872,7 +883,7 @@ function paintFams() {
 
 // The red name is always shown, as in the book; turning the card only checks the family.
 // Lesson 1, level 1: the learner judges alone, there is no correction.
-const SWIPE_HINT = "Tu t’évalues toi-même : glisse à droite si tu la reconnais, à gauche si elle est à revoir";
+const SWIPE_HINT = "Tu t’évalues toi-même : glisse à droite si tu la reconnais,<br>à gauche si elle est à revoir";
 function flip() {
   if (!famQuiz) return;
   shown = !shown;
@@ -1116,14 +1127,14 @@ const writing = () => mode === "wletters" || mode === "wwords" || mode === "wfor
 let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes = [], wShown = false;
 const wWords = () => mode === "wwords";
 const wLesson2 = () => mode === "wwords" || mode === "wforms";
-const wModel = it => wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${it.ex}</span>`
+const wModel = (it, guide) => wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(170px, 40vw, 21vh)">${SIGN_WRITE[it.id][guide ? 0 : 1]}</span>`
   : wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
   : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:baseline; gap:0.35em; white-space:nowrap; font-size:min(${lettersOf(it.w).length > 3 ? 46 : 60}px, 14vw, 9vh)">${inked(it.w, it.k, "")}</span>`
   : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh)">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
 let wArabic = false;
-const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><span class="ar sfont" lang="ar">${it.ex.replace(/[\u064B-\u0652\u0670\u06DF-\u06E6\u08F1]/g, "")}</span><b>${it.fr}</b></span>`
+const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><b>${it.fr}</b></span>`
   : wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
   : wKind === "split" ? `<span class="prompt ar" lang="ar">${wordShow(it)}</span>`
   : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}${wayBadge(it)}</span>`
@@ -1155,7 +1166,7 @@ const CHOICE = {
   words: { title: "Séparer les lettres", write: "split", top: "بلب", tiles: ["ب","ت","ل","ن"],
     choose: "Tu vois une case du livre, tu tapes ses lettres.", text: "Tu vois une case du livre, tu écris ses lettres séparées, puis tu vérifies." },
   signs: { title: "Les signes", write: "sign", lesson: 1,
-    choose: "Tu vois un signe, tu choisis son nom et comment il se lit.", text: "Tu vois la lettre et le nom du signe, tu l’écris, puis tu vérifies." },
+    choose: "Tu vois un signe, tu choisis son nom et comment il se lit.", text: "Tu vois une lettre et le nom d’un signe, tu ajoutes le signe à sa place, puis tu vérifies." },
   forms: { title: "Les formes", write: "form", top: "ـبـ", tiles: ["ب","ن"], places: true,
     choose: "Tu vois une forme, tu choisis la lettre et sa place.", text: "Tu vois une lettre et sa place, tu écris sa forme, puis tu vérifies." },
 };
@@ -1169,10 +1180,10 @@ function openChoice(which) {
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
   $("cwTraceText").textContent = c.choose; $("cwTestText").textContent = c.text;
   if (which === "signs") {
-    const pill = (t, on) => `<span style="padding:2px 5px; border-radius:99px; font:700 8.5px/1.3 system-ui, sans-serif; ${on ? "background:#1d1d1b; color:#fff" : "border:1px solid #e2dccf; color:#1d1d1b"}">${t}</span>`;
+    const pill = (t, on) => `<span style="padding:2px 5px; white-space:nowrap; border-radius:99px; font:700 8.5px/1.3 system-ui, sans-serif; ${on ? "background:#1d1d1b; color:#fff" : "border:1px solid #e2dccf; color:#1d1d1b"}">${t}</span>`;
     $("pvTrace").innerHTML = `<span class="mc"><span style="display:flex; flex-direction:column; align-items:center; gap:6px">${signHtml(SIGNS[5], 34)}
       <span style="display:flex; gap:3px">${pill("Damma")}${pill("Dammatân", 1)}</span><span style="display:flex; gap:3px">${pill("« ou » court")}${pill("« oun »", 1)}</span></span></span>`;
-    $("pvTest").innerHTML = `<span class="mc"><span style="position:absolute; top:6px; left:0; right:0; display:flex; flex-direction:column; align-items:center"><span class="ar sfont" lang="ar" style="font-size:22px; line-height:1.4">ب</span><b style="font-size:10px; color:#d6301f">Dammatân</b></span><span style="font-size:28px; color:#b9b2a3; margin-top:26px">?</span><span style="position:absolute; left:12px; right:12px; top:70%; border-top:2px dashed #e2dccf"></span></span>`;
+    $("pvTest").innerHTML = `<span class="mc"><b style="position:absolute; top:8px; left:0; right:0; text-align:center; font-size:10px; color:#d6301f">Dammatân</b><span class="ar sfont" lang="ar" style="font-size:44px; color:#d9d3c5; margin-top:14px">ب</span><span style="position:absolute; top:46px; left:50%; font-size:18px; color:#b9b2a3">?</span></span>`;
     return show("cw");
   }
   const top = `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:24px">${c.top}</span>`;
@@ -1221,7 +1232,7 @@ function wRender() {
   stopSound();
   $("wStage").innerHTML = `<div class="wcard enter" id="wCard">${wPrompt(it)}${mode === "wletters" && wKind === "trace" ? soundTops(it.g) : it.w !== undefined ? cellSpeaker(it) : ""}<span class="line"></span>
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
-    ${wKind === "trace" ? `<span class="model guide">${wModel(it)}</span>` : ""}
+    ${wKind === "trace" || wKind === "sign" ? `<span class="model guide">${wModel(it, true)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
   $("wHint").innerHTML = wKind === "trace"
     ? `Repasse sur ${wWords() ? "les lettres liées" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
@@ -1233,7 +1244,7 @@ function wRender() {
   const sk = currentSoundKey(); if (sk) primeSound(sk);
 }
 // What to write, under the card.
-const wTask = () => wKind === "sign" ? "Écris la lettre avec ce signe" : wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
+const wTask = () => wKind === "sign" ? "Ajoute ce signe sur la lettre grise, à sa place" : wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
   : wWords() ? "Écris ces lettres liées, d’un seul trait" : "Dessine la lettre de mémoire";
 function wNameSwitch() {
   const b = $("wName"); if (!b) return;
