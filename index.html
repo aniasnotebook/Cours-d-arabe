@@ -1381,7 +1381,7 @@ document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("pag
 function openPage(n, part = "book") {
   $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span>`
     : `<span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span>`;
-  $("sheet").innerHTML = part === "signs" ? `<img class="sheetpg" src="book/fiche1-signes.jpg" alt="Les voyelles et les signes de lecture">`
+  $("sheet").innerHTML = part === "signs" ? `<img class="sheetpg" src="book/fiche1-signes-v2.jpg" alt="Les voyelles et les signes de lecture">`
     : part.startsWith("fiche1") ? [1, 2].map(i => `<img class="sheetpg" src="book/${part}-${i}.jpg" alt="">`).join("")
     : n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
     : part === "forms" ? `<h3>Les formes des lettres</h3><p class="muted center" style="margin:-4px 0 8px; font-size:13px">Tableau fait par l’app pour s’entraîner : il n’est pas dans le livre.</p>
