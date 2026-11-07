@@ -210,6 +210,10 @@
 
   .wcard .ways.twoways { gap:10px; bottom:60px; } .wcard .ways.twoways span { width:auto; height:auto; padding:4px 12px 2px; opacity:1; display:flex; flex-direction:column; align-items:center; }
   .wcard .ways.twoways b { font-size:38px; line-height:1.5; color:#2f7d4f; font-weight:500; } .wcard .ways.twoways small { font:600 11px system-ui, sans-serif; color:#6b665c; }
+  /* Once answered, only the right answer and the wrong pick stay, so the correction fits without scrolling. */
+  .card.quiz.signs.good .chip.off, .card.quiz.signs.bad .chip.off { display:none; }
+  @media (max-height:600px) { .card.quiz.signs.good .verdict, .card.quiz.signs.bad .verdict { margin:0; line-height:1.2; } .card.quiz.signs.good .sigrow, .card.quiz.signs.bad .sigrow { row-gap:0; padding-top:4px; padding-bottom:4px; } }
+  .sigrow .eximg { height:1.3em; display:block; }   /* the doubled waw, drawn the same on every phone */
   .sigrow .snote { grid-column:1 / -1; font-size:12px; color:#6b665c; margin-top:2px; }
   .sigrow .k { color:#6b665c; font-size:12px; font-weight:600; } .sigrow .ar { font-size:22px; line-height:1.6; font-weight:600; } .sigrow .ex { font-size:28px; }
   .card.quiz .nolink { font:600 12px/1.35 system-ui, sans-serif; color:#6b665c; background:#f3efe6; border-radius:10px; padding:4px 10px; text-align:center; max-width:300px; }
@@ -735,7 +739,7 @@ function openPron(g) {
 }
 // The sheet's own drawing of each sign (cut from the PDF at 600 dpi, red on transparent): same on every phone,
 // whatever its fonts. [width, height] in pixels; the dotted circle is ~92 px wide, drawn at 0.6 × size.
-const SIGN_IMG = {"nonlueM":[86,126],"nonlue":[86,115],"kasra":[86,112],"chedda":[86,118],"ya":[180,142],"yaS":[49,27],"fatha":[86,113],"madd":[86,107],"soukoun":[86,116],"waw":[162,140],"iqlab":[86,129],"kasratan":[86,111],"soukounM":[86,117],"alifS":[86,130],"fathatan":[86,122],"damma":[86,122],"alif":[119,127],"dammatan":[86,122],"wawS":[31,40]};
+const SIGN_IMG = {"nonlueM":[86,126],"nonlue":[86,115],"kasra":[86,112],"chedda":[86,118],"ya":[180,142],"yaS":[49,27],"fatha":[86,113],"madd":[86,107],"soukoun":[86,116],"waw":[162,140],"iqlab":[86,129],"kasratan":[86,111],"soukounM":[86,117],"alifS":[86,130],"fathatan":[86,122],"damma":[86,122],"alif":[119,127],"dammatan":[86,120],"wawS":[31,40]};
 const signImg = (id, size) => { const [w, h] = SIGN_IMG[id], k = size * .6 / 92; return `<img class="sgimg" src="book/sg/${id}.png" alt="" style="width:${Math.round(w * k)}px; height:${Math.round(h * k)}px">`; };
 // ---------- Les signes (lesson 1): the class's Fiche 1 table « Les voyelles et les signes de lecture », word for word.
 // mark: the sign alone, over or under the red dotted circle as the sheet draws it; after: the letter written next to it
@@ -1069,7 +1073,7 @@ function check() {
     ok = pick.name === it.id && sayOf(pick.say) === it.say;
     // The book's ways sit beside the sheet's explanation, in one row: a bigger strip of pictures, the table next to it.
     ans.insertAdjacentHTML("beforeend", `<span class="sigline">${it.book ? `<span class="sways"><small>Dans le livre</small><span class="sgrid">${signWays(it)}</span></span>` : ""}<span class="sigrow"><span class="k">Nom</span><span>${it.ar ? `<span class="ar" lang="ar">${it.ar}</span> · ` : ""}<b>${it.fr}</b></span>
-      <span class="k">Exemple</span><span class="ar ex" lang="ar">${it.ex}</span><span class="k">Lecture</span><span>${it.read}</span>${it.note ? `<span class="snote">${it.note}</span>` : ""}</span></span>`);
+      <span class="k">Exemple</span><span class="ar ex" lang="ar">${it.id === "dammatan" ? `<img class="eximg" src="book/sg/ex-dammatan.png" alt="${it.ex}">` : it.ex}</span><span class="k">Lecture</span><span>${it.read}</span>${it.note ? `<span class="snote">${it.note}</span>` : ""}</span></span>`);
     chips.forEach(o => {
       const right = o.dataset.v === it.id, chosen = o.classList.contains("on"), label = o.textContent;
       o.className = "chip" + (right && chosen ? " right" : right ? " missed" : chosen ? " wrong" : " off");
