@@ -393,7 +393,12 @@
   .spk { width:44px; height:38px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; display:grid; place-items:center; padding:0; }
   .spk svg { width:20px; height:20px; } .spk.on { background:var(--accent); border-color:var(--accent); color:#fff; }
   .card.under .tops { visibility:hidden; }
-  #ytBox { position:fixed; left:-10000px; top:0; width:240px; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#000; z-index:5; box-shadow:0 4px 16px rgba(0,0,0,.25); }
+  #ytBox { position:fixed; left:-10000px; top:0; width:240px; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#000; z-index:5; }
+  /* While a sound plays, the video rises from the bottom of the screen in a sheet, like the Prononciation one: 16:9, no black
+     bars, at least 200 px high (YouTube's minimum player size); the card above stays free to trace. */
+  #ytSheet { position:fixed; left:0; right:0; bottom:0; z-index:4; background:var(--surface); border-radius:20px 20px 0 0; box-shadow:0 -6px 24px rgba(0,0,0,.18);
+    padding-bottom:env(safe-area-inset-bottom); transform:translateY(110%); transition:transform .22s ease; }
+  #ytSheet.on { transform:none; } #ytSheet i { display:block; width:40px; height:4px; border-radius:2px; background:var(--line); margin:8px auto 0; }
   #ytBox iframe { width:100%; height:100%; display:block; border:0; }
   .pron { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; font:600 13px system-ui, sans-serif; z-index:1; }
   .pron svg { width:18px; height:18px; }
@@ -561,6 +566,7 @@
   </section>
 
   <!-- A round -->
+  <div id="ytSheet" aria-hidden="true"><i></i></div>
   <div id="ytBox" aria-hidden="true"><div id="ytFrame"></div></div>
   <section class="screen" id="play" hidden>
     <div class="top">
@@ -803,9 +809,10 @@ const soundTops = g => `<span class="tops"><button class="spk" data-g="${g}" ari
 function playSound(g, btn) {
   const s = soundAt(g), t = s && s.t;
   if (!ytReady || !t) { loadSound(); const h = $("hint"); if (h) h.textContent = "Le son a besoin d’Internet : réessaie dans un instant."; return; }
-  // The small video: same size and place on every card, its top right corner (the letter stays clear).
-  const c = btn.closest(".card, .wcard").getBoundingClientRect(), box = $("ytBox"), w = 150;
-  box.style.width = w + "px"; box.style.left = (c.right - w - 12) + "px"; box.style.top = (c.top + 12) + "px";
+  // The video in its sheet at the bottom of the screen: the screen's width (356 px at least, so 200 px high), centred.
+  const box = $("ytBox"), w = Math.max(356, Math.min(innerWidth - 8, 560)), h = Math.round(w * 9 / 16);
+  box.style.width = w + "px"; box.style.left = Math.round((innerWidth - w) / 2) + "px"; box.style.top = "auto"; box.style.bottom = "calc(10px + env(safe-area-inset-bottom))";
+  $("ytSheet").style.height = (h + 34) + "px"; $("ytSheet").classList.add("on");
   btn.classList.add("on"); box.classList.add("on");
   ytWarm = 2; ytP.unMute(); ytP.setVolume(100);
   ytAsked = performance.now(); ytLog = []; ytNote("w" + ytWarm + " s" + ytP.getPlayerState() + (s.v !== ytVid ? " new" : ""));
@@ -843,7 +850,7 @@ function stopSound() {
   clearInterval(ytTimer); clearTimeout(ytEnd); clearTimeout(ytLast); ytEndAt = 0;
   // Mute first: a pause takes a moment to reach the video, the sound must not run on into the next letter.
   if (ytReady && ytP.getPlayerState) { ytP.mute(); if ([1, 3].includes(ytP.getPlayerState())) ytP.pauseVideo(); }
-  $("ytBox").style.left = "-10000px"; $("ytBox").classList.remove("on");
+  $("ytBox").style.left = "-10000px"; $("ytBox").classList.remove("on"); $("ytSheet").classList.remove("on");
   document.querySelectorAll(".spk.on").forEach(b => b.classList.remove("on"));
 }
 function openPron(g) {
