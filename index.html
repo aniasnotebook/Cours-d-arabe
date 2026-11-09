@@ -742,8 +742,11 @@ function playSound(g, btn) {
   const asked = performance.now(); let kicks = 0;
   clearInterval(ytTimer); ytTimer = setInterval(() => { const ct = ytP.getCurrentTime();
     // Still not playing a moment later (a play request can get lost while the player was busy): ask again, 3 times at most.
-    if (!ytFresh && performance.now() - asked > 900 * (kicks + 1) && kicks < 3 && ![1, 3].includes(ytP.getPlayerState())) { kicks++; ytP.seekTo(t[0], true); ytP.playVideo(); }
-    if (!ytFresh) { if (ct < t[0] - 0.3 || ct >= t[1]) return; ytFresh = true; if (ytP.getPlayerState() === 1) armEnd(); }
+    if (!ytFresh && performance.now() - asked > 900 * (kicks + 1) && ![1, 3].includes(ytP.getPlayerState())) {
+      if (kicks < 3) { kicks++; ytP.seekTo(t[0], true); ytP.playVideo(); }
+      else { stopSound(); const h = $("write").hidden ? $("hint") : $("wHint"); if (h) h.textContent = "Le téléphone a bloqué le son : touche le haut-parleur pour l’entendre."; }   // the phone wants a tap first
+    }
+    if (!ytFresh) { if (ct < t[0] - 0.3 || ct >= t[1] || ytP.getPlayerState() !== 1) return; ytFresh = true; if (ytP.getPlayerState() === 1) armEnd(); }
     if (ct >= t[1]) stopSound(); }, 50);
 }
 let ytEnd = 0, ytEndAt = 0, ytFresh = false, ytLast = 0;
@@ -1588,6 +1591,7 @@ function backToPlace() {
   if (writing()) {
     wKind === "split" || wKind === "form" || wKind === "sign" ? openChoice({ split: "words", form: "forms", sign: "signs" }[wKind]) : openWriting(mode === "wwords" ? 2 : 1); mode = p.mode; wKind = p.wKind;
     wSource = r.src.map(at); wDeck = r.deck.map(at); wAnswers = r.ans.map(([i, ok, skip]) => ({ item: at(i), ok, skip })); wPos = r.pos;
+    if (wKind === "trace" && autoOn()) wAskSound = true;   // a phone plays sound only after a tap: the answer is that tap
     if (p.screen === "stats") showStats(); else openWriteRound();
   } else {
     if (mode === "words" || mode === "forms" || mode === "signs") openChoice(mode);   // so Retour from the round finds the choice screen
