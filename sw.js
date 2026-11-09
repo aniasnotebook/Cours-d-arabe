@@ -1,6 +1,7 @@
 // Works offline once opened: the page is fetched fresh when there is a connection, the copy is used otherwise.
-const CACHE = "cours-arabe-v150";
-const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
+const CACHE = "cours-arabe-v151";
+const CORE = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
+  "fonts/Amiri-400-arabic.woff2", "fonts/Amiri-400-latin.woff2", "fonts/Amiri-700-arabic.woff2", "fonts/Amiri-700-latin.woff2", "fonts/NotoNaskhArabic-500-arabic.woff2", "fonts/NotoNaskhArabic-500-latin.woff2", "fonts/NotoNaskhArabic-600-arabic.woff2", "fonts/NotoNaskhArabic-600-latin.woff2"];   // the fonts ship with the app: nothing is asked from Google
 
 self.addEventListener("install", e => {
   // The book's pictures are saved too, one by one, so lesson 2 also works offline (a missing one never blocks the install).
@@ -27,7 +28,7 @@ self.addEventListener("fetch", e => {
   }
   if (url.origin !== location.origin) return;
   // The book's pictures never change either: keep the first copy (each one is fetched the first time it shows).
-  if (url.pathname.includes("/book/")) {
+  if (url.pathname.includes("/book/") || url.pathname.includes("/fonts/")) {
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
       return res;

@@ -42,7 +42,8 @@ const FONTS = ["Amiri", "Amiri Quran", "Scheherazade New", "Lateef", "Gulzar", "
 // Letters whose other forms only exist next to another letter: the pair is written and the other letter hidden.
 const CTX = { "ر": [["ب",""],["ع",""],["ج",""],["ح",""],["ل",""]], "ز": [["ب",""],["ع",""],["ج",""],["ح",""],["ل",""]],
   "م": [["ح",""],["ل",""],["ت",""],["","ـ"],["ب","ب"]], "ـم": [["ح",""],["ل",""],["ت",""],["","ـ"],["ب","ب"]],
-  "ه": [["ب",""],["","ـ"],["ب","ا"],["ب","ب"],["ل",""]], "هـ": [["ب",""],["","ـ"],["ب","ا"],["ب","ب"],["ل",""]] };
+  "ه": [["ب",""],["","ـ"],["ب","ا"],["ب","ب"],["ل",""]], "هـ": [["ب",""],["","ـ"],["ب","ا"],["ب","ب"],["ل",""]],
+  "ت": [["ب",""],["","ـ"],["ب","ب"],["ل",""],["ح",""]], "ة": [["ب",""],["ل",""],["ن",""],["ح",""],["ع",""]] };
 const CTX_FONTS = ["Amiri", "Amiri Quran", "Scheherazade New", "Lateef"];
 // The extra forms come first, then every font as usual.
 const optsOf = w => [...(CTX[w] ? CTX_FONTS.flatMap(f => CTX[w].map(([a, b]) => ({ f, a, b, id: `${f} [${a}|${b}]`,
