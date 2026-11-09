@@ -19,9 +19,11 @@
   /* Flashcard app layout: pick a lesson, set the round, then one card at a time with answers under the thumb. */
   :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
           --accent:#2f7d4f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
-          --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#d6301f; --q-green:#3f8f3a; --q-red:#e0302a; --pick:#1d1d1b; --on-pick:#fff; }
+          --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#d6301f; --pick:#1d1d1b; --on-pick:#fff;
+          --p-ini:#2b6cb0; --p-med:#d9822b; --p-fin:#2f7d4f; --p-iso:#1d1d1b; }   /* a letter's colour says its place in the word: start, middle, end, alone */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
-          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; } }
+          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark;
+          --p-ini:#6ea8e8; --p-med:#f0a35a; --p-fin:#6cc08d; --p-iso:#ece9e2; } }
   :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
           --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
   * { box-sizing:border-box; }
@@ -50,12 +52,12 @@
   .top h1 { margin:0; font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; }
   .pillbtn { justify-self:end; height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line); background:var(--surface); font-size:14px; font-weight:600; }
 
-  /* Book header */
+  /* Lesson header: the Arabic title of the lesson, in the app's own look. */
   .bism { text-align:center; font-size:clamp(24px, 7vw, 28px); line-height:1.6; }
-  .ribbons { width:100%; display:flex; gap:6px; color:#fff; font-size:clamp(17px, 5vw, 20px); }
-  .ribbons span { padding:6px 12px 8px; line-height:1.6; }
-  .rg { background:var(--q-green); flex:0 0 auto; border-radius:4px 12px 12px 4px; }
-  .rr { background:var(--q-red); flex:1; text-align:center; border-radius:12px 4px 4px 12px; }
+  .ribbons { width:100%; display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:0 10px; font-size:clamp(18px, 5.2vw, 22px); }
+  .ribbons span { line-height:1.6; }
+  .rg { color:var(--muted); } .rg::after { content:" ·"; }
+  .rr { color:var(--ink); font-weight:700; }
   .muted { color:var(--muted); margin:0; font-size:14px; }
   .center { text-align:center; }
 
@@ -424,7 +426,7 @@
     </button>
     <button class="lesson" data-open="2">
       <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></span>
-      <span class="sample ar" lang="ar"><span style="color:#1d8fd1">تحت</span> <span style="color:#e0302a">بلب</span></span>
+      <span class="sample ar" lang="ar"><span style="color:var(--p-ini)">ت</span><span style="color:var(--p-med)">ح</span><span style="color:var(--p-fin)">ت</span> <span style="color:var(--p-ini)">ب</span><span style="color:var(--p-med)">ل</span><span style="color:var(--p-fin)">ب</span></span>
       <span class="row"><span><b>Leçon 2 · Les lettres liées</b><span class="muted">Les formes, séparer et lier les lettres</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
   </section>
@@ -448,7 +450,7 @@
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></div>
     <div class="label">Exercices</div>
     <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="color:#1d8fd1; font-size:22px">تحت</span><span class="t">Séparer les lettres<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goWords"><span class="tile ar" lang="ar" style="font-size:22px">تحت</span><span class="t">Séparer les lettres<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW2"><span class="tile ar" lang="ar" style="font-size:22px">بلب</span><span class="t">Lier les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="2"></div>
   </section>
@@ -607,7 +609,6 @@ FORM_LETTERS.forEach(g => positions(g).filter(p => p !== "iso").forEach(p => FOR
   mini: `<div class="mini ar"><span class="g" lang="ar">${formOf(g, p)}</span></div>` })));
 
 // The book's four inks; each cell of lesson 2 has its letters' colours as printed, right to left: R red, G green, B blue, K black.
-const INK = { R: "#e8321f", G: "#47a23a", B: "#29a3e3", K: "#1d1d1b" }, INKS = Object.values(INK);
 // Lesson 2 as printed, page by page (7, 8, 9), row by row from the right: each cell is "text inks".
 const BOOK_PAGES = [
   ["ا K|لا RK|لا RK|با GK|لا RK|ل R", "لا RK|لح GG|لا RK|بلب GRG|ک R|ك R", "كب RG|كب RG|كا RK|كا RK|بكت BRB|تكث BRB", "ب G|ت B|ث B|ن R|ى K|با GK", "نا RK|تا BK|يا KR|ثا BK|بس BG|يس BG", "نس RG|تس BG|ثس BG|ثج BR|تح BG|نخ RK", "يح KG|بج GR|يم KR|بم GR|نم GR|تم GR", "ثم BR|بى RK|يى RK|نى RK|تى BK|ثى BK", "نبل RGR|تنل KBR|بيل GKR|يتل KGR|ثثل KBR|نبن RGR"],
@@ -618,8 +619,17 @@ const BOOK_PAGES = [
 // calligraphy and the colours are exactly the book's; the text and inks stay for the letters and the corrections.
 const BOOK_CELLS = BOOK_PAGES.flat().flatMap(r => r.split("|")).map((c, n) => { const [w, k] = c.split(" "); return { w, k, img: n }; });
 // If a picture cannot load (offline before it was ever shown), the word is written instead of a broken image.
-const bookImg = (it, black) => `<img class="cal" src="book/${black ? "k" : "c"}${it.img}.png" alt="${it.w}" onerror="this.outerHTML='<span lang=ar>'+this.alt+'</span>'">`;
-const inkOf = (w, i, k) => k ? INK[k[i]] : INKS[i % INKS.length];
+// Until the cells are redrawn in free fonts, only the book's black version is shown (its colours are the book's own).
+const bookImg = (it, black) => `<img class="cal" src="book/k${it.img}.png" alt="${it.w}" onerror="this.outerHTML='<span lang=ar>'+this.alt+'</span>'">`;
+// A letter's colour is its place in the word (start, middle, end, alone): the rule of lesson 2 itself. A letter that never joins
+// the next one (ا د ذ ر ز و…) ends a piece of the word; the joining stroke ـ counts as a neighbour.
+const NOJOIN = "اأإآٱدذرزوؤةىء";   // never joined to the letter after them (ء to neither side)
+function placeAt(w, i) {
+  const L = [...w], joinsNext = c => c === "ـ" || !NOJOIN.includes(c);
+  const fromPrev = i > 0 && joinsNext(L[i - 1]) && L[i] !== "ء", toNext = i < L.length - 1 && joinsNext(L[i]) && L[i + 1] !== "ء";
+  return fromPrev && toNext ? "med" : fromPrev ? "fin" : toNext ? "ini" : "iso";
+}
+const inkOf = (w, i) => `var(--p-${placeAt(w, i)})`;
 // A zero-width joiner on each side keeps the letters joined when each one gets its own colour.
 // The separate letters of a word, each in its ink.
 const inked = (w, k, sep = " ") => [...w].map((ch, i) => ch === "ـ" ? "" : `<span style="color:${inkOf(w, i, k)}">${l1Show(ch, w)}</span>`).filter(Boolean).join(sep);
@@ -683,9 +693,6 @@ const PASSED = 0.8;
 
 // Les formes: the book's own writing of each form, cut out of the cells of pages 7 to 9 by its ink ("letter place":
 // [[cell, picture]]). The card shows the font; the correction shows these beside it, one picture per way of writing it (repeats left out). 57 of the 72 forms are in the book.
-const FORM_BOOK = {"ل ini":[[1,"1_0.png"],[4,"4_6.png"],[124,"124_175.png"]],"ا fin":[[1,"1_1.png"],[2,"2_3.png"],[3,"3_5.png"],[4,"4_7.png"]],"ب ini":[[3,"3_4.png"],[28,"28_33.png"],[39,"39_55.png"],[50,"50_77.png"]],"ل med":[[9,"9_12.png"]],"ك ini":[[12,"12_13.png"],[13,"13_15.png"]],"ب fin":[[12,"12_14.png"]],"ك med":[[16,"16_21.png"]],"ن ini":[[24,"24_25.png"],[30,"30_37.png"]],"ت ini":[[25,"25_27.png"],[31,"31_39.png"]],"ي ini":[[26,"26_29.png"],[29,"29_35.png"],[38,"38_53.png"],[87,"87_135.png"]],"ث ini":[[27,"27_31.png"],[32,"32_41.png"]],"س fin":[[28,"28_34.png"]],"ج fin":[[33,"33_44.png"]],"ح fin":[[34,"34_46.png"]],"خ fin":[[35,"35_48.png"]],"م fin":[[38,"38_54.png"],[39,"39_56.png"]],"ي fin":[[43,"43_64.png"]],"ب med":[[48,"48_73.png"],[53,"53_86.png"]],"ن med":[[49,"49_75.png"],[54,"54_88.png"]],"ل fin":[[49,"49_76.png"]],"ي med":[[50,"50_78.png"],[55,"55_91.png"]],"ت med":[[51,"51_81.png"],[56,"56_94.png"]],"ث med":[[52,"52_84.png"],[57,"57_97.png"]],"ن fin":[[54,"54_89.png"]],"ح ini":[[123,"123_173.png"]],"ث fin":[[61,"61_100.png"]],"خ ini":[[80,"80_129.png"]],"ج ini":[[63,"63_103.png"]],"ت fin":[[63,"63_104.png"]],"ح med":[[64,"64_105.png"]],"ج med":[[65,"65_107.png"]],"خ med":[[66,"66_110.png"]],"ه fin":[[70,"70_114.png"],[71,"71_116.png"]],"ه med":[[74,"74_119.png"]],"د fin":[[79,"79_128.png"]],"ذ fin":[[80,"80_130.png"]],"ر fin":[[83,"83_132.png"],[87,"87_136.png"]],"ز fin":[[84,"84_134.png"],[88,"88_138.png"]],"س ini":[[91,"91_139.png"]],"ش ini":[[92,"92_141.png"]],"ص ini":[[97,"97_143.png"]],"ط ini":[[98,"98_145.png"]],"ض ini":[[99,"99_147.png"]],"ظ ini":[[100,"100_149.png"]],"ع ini":[[104,"104_151.png"]],"غ ini":[[105,"105_153.png"]],"ع fin":[[106,"106_156.png"]],"غ fin":[[107,"107_158.png"]],"ع med":[[108,"108_159.png"]],"غ med":[[109,"109_160.png"]],"ق ini":[[116,"116_161.png"]],"و fin":[[116,"116_162.png"]],"ف ini":[[117,"117_163.png"]],"ق med":[[118,"118_166.png"]],"ف med":[[119,"119_169.png"]],"ف fin":[[120,"120_172.png"]],"م med":[[126,"126_180.png"]]};
-const formVersions = it => FORM_BOOK[`${it.g} ${it.p}`] || [];
-const formImg = v => `<img src="book/f/${v[1]}" alt="">`;
 // Prononciation (lesson 1): the class's articulation sheet, its own boxes as printed, for each letter (a letter with two
 // points, like ن with its nasal sound, gets both), then the sheet's method. Nothing written by the app.
 const PRON_BOX = { cavite: "ا و ي", gorge: "ء ه ع ح غ خ", arriere: "ق ك", milieu: "ج ش ي", bords: "ض ل", pointe1: "ن ر",
@@ -828,7 +835,6 @@ function oneSign(s, size) {
   const circle = `<span class="sring" style="width:${ring}px; height:${ring}px; border-width:${Math.max(2, Math.round(ring / 16))}px"></span>`;
   return `<span class="sign" lang="ar"><span class="scol">${s.under ? circle + mark : mark + circle}</span>${s.after ? `<span class="safter" style="font-size:${Math.round(size * .75)}px">${s.after}</span>` : ""}</span>`;
 }
-const signWays = s => Array.from({ length: s.book || 0 }, (_, i) => `<span><img src="book/signs/${s.id}-${i + 1}.png" alt=""></span>`).join("");
 // Wrong choices: three other signs, the ones that look or sound alike first.
 const SIGN_NEAR = { fatha: ["fathatan","alif"], kasra: ["kasratan","ya"], damma: ["dammatan","waw"], fathatan: ["fatha","alif"], kasratan: ["kasra","ya"],
   dammatan: ["damma","waw"], alif: ["fatha","fathatan"], waw: ["damma","dammatan"], ya: ["kasra","kasratan"], chedda: ["soukoun","fatha"], soukoun: ["nonlue","chedda"],
@@ -1112,7 +1118,7 @@ function check() {
     const sayOf = id => SIGNS.find(x => x.id === id).say;
     ok = pick.name === it.id && sayOf(pick.say) === it.say;
     // The book's ways sit beside the sheet's explanation, in one row: a bigger strip of pictures, the table next to it.
-    ans.insertAdjacentHTML("beforeend", `<span class="sigline">${it.book ? `<span class="sways"><small>Dans le livre</small><span class="sgrid">${signWays(it)}</span></span>` : ""}<span class="sigrow"><span class="k">Nom</span><span>${it.ar ? `<span class="ar" lang="ar">${it.ar}</span> <span class="nw">· <b>${it.fr}</b></span>` : `<b>${it.fr}</b>`}</span>
+    ans.insertAdjacentHTML("beforeend", `<span class="sigline"><span class="sigrow"><span class="k">Nom</span><span>${it.ar ? `<span class="ar" lang="ar">${it.ar}</span> <span class="nw">· <b>${it.fr}</b></span>` : `<b>${it.fr}</b>`}</span>
       <span class="k">Exemple</span><span class="ar ex" lang="ar">${it.id === "dammatan" ? `<img class="eximg" src="book/sg/ex-dammatan.png" alt="${it.ex}">` : it.ex}</span><span class="k">Lecture</span><span>${tail(it.read)}</span>${it.note ? `<span class="snote">${tail(it.note)}</span>` : ""}</span></span>`);
     chips.forEach(o => {
       const right = o.dataset.v === it.id, chosen = o.classList.contains("on"), label = o.textContent;
@@ -1126,9 +1132,6 @@ function check() {
     ans.insertAdjacentHTML("beforeend", `<span class="formrow ar" lang="ar">${positions(it.g).map(q => `<span class="${q === it.p ? "on" : ""}"><small>${q === it.p ? places.map(x => POS[x]).join(" / ") : POS[q]}</small>${formOf(it.g, q)}</span>`).join("")}</span>`);
     // The class's word for these 6: they join the letter before, never the one after (Fiche 1).
     if (NOLINK.includes(it.g)) { card.classList.add("tight"); ans.insertAdjacentHTML("beforeend", `<span class="nolink"><span class="l">Lettre non liante : elle s’attache à la lettre d’avant, mais jamais à celle qui la suit.</span><span class="s">Non liante : jamais attachée à la lettre qui suit.</span></span>`); }
-    // The book's ways of writing this form, in the book's order.
-    const vs = formVersions(it);
-    if (vs.length) ans.querySelector(".fhead").insertAdjacentHTML("beforeend", `<span class="fbook"><small>Dans le livre</small><span class="fstack">${vs.map(v => `<span>${formImg(v)}</span>`).join("")}</span></span>`);
     chips.forEach(o => {
       const right = o.dataset.k === "letter" ? o.dataset.v === it.g : places.includes(o.dataset.v), chosen = o.classList.contains("on");
       o.className = "chip" + (o.dataset.k === "letter" ? " ar" : "") + (right && chosen ? " right" : right && o.dataset.k === "pos" ? " missed" : right ? " right" : chosen ? " wrong" : " off");
@@ -1196,7 +1199,7 @@ let wArabic = false;
 const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><b>${it.fr}</b></span>`
   : wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
   : wKind === "split" ? `<span class="prompt ar" lang="ar">${wordShow(it)}</span>`
-  : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}${wayBadge(it)}</span>`
+  : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}</span>`
   : wKind === "trace" ? `<span class="prompt name ar" lang="ar">${it.ar}</span>`
   : `<button class="prompt swap" id="wName">${wArabic ? `<span class="ar" lang="ar" style="font-size:40px">${it.ar}</span>` : `<span class="fr">${it.fr}</span>`}
       <span class="tip">${SWAP}${wArabic ? `Tape pour revenir à « ${it.fr} »` : "Tape pour le nom en arabe"}</span></button>`;
@@ -1339,30 +1342,17 @@ function wButtons() {
 function wErase() { clearTimeout(wAuto); wStrokes = []; if (wShown) wHide(); wPaint(); wButtons(); }
 function wUndo() { if (!wAnswers.length) return; wAnswers.pop(); wRender(); }
 
-// The book's letter in green over the drawing.
-// Lier les lettres: when the book writes the same letters several ways (لا five times, كا twice…), the card says which
-// one is asked (« Façon 2 sur 5 · page 7 »), and the correction shows all of them with the right one ringed.
+// The book page (7, 8 or 9) a cell is on.
 const bookPage = it => it.img < 54 ? 7 : it.img < 114 ? 8 : 9;
-// Cells printed exactly alike count as one way (the two با, two of the لا).
-const SAME = { 23: 3, 8: 4 };
-const wayOf = it => WORD_CARDS[SAME[it.img] ?? it.img];
-// Ways are grouped by the lesson 1 letters the card asks for: ة is a way to write ta, هـ ha, ـم mim, أ ؤ ئ the hamza.
-const askKey = it => lettersOf(it.w).map(x => L1(x, it.w)).join("");
-const waysOf = it => WORD_CARDS.filter(c => askKey(c) === askKey(it) && SAME[c.img] === undefined);
-function wayBadge(it) {
-  const ways = waysOf(it); if (ways.length < 2) return "";
-  return `<span class="way">${nb(`Façon ${ways.indexOf(wayOf(it)) + 1} sur ${ways.length} · page ${bookPage(it)}`)}</span>`;
-}
+// The model in colour over the drawing.
 function wReveal() {
   wShown = true;
   $("wCard").classList.add("shown");
   if (mode === "wletters" && !$("wCard").querySelector(".tops")) $("wCard").insertAdjacentHTML("beforeend", soundTops(wDeck[wPos].g));   // after the answer, not before
   if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
-  const ways = wWords() ? waysOf(wDeck[wPos]) : [];
-  if (ways.length > 1) $("wCard").insertAdjacentHTML("beforeend", `<div class="ways" id="wWays">${ways.map(c => `<span class="${c === wayOf(wDeck[wPos]) ? "on" : ""}">${bookImg(c)}</span>`).join("")}</div>`);
   const c = $("wCard");
   // Soukoun and letter not read: the two ways, as on the sheet and as in the Mushaf.
-  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? "couleur" : "vert"} ${wKind === "sign" ? "la lettre de la fiche" : `${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre`}</span>`);
+  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? (wKind === "split" ? "couleur" : "noir") : "vert"} ${wKind === "sign" ? "la lettre de la fiche" : `${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"} du livre`}</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
   wButtons();
   wSwipe(c);
