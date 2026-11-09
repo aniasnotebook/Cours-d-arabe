@@ -739,7 +739,10 @@ function playSound(g, btn) {
   // The player reports its time late: just after a jump it can still give the end of the last sound, which would close
   // this one at once. So the end only counts once the reported time is inside this clip; a long timer is the last resort.
   ytEndAt = t[1]; ytFresh = false; clearTimeout(ytEnd); clearTimeout(ytLast); ytLast = setTimeout(stopSound, (t[1] - t[0] + 5) * 1000);
+  const asked = performance.now(); let kicks = 0;
   clearInterval(ytTimer); ytTimer = setInterval(() => { const ct = ytP.getCurrentTime();
+    // Still not playing a moment later (a play request can get lost while the player was busy): ask again, 3 times at most.
+    if (!ytFresh && performance.now() - asked > 900 * (kicks + 1) && kicks < 3 && ![1, 3].includes(ytP.getPlayerState())) { kicks++; ytP.seekTo(t[0], true); ytP.playVideo(); }
     if (!ytFresh) { if (ct < t[0] - 0.3 || ct >= t[1]) return; ytFresh = true; if (ytP.getPlayerState() === 1) armEnd(); }
     if (ct >= t[1]) stopSound(); }, 50);
 }
@@ -1268,9 +1271,9 @@ function openWriteRound() {
 function wRender() {
   clearTimeout(wAuto);
   if (wKind !== "trace") wPos = wAnswers.length;
-  if (wPos >= wDeck.length) { forgetStop(wSource); return wKind !== "trace" ? showStats() : show("cw"); }
+  if (wPos >= wDeck.length) { forgetStop(wSource); return showStats(); }
   if (wPos === 0) pausedAt = -1;
-  pageBreak(wPos, wDeck, wSource, () => wKind !== "trace" ? showStats() : show("cw"));
+  pageBreak(wPos, wDeck, wSource, showStats);
   wStrokes = []; wShown = false; wArabic = false;
   const it = wDeck[wPos], good = wAnswers.filter(a => a.ok).length;
   $("wCount").textContent = `${wPos + 1} / ${wDeck.length}`;
@@ -1435,6 +1438,8 @@ function wPaint() {
 // ---------- End of a round: only the cards answered count, so a round can stop early.
 function showStats() {
   if (writing()) { answers = wAnswers; deck = wDeck; source = wSource; }
+  if (writing() && wKind === "trace") return traceEnd();
+  $("rTiles").hidden = $("rBar").hidden = false;
   const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
@@ -1730,7 +1735,19 @@ $("wTopBack").onclick = () => askThen("quit", () => show("cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = () => askThen("stop", showStats);
 $("peek").onclick = () => mode === "signs" ? openPage(1, "signs") : openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
-$("again").onclick = () => start(source);
+$("again").onclick = () => { wAskSound = writing() && wKind === "trace"; start(source); };
+// Tracer has no right or wrong: its end says the round is done, how many cards were traced, and offers another round.
+function traceEnd() {
+  const l2 = mode === "wwords", k = Math.min(wPos, wDeck.length), unit = l2 ? "case" : "lettre";
+  show("stats");
+  $("party").className = "party m5"; $("party").innerHTML = confetti(0, 0) + MARK;
+  $("rTitle").textContent = `Bravo, tu as tracé ${k === pool(mode).length ? (l2 ? "toutes les cases" : "toutes les lettres") : `les ${k} ${unit}s`}`;
+  $("rSub").textContent = nb(`${l2 ? "Lier les lettres" : "Écrire les lettres"} · tracer · ${k} ${unit}${k > 1 ? "s" : ""}`);
+  $("rTiles").hidden = $("rBar").hidden = true; $("rLine").textContent = $("missed").innerHTML = "";
+  $("famText").hidden = $("reviewLabel").hidden = $("review").hidden = true;
+  $("lessonLinks").innerHTML = lessonLinks(l2 ? 2 : 1);
+  $("again").className = "primary";
+}
 $("page").onclick = closePage;
 
 document.addEventListener("keydown", e => {
