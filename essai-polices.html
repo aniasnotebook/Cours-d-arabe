@@ -20,6 +20,9 @@
   .foot { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #e2dccf; padding:10px 12px; display:flex; gap:8px; }
   .foot button { flex:1; height:48px; border-radius:24px; border:1px solid #e2dccf; background:#fff; color:#1d1d1b; font:700 15px system-ui; }
   .foot button.go { background:#2f7d4f; color:#fff; border:0; }
+  .jump { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px; font-size:13px; color:#6b665c; }
+  .jump button { height:36px; min-width:44px; border-radius:18px; border:1px solid #e2dccf; background:#fff; font:700 20px Amiri, serif; }
+  .opts button b { font-weight:inherit; }
   #out { width:100%; height:110px; margin-top:10px; font:12px monospace; } [hidden] { display:none !important; }
 </style>
 </head>
@@ -27,14 +30,23 @@
 <h1>Choisir une police pour chaque case</h1>
 <p>Touche la police qui ressemble le plus à la case du livre : la case suivante vient toute seule. Tes choix restent sur ce téléphone. À la fin, touche « Copier » et colle le texte dans la conversation. Ces 58 polices sont toutes libres de droits (Google Fonts, licence libre).</p>
 <div class="top"><div class="book"><img id="img" alt=""><div><b id="pos"></b><span id="done"></span></div></div></div>
+<div class="jump" id="jump"></div>
 <div class="opts" id="opts"></div>
 <textarea id="out" hidden readonly></textarea>
 <div class="foot"><button id="prev">‹ Précédente</button><button id="next">Suivante ›</button><button class="go" id="copy">Copier</button></div>
 <script>
 // The 117 different cells of pages 7 to 9, each word once: [number in the book's order (from 0), word].
-const CELLS = [[0, "ا"], [1, "لا"], [3, "با"], [5, "ل"], [7, "لح"], [9, "بلب"], [10, "ک"], [11, "ك"], [12, "كب"], [14, "كا"], [16, "بكت"], [17, "تكث"], [18, "ب"], [19, "ت"], [20, "ث"], [21, "ن"], [22, "ى"], [24, "نا"], [25, "تا"], [26, "يا"], [27, "ثا"], [28, "بس"], [29, "يس"], [30, "نس"], [31, "تس"], [32, "ثس"], [33, "ثج"], [34, "تح"], [35, "نخ"], [36, "يح"], [37, "بج"], [38, "يم"], [39, "بم"], [40, "نم"], [41, "تم"], [42, "ثم"], [43, "بى"], [44, "يى"], [45, "نى"], [46, "تى"], [47, "ثى"], [48, "نبل"], [49, "تنل"], [50, "بيل"], [51, "يتل"], [52, "ثثل"], [53, "نبن"], [54, "بنن"], [55, "تين"], [56, "يتن"], [57, "ثثن"], [58, "ج"], [59, "ح"], [60, "خ"], [61, "حث"], [62, "خب"], [63, "جت"], [64, "تحت"], [65, "يجب"], [66, "بخت"], [67, "ة"], [68, "ه"], [69, "بة"], [70, "يه"], [71, "ته"], [72, "نة"], [73, "هـ"], [74, "يهب"], [75, "بها"], [76, "بهم"], [77, "د"], [78, "ذ"], [79, "جد"], [80, "خذ"], [81, "ر"], [82, "ز"], [83, "جر"], [84, "خز"], [87, "ير"], [88, "تز"], [89, "س"], [90, "ش"], [91, "سل"], [92, "شل"], [93, "ص"], [94, "ض"], [95, "ط"], [96, "ظ"], [97, "صب"], [98, "طب"], [99, "ضا"], [100, "ظا"], [101, "ع"], [102, "غ"], [103, "ء"], [104, "عز"], [105, "غر"], [106, "صع"], [107, "ضغ"], [108, "بعد"], [109, "تغذ"], [110, "أ"], [111, "ؤ"], [112, "ئ"], [113, "ف"], [114, "ق"], [115, "و"], [116, "قو"], [117, "فو"], [118, "فقل"], [119, "قفل"], [120, "يف"], [121, "م"], [122, "ـم"], [123, "حم"], [124, "لم"], [126, "تمت"]];
+const CELLS = [[0, "ا"], [1, "لا"], [3, "با"], [5, "ل"], [7, "لح"], [9, "بلب"], [10, "ک"], [11, "ك"], [12, "كب"], [14, "كا"], [16, "بكت"], [17, "تكث"], [18, "ب"], [19, "ت"], [20, "ث"], [21, "ن"], [22, "ى"], [24, "نا"], [25, "تا"], [26, "يا"], [27, "ثا"], [28, "بس"], [29, "يس"], [30, "نس"], [31, "تس"], [32, "ثس"], [33, "ثج"], [34, "تح"], [35, "نخ"], [36, "يح"], [37, "بج"], [38, "يم"], [39, "بم"], [40, "نم"], [41, "تم"], [42, "ثم"], [43, "بى"], [44, "يى"], [45, "نى"], [46, "تى"], [47, "ثى"], [48, "نبل"], [49, "تنل"], [50, "بيل"], [51, "يتل"], [52, "ثثل"], [53, "نبن"], [54, "بنن"], [55, "تين"], [56, "يتن"], [57, "ثثن"], [58, "ج"], [59, "ح"], [60, "خ"], [61, "حث"], [62, "خب"], [63, "جت"], [64, "تحت"], [65, "يجب"], [66, "بخت"], [67, "ة"], [68, "ه"], [69, "بة"], [70, "يه"], [71, "ته"], [72, "نة"], [73, "هـ"], [74, "يهب"], [75, "بها"], [76, "بهم"], [77, "د"], [78, "ذ"], [79, "جد"], [80, "خذ"], [81, "ر"], [82, "ز"], [83, "جر"], [84, "خز"], [85, "ر"], [86, "ز"], [87, "ير"], [88, "تز"], [89, "س"], [90, "ش"], [91, "سل"], [92, "شل"], [93, "ص"], [94, "ض"], [95, "ط"], [96, "ظ"], [97, "صب"], [98, "طب"], [99, "ضا"], [100, "ظا"], [101, "ع"], [102, "غ"], [103, "ء"], [104, "عز"], [105, "غر"], [106, "صع"], [107, "ضغ"], [108, "بعد"], [109, "تغذ"], [110, "أ"], [111, "ؤ"], [112, "ئ"], [113, "ف"], [114, "ق"], [115, "و"], [116, "قو"], [117, "فو"], [118, "فقل"], [119, "قفل"], [120, "يف"], [121, "م"], [122, "ـم"], [123, "حم"], [124, "لم"], [126, "تمت"]];
 // Every Google Fonts family with Arabic letters and an open licence: the four closest to the book first, then calligraphic (serif) ones.
 const FONTS = ["Amiri", "Amiri Quran", "Scheherazade New", "Lateef", "Gulzar", "Noto Naskh Arabic", "Markazi Text", "Noto Nastaliq Urdu", "Alkalami", "Mirza", "Alyamama", "Aref Ruqaa", "Ruwudu", "Aref Ruqaa Ink", "Parastoo", "Playpen Sans Arabic", "Google Sans", "Rubik", "IBM Plex Sans Arabic", "Almarai", "Noto Kufi Arabic", "Readex Pro", "Cairo", "Changa", "El Messiri", "Reem Kufi", "Tajawal", "Noto Sans Arabic", "Zain", "Vazirmatn", "Alexandria", "Lalezar", "Reem Kufi Fun", "Mada", "Fustat", "Qahiri", "Cairo Play", "Alan Sans", "Kufam", "Harmattan", "Cascadia Code", "Beiruti", "Cascadia Mono", "Estedad", "Reem Kufi Ink", "Lemonada", "Baloo Bhaijaan 2", "Jomhuria", "Blaka", "Vibes", "Blaka Ink", "Rakkas", "Marhey", "Katibeh", "Handjet", "Badeen Display", "Oi", "Blaka Hollow"];
+// Letters whose other forms only exist next to another letter: the pair is written and the other letter hidden.
+const CTX = { "ر": [["ب",""],["ع",""],["ج",""],["ح",""],["ل",""]], "ز": [["ب",""],["ع",""],["ج",""],["ح",""],["ل",""]],
+  "م": [["ح",""],["ل",""],["ت",""],["","ـ"],["ب","ب"]], "ـم": [["ح",""],["ل",""],["ت",""],["","ـ"],["ب","ب"]],
+  "ه": [["ب",""],["","ـ"],["ب","ا"],["ب","ب"],["ل",""]], "هـ": [["ب",""],["","ـ"],["ب","ا"],["ب","ب"],["ل",""]] };
+const CTX_FONTS = ["Amiri", "Amiri Quran", "Scheherazade New", "Lateef"];
+// The extra forms come first, then every font as usual.
+const optsOf = w => [...(CTX[w] ? CTX_FONTS.flatMap(f => CTX[w].map(([a, b]) => ({ f, a, b, id: `${f} [${a}|${b}]`,
+  tag: `${a ? "après " + a : ""}${b === "ـ" ? "en début" : b ? " avant " + b : ""}` }))) : []), ...FONTS.map(f => ({ f, a: "", b: "", id: f }))];
 let pick = {}, at = 0; try { pick = JSON.parse(localStorage.getItem("fontPick2") || "{}"); at = +localStorage.getItem("fontAt") || 0; } catch (e) {}
 const save = () => { try { localStorage.setItem("fontPick2", JSON.stringify(pick)); localStorage.setItem("fontAt", at); } catch (e) {} };
 const $ = id => document.getElementById(id);
@@ -43,11 +55,12 @@ function draw() {
   $("img").src = `book/k${n}.png`; $("img").alt = w;
   $("pos").textContent = `Case ${at + 1} sur ${CELLS.length}`;
   $("done").textContent = `${Object.keys(pick).length} choisies`;
-  $("opts").innerHTML = FONTS.map((f, i) => `<button data-i="${i}" class="${pick[n] === f ? "on" : ""}"><span style="font-family:'${f}'">${w}</span><i>${f}</i></button>`).join("");
+  const g = w.replace("ـ", "");
+  $("opts").innerHTML = optsOf(w).map((o, i) => `<button data-i="${i}" class="${pick[n] === o.id ? "on" : ""}"><span style="font-family:'${o.f}'">${o.tag ? `<b style="color:transparent">${o.a}</b>${g}<b style="color:transparent">${o.b}</b>` : w}</span><i>${o.f}${o.tag ? "<br>forme " + o.tag : ""}</i></button>`).join("");
   $("prev").disabled = at === 0; save(); scrollTo(0, 0);
 }
 $("opts").onclick = e => { const b = e.target.closest("button[data-i]"); if (!b) return;
-  pick[CELLS[at][0]] = FONTS[+b.dataset.i]; $("opts").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); save();
+  pick[CELLS[at][0]] = optsOf(CELLS[at][1])[+b.dataset.i].id; $("opts").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); save();
   setTimeout(() => { if (at < CELLS.length - 1) { at++; draw(); } else $("done").textContent = `${Object.keys(pick).length} choisies : c'est fini, touche « Copier »`; }, 350); };
 $("prev").onclick = () => { if (at > 0) { at--; draw(); } };
 $("next").onclick = () => { if (at < CELLS.length - 1) { at++; draw(); } };
@@ -55,6 +68,8 @@ $("copy").onclick = () => { const t = "POLICES " + CELLS.map(([n]) => `${n}=${pi
   $("out").value = t; $("out").hidden = false; $("out").select();
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => $("copy").textContent = "Copié !").catch(() => { document.execCommand("copy"); $("copy").textContent = "Copié !"; });
   setTimeout(() => $("copy").textContent = "Copier", 2000); };
+$("jump").innerHTML = "Formes en plus : " + CELLS.map(([n, w], i) => CTX[w] ? `<button data-at="${i}">${w}</button>` : "").join("");
+$("jump").onclick = e => { const b = e.target.closest("button[data-at]"); if (b) { at = +b.dataset.at; draw(); } };
 draw();
 </script>
 </body>
