@@ -739,17 +739,17 @@ function playSound(g, btn) {
   // The player reports its time late: just after a jump it can still give the end of the last sound, which would close
   // this one at once. So the end only counts once the reported time is inside this clip; a long timer is the last resort.
   ytEndAt = t[1]; ytFresh = false; clearTimeout(ytEnd); clearTimeout(ytLast); ytLast = setTimeout(stopSound, (t[1] - t[0] + 5) * 1000);
-  const asked = performance.now(); let kicks = 0;
+  const asked = ytAsked = performance.now(); let kicks = 0;
   clearInterval(ytTimer); ytTimer = setInterval(() => { const ct = ytP.getCurrentTime();
     // Still not playing a moment later (a play request can get lost while the player was busy): ask again, 3 times at most.
     if (!ytFresh && performance.now() - asked > 900 * (kicks + 1) && ![1, 3].includes(ytP.getPlayerState())) {
       if (kicks < 3) { kicks++; ytP.seekTo(t[0], true); ytP.playVideo(); }
-      else { stopSound(); const h = $("write").hidden ? $("hint") : $("wHint"); if (h) h.textContent = "Le téléphone a bloqué le son : touche le haut-parleur pour l’entendre."; }   // the phone wants a tap first
+      else { stopSound(); const h = $("write").hidden ? $("hint") : $("wHint"); if (h) h.textContent = "Le téléphone a bloqué le son : il démarre dès que tu traces ou que tu touches le haut-parleur."; }   // the phone wants a tap first
     }
     if (!ytFresh) { if (ct < t[0] - 0.3 || ct >= t[1] || ytP.getPlayerState() !== 1) return; ytFresh = true; if (ytP.getPlayerState() === 1) armEnd(); }
     if (ct >= t[1]) stopSound(); }, 50);
 }
-let ytEnd = 0, ytEndAt = 0, ytFresh = false, ytLast = 0;
+let ytEnd = 0, ytEndAt = 0, ytFresh = false, ytLast = 0, ytAsked = 0;
 function armEnd() { clearTimeout(ytEnd); const left = ytEndAt - ytP.getCurrentTime(); ytEnd = setTimeout(stopSound, Math.max(0, left * 1000)); }
 // Tracer with « Son automatique »: each card plays its own sound, the learner listens while tracing.
 const autoOn = () => { try { return localStorage.getItem("autoSound") === "1"; } catch (e) { return false; } };
@@ -760,7 +760,8 @@ function autoSound() {
   if (ytReady && ytWarm === 2) playSound(b.dataset.g, b); else loadSound(b.dataset.g);   // not ready yet: it plays once warm
 }
 function stopSound() {
-  if ($("ytBox").classList.contains("on") && $("wCard")) $("wCard").dataset.heard = 1;   // this card's sound has played
+  if ($("ytBox").classList.contains("on") && ytFresh && $("wCard")) $("wCard").dataset.heard = 1;   // this card's sound has really played
+  ytFresh = false;
   clearInterval(ytTimer); clearTimeout(ytEnd); clearTimeout(ytLast); ytEndAt = 0;
   // Mute first: a pause takes a moment to reach the video, the sound must not run on into the next letter.
   if (ytReady && ytP.getPlayerState) { ytP.mute(); if ([1, 3].includes(ytP.getPlayerState())) ytP.pauseVideo(); }
@@ -1416,6 +1417,10 @@ function wCanvas() {
   };
   cv.onpointermove = e => { if (cur) { cur.push(at(e)); wPaint(); } };
   cv.onpointerup = cv.onpointercancel = e => {
+    // « Avec le son » and the phone blocked it: lifting the finger is a tap the phone accepts, the sound starts then.
+    if (e.type === "pointerup" && wKind === "trace" && autoOn() && !card.dataset.heard && !ytFresh && ytReady && ytWarm === 2
+      && (!$("ytBox").classList.contains("on") || (performance.now() - ytAsked > 1000 && ![1, 3].includes(ytP.getPlayerState())))) {
+      const b = card.querySelector(".spk"); if (b && soundAt(b.dataset.g)) playSound(b.dataset.g, b); }
     if (edge) { const dx = at(e)[0] - edge.x0; edge = null; if (Math.abs(dx) > 60) wGo(dx < 0 ? 1 : -1); return; }
     if (cur && wStrokes.length === 1) wButtons();   // Vérifier / Suivante wake up with the first line
     // Tracing moves on by itself once the finger has rested a moment (time to add the dots first; longer between linked letters).
