@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Essai des polices</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri&family=Scheherazade+New&family=Noto+Naskh+Arabic&family=Lateef&family=Markazi+Text&family=Mirza&family=Harmattan&family=Noto+Nastaliq+Urdu&family=Gulzar&family=Aref+Ruqaa&family=Reem+Kufi&display=block">
+<style>
+  body { margin:0; background:#f3efe6; color:#1d1d1b; font:16px/1.4 system-ui,-apple-system,sans-serif; padding:16px 16px 90px; }
+  h1 { font-size:20px; margin:4px 0; } p { margin:0 0 12px; color:#6b665c; font-size:14px; }
+  .bar { position:sticky; top:0; z-index:5; background:#f3efe6; padding:8px 0; display:flex; gap:8px; align-items:center; }
+  .bar b { flex:1; } .bar label { font-size:14px; color:#6b665c; display:flex; gap:6px; align-items:center; }
+  .cell { background:#fff; border-radius:18px; padding:12px; margin:12px 0; }
+  .cell.done .hd .n::after { content:" ✓"; color:#2f7d4f; }
+  .hd { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+  .hd .n { font:700 14px system-ui; color:#6b665c; width:34px; }
+  .hd img { height:80px; max-width:150px; object-fit:contain; } .hd small { color:#6b665c; font-size:12px; }
+  .opts { display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
+  .opts button { height:96px; border-radius:14px; border:2px solid #e2dccf; background:#fff; padding:2px 2px 0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; overflow:hidden; color:#1d1d1b; }
+  .opts button span { font-size:46px; line-height:1.6; direction:rtl; white-space:nowrap; }
+  .opts button i { font:600 10px system-ui; font-style:normal; color:#6b665c; padding-bottom:4px; }
+  .opts button.on { border-color:#2f7d4f; background:#e7f2ea; } .opts button.on i { color:#2f7d4f; }
+  .foot { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #e2dccf; padding:10px 16px; display:flex; gap:10px; }
+  .foot button { flex:1; height:48px; border-radius:24px; border:0; background:#2f7d4f; color:#fff; font:700 16px system-ui; }
+  .foot button.sec { background:#fff; color:#1d1d1b; border:1px solid #e2dccf; }
+  #out { width:100%; height:120px; margin-top:8px; font:12px monospace; } [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<h1>Choisir une police pour chaque case</h1>
+<p>À gauche, la case du livre. Touche la police qui lui ressemble le plus. Tes choix restent sur ce téléphone ; quand tu as fini, touche « Copier les choix » et colle-les dans la conversation. Toutes ces polices sont libres de droits (licence OFL).</p>
+<div class="bar"><b id="count"></b><label><input type="checkbox" id="todo"> Seulement les cases à faire</label></div>
+<div id="list"></div>
+<textarea id="out" hidden readonly></textarea>
+<div class="foot"><button class="sec" id="reset">Tout effacer</button><button id="copy">Copier les choix</button></div>
+<script>
+// The 117 different cells of pages 7 to 9 (each word once): [number in the book's order, word].
+const CELLS = [[0,"ا"],[1,"لا"],[3,"با"],[5,"ل"],[7,"لح"],[9,"بلب"],[10,"ک"],[11,"ك"],[12,"كب"],[14,"كا"],[16,"بكت"],[17,"تكث"],[18,"ب"],[19,"ت"],[20,"ث"],[21,"ن"],[22,"ى"],[24,"نا"],[25,"تا"],[26,"يا"],[27,"ثا"],[28,"بس"],[29,"يس"],[30,"نس"],[31,"تس"],[32,"ثس"],[33,"ثج"],[34,"تح"],[35,"نخ"],[36,"يح"],[37,"بج"],[38,"يم"],[39,"بم"],[40,"نم"],[41,"تم"],[42,"ثم"],[43,"بى"],[44,"يى"],[45,"نى"],[46,"تى"],[47,"ثى"],[48,"نبل"],[49,"تنل"],[50,"بيل"],[51,"يتل"],[52,"ثثل"],[53,"نبن"],[54,"بنن"],[55,"تين"],[56,"يتن"],[57,"ثثن"],[58,"ج"],[59,"ح"],[60,"خ"],[61,"حث"],[62,"خب"],[63,"جت"],[64,"تحت"],[65,"يجب"],[66,"بخت"],[67,"ة"],[68,"ه"],[69,"بة"],[70,"يه"],[71,"ته"],[72,"نة"],[73,"هـ"],[74,"يهب"],[75,"بها"],[76,"بهم"],[77,"د"],[78,"ذ"],[79,"جد"],[80,"خذ"],[81,"ر"],[82,"ز"],[83,"جر"],[84,"خز"],[87,"ير"],[88,"تز"],[89,"س"],[90,"ش"],[91,"سل"],[92,"شل"],[93,"ص"],[94,"ض"],[95,"ط"],[96,"ظ"],[97,"صب"],[98,"طب"],[99,"ضا"],[100,"ظا"],[101,"ع"],[102,"غ"],[103,"ء"],[104,"عز"],[105,"غر"],[106,"صع"],[107,"ضغ"],[108,"بعد"],[109,"تغذ"],[110,"أ"],[111,"ؤ"],[112,"ئ"],[113,"ف"],[114,"ق"],[115,"و"],[116,"قو"],[117,"فو"],[118,"فقل"],[119,"قفل"],[120,"يف"],[121,"م"],[122,"ـم"],[123,"حم"],[124,"لم"],[126,"تمت"]];
+// Free fonts (SIL Open Font License, from Google Fonts): naskh first, then other styles.
+const FONTS = [["Amiri Quran", "AQ"], ["Amiri", "AM"], ["Scheherazade New", "SC"], ["Noto Naskh Arabic", "NN"], ["Lateef", "LA"], ["Markazi Text", "MK"], ["Mirza", "MI"], ["Harmattan", "HA"], ["Noto Nastaliq Urdu", "NQ"], ["Gulzar", "GU"], ["Aref Ruqaa", "AR"], ["Reem Kufi", "RK"]];
+let pick = {}; try { pick = JSON.parse(localStorage.getItem("fontPick") || "{}"); } catch (e) {}
+const save = () => { try { localStorage.setItem("fontPick", JSON.stringify(pick)); } catch (e) {} };
+const $ = id => document.getElementById(id);
+function draw() {
+  const only = $("todo").checked;
+  $("list").innerHTML = CELLS.filter(([n]) => !only || !pick[n]).map(([n, w], i) => `<div class="cell${pick[n] ? " done" : ""}" data-n="${n}">
+    <div class="hd"><span class="n">${CELLS.findIndex(c => c[0] === n) + 1}</span><img src="book/k${n}.png" alt="${w}"><small>case ${n + 1} du livre</small></div>
+    <div class="opts">${FONTS.map(([f, k]) => `<button data-k="${k}" class="${pick[n] === k ? "on" : ""}"><span style="font-family:'${f}'">${w}</span><i>${f}</i></button>`).join("")}</div></div>`).join("");
+  $("count").textContent = `${Object.keys(pick).length} / ${CELLS.length} cases choisies`;
+}
+$("list").onclick = e => { const b = e.target.closest("button[data-k]"); if (!b) return; const c = b.closest(".cell"), n = +c.dataset.n;
+  pick[n] = b.dataset.k; save(); c.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); c.classList.add("done");
+  $("count").textContent = `${Object.keys(pick).length} / ${CELLS.length} cases choisies`; };
+$("todo").onchange = draw;
+$("copy").onclick = () => { const t = "POLICES " + CELLS.map(([n]) => `${n}:${pick[n] || "-"}`).join(" ");
+  $("out").value = t; $("out").hidden = false; $("out").select();
+  (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => $("copy").textContent = "Copié !").catch(() => { document.execCommand("copy"); $("copy").textContent = "Copié !"; });
+  setTimeout(() => $("copy").textContent = "Copier les choix", 2000); };
+$("reset").onclick = () => { if (confirm("Effacer tous tes choix ?")) { pick = {}; save(); draw(); } };
+draw();
+</script>
+</body>
+</html>
