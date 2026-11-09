@@ -5,59 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Essai des polices</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri&family=Scheherazade+New&family=Noto+Naskh+Arabic&family=Lateef&family=Markazi+Text&family=Mirza&family=Harmattan&family=Noto+Nastaliq+Urdu&family=Gulzar&family=Aref+Ruqaa&family=Reem+Kufi&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gulzar&amp;family=Amiri&amp;family=Noto+Naskh+Arabic&amp;family=Markazi+Text&amp;family=Noto+Nastaliq+Urdu&amp;family=Alkalami&amp;family=Mirza&amp;family=Alyamama&amp;family=Lateef&amp;family=Aref+Ruqaa&amp;family=Scheherazade+New&amp;family=Ruwudu&amp;family=Amiri+Quran&amp;family=Aref+Ruqaa+Ink&amp;family=Parastoo&amp;family=Playpen+Sans+Arabic&amp;family=Google+Sans&amp;family=Rubik&amp;family=IBM+Plex+Sans+Arabic&amp;family=Almarai&amp;family=Noto+Kufi+Arabic&amp;family=Readex+Pro&amp;family=Cairo&amp;family=Changa&amp;family=El+Messiri&amp;family=Reem+Kufi&amp;family=Tajawal&amp;family=Noto+Sans+Arabic&amp;family=Zain&amp;family=Vazirmatn&amp;family=Alexandria&amp;family=Lalezar&amp;family=Reem+Kufi+Fun&amp;family=Mada&amp;family=Fustat&amp;family=Qahiri&amp;family=Cairo+Play&amp;family=Alan+Sans&amp;family=Kufam&amp;family=Harmattan&amp;family=Cascadia+Code&amp;family=Beiruti&amp;family=Cascadia+Mono&amp;family=Estedad&amp;family=Reem+Kufi+Ink&amp;family=Lemonada&amp;family=Baloo+Bhaijaan+2&amp;family=Jomhuria&amp;family=Blaka&amp;family=Vibes&amp;family=Blaka+Ink&amp;family=Rakkas&amp;family=Marhey&amp;family=Katibeh&amp;family=Handjet&amp;family=Badeen+Display&amp;family=Oi&amp;family=Blaka+Hollow&amp;display=swap&amp;text=%D8%A1%D8%A3%D8%A4%D8%A6%D8%A7%D8%A8%D8%A9%D8%AA%D8%AB%D8%AC%D8%AD%D8%AE%D8%AF%D8%B0%D8%B1%D8%B2%D8%B3%D8%B4%D8%B5%D8%B6%D8%B7%D8%B8%D8%B9%D8%BA%D9%80%D9%81%D9%82%D9%83%D9%84%D9%85%D9%86%D9%87%D9%88%D9%89%D9%8A%DA%A9">
 <style>
-  body { margin:0; background:#f3efe6; color:#1d1d1b; font:16px/1.4 system-ui,-apple-system,sans-serif; padding:16px 16px 90px; }
-  h1 { font-size:20px; margin:4px 0; } p { margin:0 0 12px; color:#6b665c; font-size:14px; }
-  .bar { position:sticky; top:0; z-index:5; background:#f3efe6; padding:8px 0; display:flex; gap:8px; align-items:center; }
-  .bar b { flex:1; } .bar label { font-size:14px; color:#6b665c; display:flex; gap:6px; align-items:center; }
-  .cell { background:#fff; border-radius:18px; padding:12px; margin:12px 0; }
-  .cell.done .hd .n::after { content:" ✓"; color:#2f7d4f; }
-  .hd { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
-  .hd .n { font:700 14px system-ui; color:#6b665c; width:34px; }
-  .hd img { height:80px; max-width:150px; object-fit:contain; } .hd small { color:#6b665c; font-size:12px; }
-  .opts { display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; }
-  .opts button { height:96px; border-radius:14px; border:2px solid #e2dccf; background:#fff; padding:2px 2px 0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; overflow:hidden; color:#1d1d1b; }
+  body { margin:0; background:#f3efe6; color:#1d1d1b; font:16px/1.4 system-ui,-apple-system,sans-serif; padding:12px 16px 96px; }
+  h1 { font-size:19px; margin:2px 0; } p { margin:0 0 10px; color:#6b665c; font-size:13px; }
+  .top { position:sticky; top:0; z-index:5; background:#f3efe6; padding:8px 0; }
+  .book { background:#fff; border-radius:18px; padding:8px 12px; display:flex; align-items:center; gap:12px; }
+  .book img { height:110px; max-width:55%; object-fit:contain; } .book div { font-size:13px; color:#6b665c; } .book b { display:block; font-size:18px; color:#1d1d1b; }
+  .opts { display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:8px; margin-top:10px; }
+  .opts button { height:104px; border-radius:14px; border:2px solid #e2dccf; background:#fff; padding:2px 2px 0; display:flex; flex-direction:column; align-items:center; justify-content:space-between; overflow:hidden; color:#1d1d1b; }
   .opts button span { font-size:46px; line-height:1.6; direction:rtl; white-space:nowrap; }
-  .opts button i { font:600 10px system-ui; font-style:normal; color:#6b665c; padding-bottom:4px; }
+  .opts button i { font:600 10px/1.2 system-ui; font-style:normal; color:#6b665c; padding-bottom:4px; text-align:center; }
   .opts button.on { border-color:#2f7d4f; background:#e7f2ea; } .opts button.on i { color:#2f7d4f; }
-  .foot { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #e2dccf; padding:10px 16px; display:flex; gap:10px; }
-  .foot button { flex:1; height:48px; border-radius:24px; border:0; background:#2f7d4f; color:#fff; font:700 16px system-ui; }
-  .foot button.sec { background:#fff; color:#1d1d1b; border:1px solid #e2dccf; }
-  #out { width:100%; height:120px; margin-top:8px; font:12px monospace; } [hidden] { display:none !important; }
+  .foot { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #e2dccf; padding:10px 12px; display:flex; gap:8px; }
+  .foot button { flex:1; height:48px; border-radius:24px; border:1px solid #e2dccf; background:#fff; color:#1d1d1b; font:700 15px system-ui; }
+  .foot button.go { background:#2f7d4f; color:#fff; border:0; }
+  #out { width:100%; height:110px; margin-top:10px; font:12px monospace; } [hidden] { display:none !important; }
 </style>
 </head>
 <body>
 <h1>Choisir une police pour chaque case</h1>
-<p>À gauche, la case du livre. Touche la police qui lui ressemble le plus. Tes choix restent sur ce téléphone ; quand tu as fini, touche « Copier les choix » et colle-les dans la conversation. Toutes ces polices sont libres de droits (licence OFL).</p>
-<div class="bar"><b id="count"></b><label><input type="checkbox" id="todo"> Seulement les cases à faire</label></div>
-<div id="list"></div>
+<p>Touche la police qui ressemble le plus à la case du livre : la case suivante vient toute seule. Tes choix restent sur ce téléphone. À la fin, touche « Copier » et colle le texte dans la conversation. Ces 58 polices sont toutes libres de droits (Google Fonts, licence libre).</p>
+<div class="top"><div class="book"><img id="img" alt=""><div><b id="pos"></b><span id="done"></span></div></div></div>
+<div class="opts" id="opts"></div>
 <textarea id="out" hidden readonly></textarea>
-<div class="foot"><button class="sec" id="reset">Tout effacer</button><button id="copy">Copier les choix</button></div>
+<div class="foot"><button id="prev">‹ Précédente</button><button id="next">Suivante ›</button><button class="go" id="copy">Copier</button></div>
 <script>
-// The 117 different cells of pages 7 to 9 (each word once): [number in the book's order, word].
-const CELLS = [[0,"ا"],[1,"لا"],[3,"با"],[5,"ل"],[7,"لح"],[9,"بلب"],[10,"ک"],[11,"ك"],[12,"كب"],[14,"كا"],[16,"بكت"],[17,"تكث"],[18,"ب"],[19,"ت"],[20,"ث"],[21,"ن"],[22,"ى"],[24,"نا"],[25,"تا"],[26,"يا"],[27,"ثا"],[28,"بس"],[29,"يس"],[30,"نس"],[31,"تس"],[32,"ثس"],[33,"ثج"],[34,"تح"],[35,"نخ"],[36,"يح"],[37,"بج"],[38,"يم"],[39,"بم"],[40,"نم"],[41,"تم"],[42,"ثم"],[43,"بى"],[44,"يى"],[45,"نى"],[46,"تى"],[47,"ثى"],[48,"نبل"],[49,"تنل"],[50,"بيل"],[51,"يتل"],[52,"ثثل"],[53,"نبن"],[54,"بنن"],[55,"تين"],[56,"يتن"],[57,"ثثن"],[58,"ج"],[59,"ح"],[60,"خ"],[61,"حث"],[62,"خب"],[63,"جت"],[64,"تحت"],[65,"يجب"],[66,"بخت"],[67,"ة"],[68,"ه"],[69,"بة"],[70,"يه"],[71,"ته"],[72,"نة"],[73,"هـ"],[74,"يهب"],[75,"بها"],[76,"بهم"],[77,"د"],[78,"ذ"],[79,"جد"],[80,"خذ"],[81,"ر"],[82,"ز"],[83,"جر"],[84,"خز"],[87,"ير"],[88,"تز"],[89,"س"],[90,"ش"],[91,"سل"],[92,"شل"],[93,"ص"],[94,"ض"],[95,"ط"],[96,"ظ"],[97,"صب"],[98,"طب"],[99,"ضا"],[100,"ظا"],[101,"ع"],[102,"غ"],[103,"ء"],[104,"عز"],[105,"غر"],[106,"صع"],[107,"ضغ"],[108,"بعد"],[109,"تغذ"],[110,"أ"],[111,"ؤ"],[112,"ئ"],[113,"ف"],[114,"ق"],[115,"و"],[116,"قو"],[117,"فو"],[118,"فقل"],[119,"قفل"],[120,"يف"],[121,"م"],[122,"ـم"],[123,"حم"],[124,"لم"],[126,"تمت"]];
-// Free fonts (SIL Open Font License, from Google Fonts): naskh first, then other styles.
-const FONTS = [["Amiri Quran", "AQ"], ["Amiri", "AM"], ["Scheherazade New", "SC"], ["Noto Naskh Arabic", "NN"], ["Lateef", "LA"], ["Markazi Text", "MK"], ["Mirza", "MI"], ["Harmattan", "HA"], ["Noto Nastaliq Urdu", "NQ"], ["Gulzar", "GU"], ["Aref Ruqaa", "AR"], ["Reem Kufi", "RK"]];
-let pick = {}; try { pick = JSON.parse(localStorage.getItem("fontPick") || "{}"); } catch (e) {}
-const save = () => { try { localStorage.setItem("fontPick", JSON.stringify(pick)); } catch (e) {} };
+// The 117 different cells of pages 7 to 9, each word once: [number in the book's order (from 0), word].
+const CELLS = [[0, "ا"], [1, "لا"], [3, "با"], [5, "ل"], [7, "لح"], [9, "بلب"], [10, "ک"], [11, "ك"], [12, "كب"], [14, "كا"], [16, "بكت"], [17, "تكث"], [18, "ب"], [19, "ت"], [20, "ث"], [21, "ن"], [22, "ى"], [24, "نا"], [25, "تا"], [26, "يا"], [27, "ثا"], [28, "بس"], [29, "يس"], [30, "نس"], [31, "تس"], [32, "ثس"], [33, "ثج"], [34, "تح"], [35, "نخ"], [36, "يح"], [37, "بج"], [38, "يم"], [39, "بم"], [40, "نم"], [41, "تم"], [42, "ثم"], [43, "بى"], [44, "يى"], [45, "نى"], [46, "تى"], [47, "ثى"], [48, "نبل"], [49, "تنل"], [50, "بيل"], [51, "يتل"], [52, "ثثل"], [53, "نبن"], [54, "بنن"], [55, "تين"], [56, "يتن"], [57, "ثثن"], [58, "ج"], [59, "ح"], [60, "خ"], [61, "حث"], [62, "خب"], [63, "جت"], [64, "تحت"], [65, "يجب"], [66, "بخت"], [67, "ة"], [68, "ه"], [69, "بة"], [70, "يه"], [71, "ته"], [72, "نة"], [73, "هـ"], [74, "يهب"], [75, "بها"], [76, "بهم"], [77, "د"], [78, "ذ"], [79, "جد"], [80, "خذ"], [81, "ر"], [82, "ز"], [83, "جر"], [84, "خز"], [87, "ير"], [88, "تز"], [89, "س"], [90, "ش"], [91, "سل"], [92, "شل"], [93, "ص"], [94, "ض"], [95, "ط"], [96, "ظ"], [97, "صب"], [98, "طب"], [99, "ضا"], [100, "ظا"], [101, "ع"], [102, "غ"], [103, "ء"], [104, "عز"], [105, "غر"], [106, "صع"], [107, "ضغ"], [108, "بعد"], [109, "تغذ"], [110, "أ"], [111, "ؤ"], [112, "ئ"], [113, "ف"], [114, "ق"], [115, "و"], [116, "قو"], [117, "فو"], [118, "فقل"], [119, "قفل"], [120, "يف"], [121, "م"], [122, "ـم"], [123, "حم"], [124, "لم"], [126, "تمت"]];
+// Every Google Fonts family with Arabic letters and an open licence: calligraphic (serif) ones first.
+const FONTS = ["Gulzar", "Amiri", "Noto Naskh Arabic", "Markazi Text", "Noto Nastaliq Urdu", "Alkalami", "Mirza", "Alyamama", "Lateef", "Aref Ruqaa", "Scheherazade New", "Ruwudu", "Amiri Quran", "Aref Ruqaa Ink", "Parastoo", "Playpen Sans Arabic", "Google Sans", "Rubik", "IBM Plex Sans Arabic", "Almarai", "Noto Kufi Arabic", "Readex Pro", "Cairo", "Changa", "El Messiri", "Reem Kufi", "Tajawal", "Noto Sans Arabic", "Zain", "Vazirmatn", "Alexandria", "Lalezar", "Reem Kufi Fun", "Mada", "Fustat", "Qahiri", "Cairo Play", "Alan Sans", "Kufam", "Harmattan", "Cascadia Code", "Beiruti", "Cascadia Mono", "Estedad", "Reem Kufi Ink", "Lemonada", "Baloo Bhaijaan 2", "Jomhuria", "Blaka", "Vibes", "Blaka Ink", "Rakkas", "Marhey", "Katibeh", "Handjet", "Badeen Display", "Oi", "Blaka Hollow"];
+let pick = {}, at = 0; try { pick = JSON.parse(localStorage.getItem("fontPick2") || "{}"); at = +localStorage.getItem("fontAt") || 0; } catch (e) {}
+const save = () => { try { localStorage.setItem("fontPick2", JSON.stringify(pick)); localStorage.setItem("fontAt", at); } catch (e) {} };
 const $ = id => document.getElementById(id);
 function draw() {
-  const only = $("todo").checked;
-  $("list").innerHTML = CELLS.filter(([n]) => !only || !pick[n]).map(([n, w], i) => `<div class="cell${pick[n] ? " done" : ""}" data-n="${n}">
-    <div class="hd"><span class="n">${CELLS.findIndex(c => c[0] === n) + 1}</span><img src="book/k${n}.png" alt="${w}"><small>case ${n + 1} du livre</small></div>
-    <div class="opts">${FONTS.map(([f, k]) => `<button data-k="${k}" class="${pick[n] === k ? "on" : ""}"><span style="font-family:'${f}'">${w}</span><i>${f}</i></button>`).join("")}</div></div>`).join("");
-  $("count").textContent = `${Object.keys(pick).length} / ${CELLS.length} cases choisies`;
+  const [n, w] = CELLS[at];
+  $("img").src = `book/k${n}.png`; $("img").alt = w;
+  $("pos").textContent = `Case ${at + 1} sur ${CELLS.length}`;
+  $("done").textContent = `${Object.keys(pick).length} choisies`;
+  $("opts").innerHTML = FONTS.map((f, i) => `<button data-i="${i}" class="${pick[n] === f ? "on" : ""}"><span style="font-family:'${f}'">${w}</span><i>${f}</i></button>`).join("");
+  $("prev").disabled = at === 0; save(); scrollTo(0, 0);
 }
-$("list").onclick = e => { const b = e.target.closest("button[data-k]"); if (!b) return; const c = b.closest(".cell"), n = +c.dataset.n;
-  pick[n] = b.dataset.k; save(); c.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); c.classList.add("done");
-  $("count").textContent = `${Object.keys(pick).length} / ${CELLS.length} cases choisies`; };
-$("todo").onchange = draw;
-$("copy").onclick = () => { const t = "POLICES " + CELLS.map(([n]) => `${n}:${pick[n] || "-"}`).join(" ");
+$("opts").onclick = e => { const b = e.target.closest("button[data-i]"); if (!b) return;
+  pick[CELLS[at][0]] = FONTS[+b.dataset.i]; $("opts").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); save();
+  setTimeout(() => { if (at < CELLS.length - 1) { at++; draw(); } else $("done").textContent = `${Object.keys(pick).length} choisies : c'est fini, touche « Copier »`; }, 350); };
+$("prev").onclick = () => { if (at > 0) { at--; draw(); } };
+$("next").onclick = () => { if (at < CELLS.length - 1) { at++; draw(); } };
+$("copy").onclick = () => { const t = "POLICES " + CELLS.map(([n]) => `${n}=${pick[n] || "-"}`).join(" | ");
   $("out").value = t; $("out").hidden = false; $("out").select();
   (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => $("copy").textContent = "Copié !").catch(() => { document.execCommand("copy"); $("copy").textContent = "Copié !"; });
-  setTimeout(() => $("copy").textContent = "Copier les choix", 2000); };
-$("reset").onclick = () => { if (confirm("Effacer tous tes choix ?")) { pick = {}; save(); draw(); } };
+  setTimeout(() => $("copy").textContent = "Copier", 2000); };
 draw();
 </script>
 </body>
