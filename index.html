@@ -75,26 +75,26 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#f3efe6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#fcfbf7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#16181a" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Cours d’arabe">
 <style>
   /* Flashcard app layout: pick a lesson, set the round, then one card at a time with answers under the thumb. */
-  :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
+  :root { --bg:#fcfbf7; --dot:#e2ddd0; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
           --accent:#1f3f8f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
           --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#2fa84a; --pick:#1d1d1b; --on-pick:#fff;
           --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* a letter's colour says its place in the word: start (blue pen), middle (apple green), end (blood orange), alone */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
           --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark;
-          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; } }
+          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; --dot:#2a2e33; } }
   :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
-          --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
+          --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; --dot:#2a2e33; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   html, body { height:100%; overscroll-behavior:none; touch-action:manipulation; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  body { margin:0; background:var(--bg) radial-gradient(var(--dot) 1.3px, transparent 1.3px) 0 0 / 22px 22px; color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
          display:flex; flex-direction:column; align-items:center; overflow:hidden;
          padding-block:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
          padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
@@ -131,6 +131,17 @@
   .lesson .sample { font-size:42px; line-height:1.4; text-align:center; direction:rtl; }
   .lesson .row { display:flex; align-items:center; justify-content:space-between; }
   .lesson b { font-size:18px; display:block; }
+  /* The home spreads its parts over a dotted notebook page; each card wears its lesson's number as a notebook tab, in blue pen. */
+  #home > * { margin-top:0 !important; margin-bottom:0 !important; }
+  #home { justify-content:space-evenly; padding-top:12px; padding-bottom:12px; }
+  #home .bism { font-size:clamp(26px, 8.6vw, 34px); }
+  #home .lesson { flex:none; position:relative; margin-top:36px !important; gap:10px; padding:16px 18px; border-top-right-radius:0; border-top-color:var(--accent); }
+  #home .sample { font-size:clamp(40px, 13vw, 52px); }
+  .ltab { position:absolute; top:-36px; right:-1px; height:36px; min-width:120px; padding:6px 18px 0; display:flex; align-items:center; justify-content:center;
+          background:var(--accent); color:var(--on-accent); border-radius:14px 14px 0 0; font:700 18px/1 Amiri, serif; direction:rtl; }
+  @media (max-height:640px) { #home { padding-top:34px; padding-bottom:4px; } #home .bism { font-size:24px; line-height:1.4; } #home .lesson { margin-top:32px !important; gap:4px; padding:10px 16px; }
+    #home .sample { font-size:36px; line-height:1.25; } #home .ltab { top:-32px; height:32px; font-size:17px; } #home .ltitle { font-size:19px; line-height:1.35; } }
+  .ltitle { display:block; width:100%; text-align:center; font:400 clamp(20px, 6.2vw, 24px)/1.5 Amiri, serif; color:var(--accent); direction:rtl; }
   .chev { font-size:26px; color:var(--accent); }
 
   /* Lesson screens */
@@ -397,7 +408,7 @@
   /* While a sound plays, the video rises from the bottom of the screen in a sheet, like the Prononciation one: 16:9, no black
      bars, at least 200 px high (YouTube's minimum player size); the card above stays free to trace. */
   #ytSheet { position:fixed; left:0; right:0; bottom:0; z-index:4; background:var(--surface); border-radius:20px 20px 0 0; box-shadow:0 -6px 24px rgba(0,0,0,.18);
-    padding-bottom:env(safe-area-inset-bottom); transform:translateY(110%); transition:transform .22s ease; }
+    padding-bottom:env(safe-area-inset-bottom); transform:translateY(calc(100% + 40px)); transition:transform .22s ease; }
   #ytSheet.on { transform:none; } #ytSheet i { display:block; width:40px; height:4px; border-radius:2px; background:var(--line); margin:8px auto 0; }
   #ytBox iframe { width:100%; height:100%; display:block; border:0; }
   .pron { display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; font:600 13px system-ui, sans-serif; z-index:1; }
@@ -490,12 +501,12 @@
   <section class="screen mid" id="home" hidden>
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
     <button class="lesson" data-open="1">
-      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span></span>
+      <span class="ltab" lang="ar">الدَّرسُ الأَوَّل</span><span class="ltitle" lang="ar">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span>
       <span class="sample ar" lang="ar">ا ب ت ث</span>
       <span class="row"><span><b>Leçon 1 · Les lettres seules</b><span class="muted">Les 30 lettres et les signes</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
     <button class="lesson" data-open="2">
-      <span class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></span>
+      <span class="ltab" lang="ar">الدَّرسُ الثّاني</span><span class="ltitle" lang="ar">حُرُوفُ الهِجَاءِ المُرَكَّبة</span>
       <span class="sample ar" lang="ar"><span style="color:var(--p-ini)">ت</span><span style="color:var(--p-med)">ح</span><span style="color:var(--p-fin)">ت</span> <span style="color:var(--p-ini)">ب</span><span style="color:var(--p-med)">ل</span><span style="color:var(--p-fin)">ب</span></span>
       <span class="row"><span><b>Leçon 2 · Les lettres liées</b><span class="muted">Les formes, séparer et lier les lettres</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
@@ -505,7 +516,6 @@
   <section class="screen mid" id="l1" hidden>
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
-    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span></div>
     <div class="label">Exercices</div>
     <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>M’évaluer · Les familles</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:var(--q-name); font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
@@ -517,7 +527,6 @@
   <section class="screen mid" id="l2" hidden>
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
-    <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span></div>
     <div class="label">Exercices</div>
     <button class="go" id="goForms"><span class="tile ar" lang="ar">ـبـ</span><span class="t">Les formes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goWords"><span class="tile ar" lang="ar" style="font-size:22px">تحت</span><span class="t">Séparer les lettres<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
@@ -754,11 +763,11 @@ let shown = false, famQuiz = false, guess = new Set(), pick = {}, checked = fals
 
 function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
 
-// ---------- The logo: a red card, a green card and the ba card, drawn so each card can move.
+// ---------- The logo: an orange card, a green card and the ba card in blue pen, drawn so each card can move.
 const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
-  <g class="r"><rect x="12" y="22" width="56" height="78" rx="13" transform="rotate(-18 40 61)" fill="#d6301f" stroke="#0b0b0b" stroke-width="4"/></g>
-  <g class="g"><rect x="24" y="18" width="58" height="82" rx="14" transform="rotate(-6 53 59)" fill="#2f7d4f" stroke="#0b0b0b" stroke-width="4"/></g>
-  <g class="f"><rect x="40" y="20" width="62" height="84" rx="14" transform="rotate(8 71 62)" fill="#fbfaf2" stroke="#0b0b0b" stroke-width="4"/><g transform="rotate(8 71 62)"><path d="M50 36 q0 -7 6 -10" fill="none" stroke="#b9b2a3" stroke-width="4.5" stroke-linecap="round"/><path d="M52 56 v6 q0 12 12 12 h14 q12 0 12 -12 v-6" fill="none" stroke="#0b0b0b" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><rect x="65" y="82" width="9" height="9" transform="rotate(45 69.5 86.5)" fill="#0b0b0b"/></g></g></svg>`;
+  <g class="r"><rect x="12" y="22" width="56" height="78" rx="13" transform="rotate(-18 40 61)" fill="#e5603a" stroke="#0b0b0b" stroke-width="4"/></g>
+  <g class="g"><rect x="24" y="18" width="58" height="82" rx="14" transform="rotate(-6 53 59)" fill="#2fa84a" stroke="#0b0b0b" stroke-width="4"/></g>
+  <g class="f"><rect x="40" y="20" width="62" height="84" rx="14" transform="rotate(8 71 62)" fill="#1f3f8f" stroke="#0b0b0b" stroke-width="4"/><g transform="rotate(8 71 62)"><path d="M50 36 q0 -7 6 -10" fill="none" stroke="#7f97d6" stroke-width="4.5" stroke-linecap="round"/><path d="M52 56 v6 q0 12 12 12 h14 q12 0 12 -12 v-6" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><rect x="65" y="82" width="9" height="9" transform="rotate(45 69.5 86.5)" fill="#fff"/></g></g></svg>`;
 const confetti = (burst, turn) => [0,40,80,120,160,200,240,280,320].map((a, i) =>
   `<i style="--a:${a + turn}deg; --d:${burst + (i % 4) * .05}s; background:${["#d6301f","#2f7d4f","#e2b33c"][i % 3]}"></i>`).join("");
 // A round counts as passed from 80 % of right answers.
