@@ -83,14 +83,14 @@
 <style>
   /* Flashcard app layout: pick a lesson, set the round, then one card at a time with answers under the thumb. */
   :root { --bg:#f3efe6; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
-          --accent:#2f7d4f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
-          --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#d6301f; --pick:#1d1d1b; --on-pick:#fff;
-          --p-ini:#2b6cb0; --p-med:#d9822b; --p-fin:#2f7d4f; --p-iso:#1d1d1b; }   /* a letter's colour says its place in the word: start, middle, end, alone */
+          --accent:#1f3f8f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
+          --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#2fa84a; --pick:#1d1d1b; --on-pick:#fff;
+          --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* a letter's colour says its place in the word: start (blue pen), middle (apple green), end (blood orange), alone */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
-          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark;
-          --p-ini:#6ea8e8; --p-med:#f0a35a; --p-fin:#6cc08d; --p-iso:#ece9e2; } }
+          --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark;
+          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; } }
   :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
-          --accent:#4fa673; --on-accent:#0d1f14; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
+          --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   html, body { height:100%; overscroll-behavior:none; touch-action:manipulation; }
@@ -175,7 +175,7 @@
   .card.has-fams .glyph { margin-top:auto; font-size:min(130px, 30vw, 14vh); padding-top:28px; }   /* clear of the red name */
   @media (max-height:700px) { .card.has-fams .fams .note { font-size:11px; } .card.has-fams .fams { gap:6px; } .card.has-fams .glyph { font-size:12vh; padding-top:22px; } }
   .card.has-fams .fams { position:static; margin-top:auto; }
-  .arname { position:absolute; top:12px; left:0; right:0; text-align:center; color:#d6301f; font-size:32px; line-height:1.4; pointer-events:none; }
+  .arname { position:absolute; top:12px; left:0; right:0; text-align:center; color:var(--q-name); font-size:32px; line-height:1.4; pointer-events:none; }
   .verdict { font-size:15px; font-weight:800; } .verdict.good { color:#2f7d4f; } .verdict.bad { color:#c2410c; }
   .hint { margin:0; text-align:center; font-size:13px; color:var(--muted); }
 
@@ -332,7 +332,7 @@
   .wcard { position:absolute; inset:0; border:3px solid transparent; background:var(--card); border-radius:24px; box-shadow:0 2px 6px rgba(0,0,0,.08); overflow:hidden; color:#1d1d1b; }
   .wcard canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; }
   .wcard .prompt { position:absolute; top:10px; left:0; right:0; text-align:center; font-size:46px; line-height:1.4; pointer-events:none; }
-  .wcard .prompt.name { color:#d6301f; }
+  .wcard .prompt.name { color:var(--q-name); }
   .wcard .prompt.swap { pointer-events:auto; z-index:1; border:0; background:none; padding:0; display:flex; flex-direction:column; align-items:center; gap:6px; color:#d6301f; font-size:inherit; }
   .wcard .prompt.swap .fr { font-family:Amiri, serif; font-weight:700; font-size:30px; line-height:1.3; }
   .wcard .prompt.swap .ar { line-height:1.3; }
@@ -346,7 +346,7 @@
   .wcard .ways span.on { border:2px solid #2f7d4f; background:#e3f1e7; opacity:1; }
   .wcard .ways img { height:30px; width:auto; }
   .wcard .prompt.pform { display:flex; flex-direction:column; align-items:center; gap:4px; line-height:1.7; }   /* tall letters (ح ج ع) keep clear of the place below */
-  .wcard .prompt.pform b { color:#d6301f; font:700 17px/1.3 system-ui, sans-serif; }
+  .wcard .prompt.pform b { color:var(--q-name); font:700 17px/1.3 system-ui, sans-serif; }
   .wcard .prompt.sep { color:#1d1d1b; font-size:40px; word-spacing:16px; }
   .wcard .model { position:absolute; left:0; right:0; top:84px; bottom:44px; display:grid; place-items:center; pointer-events:none; line-height:1.4; }
   .wcard .model.guide { color:#d9d3c5; }
@@ -361,7 +361,7 @@
   .wcard .erase { position:absolute; top:10px; right:10px; z-index:2; width:48px; height:48px; border-radius:50%; border:1px solid #e2dccf; background:#fff; color:#6b665c; display:grid; place-items:center; padding:0; }
   .wcard .erase svg { width:22px; height:22px; }
   .act.n { color:var(--ink); } .act.n span { border-color:var(--line); background:var(--surface); }
-  .act.go2 { color:var(--ok); } .act.go2 span { border-color:var(--accent); background:var(--accent); color:var(--on-accent); }
+  .act.go2 { color:var(--accent); } .act.go2 span { border-color:var(--accent); background:var(--accent); color:var(--on-accent); }
   .act:disabled.n, .act:disabled.go2 { opacity:1; color:var(--faint); } .act:disabled span { border-color:var(--line); background:var(--line); color:var(--faint); }
 
   /* Stats: three counts side by side, the bar of the whole round, the cards to review, the buttons pinned at the bottom. */
@@ -377,7 +377,7 @@
   .grid { width:100%; display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:8px; direction:rtl; }
   .mini { background:var(--card); border-radius:10px; border:1px solid var(--line); aspect-ratio:1; position:relative; display:grid; place-items:center; color:#1d1d1b; }
   .mini .g { font-size:clamp(24px, 8vw, 34px); line-height:1.3; }
-  .mini .n { position:absolute; top:2px; left:5px; font-size:11px; color:#d6301f; }
+  .mini .n { position:absolute; top:2px; left:5px; font-size:11px; color:var(--q-name); }
   .mini .w { font-size:clamp(17px, 5vw, 24px); line-height:1.5; }
 
   /* Full page of the book */
@@ -391,7 +391,7 @@
   .tops .spk, .tops .pron { width:40px; height:40px; padding:0; justify-content:center; }
   .tops .pron span { display:none; }
   .spk { width:44px; height:38px; border-radius:99px; border:1px solid var(--line); background:#fff; color:#1d1d1b; display:grid; place-items:center; padding:0; }
-  .spk svg { width:20px; height:20px; } .spk.on { background:#2f7d4f; border-color:#2f7d4f; color:#fff; }
+  .spk svg { width:20px; height:20px; } .spk.on { background:var(--accent); border-color:var(--accent); color:#fff; }
   .card.under .tops { visibility:hidden; }
   #ytBox { position:fixed; left:-10000px; top:0; width:240px; aspect-ratio:16/9; border-radius:12px; overflow:hidden; background:#000; z-index:5; box-shadow:0 4px 16px rgba(0,0,0,.25); }
   #ytBox iframe { width:100%; height:100%; display:block; border:0; }
@@ -412,7 +412,7 @@
   .table { width:100%; border-collapse:collapse; direction:rtl; font-size:24px; text-align:center; }
   .table th { font:600 11px system-ui, sans-serif; color:#6b665c; padding:4px; }
   .table td { border:1px solid #333; line-height:1.6; }
-  .table td.n { color:#d6301f; font-size:18px; }
+  .table td.n { color:var(--q-name); font-size:18px; }
   .words { direction:rtl; border:1px solid #333; } .words > div { display:grid; }
   .words > div > span { border:1px solid #333; text-align:center; font-size:28px; line-height:1.7; }
   img.cal { height:1.25em; vertical-align:middle; } .mini img.cal { height:1.6em; } .wcard .prompt img.cal { height:1.4em; }
@@ -503,7 +503,7 @@
     <div class="ribbons ar" lang="ar" dir="rtl"><span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span></div>
     <div class="label">Exercices</div>
     <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>M’évaluer · Les familles</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:#d6301f; font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:var(--q-name); font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goS1"><span class="tile"><span class="sfont" lang="ar" style="font-size:22px; color:#d6301f">◌ُ</span></span><span class="t">Les signes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="1"></div>
   </section>
@@ -528,8 +528,8 @@
     <h2 class="ttl">Reconnaître les lettres</h2>
     <p class="muted center">Comment veux-tu t’entraîner&nbsp;?</p>
     <div class="picks">
-      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>M’évaluer <i>›</i></b><small>Indique les lettres que tu maîtrises et celles que tu ne maîtrises pas encore.</small></button>
-      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:#d6301f">جيم</span><span class="ar" lang="ar" style="position:absolute; top:22px; left:0; right:0; text-align:center; font-size:34px; line-height:1.2">ج</span><span style="position:absolute; left:8px; right:8px; bottom:7px; display:flex; flex-direction:column; gap:3px; font-size:8.5px; font-weight:700; text-align:center; line-height:1.2"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Non liante</span></span></span></span><b>Les familles <i>›</i></b><small>Pour chaque lettre, choisis ses familles.</small></button>
+      <button class="pick" data-fam="0"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:var(--q-name)">جيم</span><span class="ar" lang="ar" style="font-size:64px; line-height:1.3">ج</span></span></span><b>M’évaluer <i>›</i></b><small>Indique les lettres que tu maîtrises et celles que tu ne maîtrises pas encore.</small></button>
+      <button class="pick" data-fam="1"><span class="pv"><span class="mc"><span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:14px; color:var(--q-name)">جيم</span><span class="ar" lang="ar" style="position:absolute; top:22px; left:0; right:0; text-align:center; font-size:34px; line-height:1.2">ج</span><span style="position:absolute; left:8px; right:8px; bottom:7px; display:flex; flex-direction:column; gap:3px; font-size:8.5px; font-weight:700; text-align:center; line-height:1.2"><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Emphatique</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Prolongation</span><span style="border:1px solid #e2dccf; border-radius:999px; padding:2px 0">Non liante</span></span></span></span><b>Les familles <i>›</i></b><small>Pour chaque lettre, choisis ses familles.</small></button>
     </div>
     <div class="settings randset" data-lesson="1"><label><span><b>Cartes aléatoires</b></span><input type="checkbox"></label></div>
   </section>
@@ -1280,7 +1280,7 @@ function openWriting(lesson) {
   $("cwTraceName").textContent = "Tracer"; $("cwTestName").textContent = "Me tester";
   $("cwTraceText").textContent = lesson === 1 ? "Entraîne-toi à l’écriture en traçant sur les lettres grises." : "Entraîne-toi à lier les lettres en traçant sur les lettres grises.";
   $("cwTestText").textContent = lesson === 1 ? "Trace la lettre indiquée de mémoire, puis vérifie si ton dessin est juste." : "Trace les lettres indiquées liées, puis vérifie si ton dessin est juste.";
-  const top = lesson === 1 ? `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px; color:#d6301f">جيم</span>`
+  const top = lesson === 1 ? `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px; color:var(--q-name)">جيم</span>`
     : `<span class="ar" lang="ar" dir="rtl" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:20px">ب ل ب</span>`;
   const big = lesson === 1 ? "ج" : "بلب";
   $("pvTrace").innerHTML = `<span class="mc">${top}<span class="ar" lang="ar" style="font-size:${lesson === 1 ? 70 : 50}px; line-height:1.3; color:#d9d3c5">${big}</span></span>`;
@@ -1312,7 +1312,7 @@ function openChoice(which) {
     const pill = (t, on) => `<span style="padding:2px 4px; white-space:nowrap; border-radius:99px; font:700 7.5px/1.3 system-ui, sans-serif; ${on ? "background:#1d1d1b; color:#fff" : "border:1px solid #e2dccf; color:#1d1d1b"}">${t}</span>`;
     $("pvTrace").innerHTML = `<span class="mc"><span style="display:flex; flex-direction:column; align-items:center; gap:6px">${signHtml(SIGNS[5], 34)}
       <span style="display:flex; gap:3px">${pill("Damma")}${pill("Dammatân", 1)}</span><span style="display:flex; gap:3px">${pill("« ou »")}${pill("« oun »", 1)}</span></span></span>`;
-    $("pvTest").innerHTML = `<span class="mc"><b style="position:absolute; top:8px; left:0; right:0; text-align:center; font-size:10px; color:#d6301f">Dammatân</b><span class="ar sfont" lang="ar" style="font-size:44px; color:#d9d3c5; margin-top:14px">ب</span><span style="position:absolute; top:46px; left:50%; font-size:18px; color:#b9b2a3">?</span></span>`;
+    $("pvTest").innerHTML = `<span class="mc"><b style="position:absolute; top:8px; left:0; right:0; text-align:center; font-size:10px; color:var(--q-name)">Dammatân</b><span class="ar sfont" lang="ar" style="font-size:44px; color:#d9d3c5; margin-top:14px">ب</span><span style="position:absolute; top:46px; left:50%; font-size:18px; color:#b9b2a3">?</span></span>`;
     return show("cw");
   }
   const top = `<span class="ar" lang="ar" style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:24px">${c.top}</span>`;
@@ -1323,7 +1323,7 @@ function openChoice(which) {
       `<span class="ar" lang="ar" style="width:26px; height:26px; border-radius:50%; display:grid; place-items:center; font-size:15px; line-height:1; ${i === 0 ? "background:#1d1d1b; color:#fff" : "border:1px dashed #b9b2a3; background:#fff; color:#6b665c"}">${t}</span>`).join("")}</span>
     ${c.places ? PV_PLACES : ""}</span></span>`;
   $("pvTest").innerHTML = which === "forms"
-    ? `<span class="mc"><span style="position:absolute; top:4px; left:0; right:0; display:flex; flex-direction:column; align-items:center"><span class="ar" lang="ar" style="font-size:24px; line-height:1.3">ب</span><b style="font-size:10px; color:#d6301f">au milieu</b></span><span style="font-size:28px; color:#b9b2a3; margin-top:24px">?</span><span style="position:absolute; left:12px; right:12px; top:68%; border-top:2px dashed #e2dccf"></span></span>`
+    ? `<span class="mc"><span style="position:absolute; top:4px; left:0; right:0; display:flex; flex-direction:column; align-items:center"><span class="ar" lang="ar" style="font-size:24px; line-height:1.3">ب</span><b style="font-size:10px; color:var(--q-name)">au milieu</b></span><span style="font-size:28px; color:#b9b2a3; margin-top:24px">?</span><span style="position:absolute; left:12px; right:12px; top:68%; border-top:2px dashed #e2dccf"></span></span>`
     : `<span class="mc">${top}<span style="font-size:28px; color:#b9b2a3">?</span><span style="position:absolute; left:12px; right:12px; top:62%; border-top:2px dashed #e2dccf"></span></span>`;
   show("cw");
 }
