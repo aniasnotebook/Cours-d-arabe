@@ -127,7 +127,7 @@ document.getElementById("adj").onclick = e => {
   d[k] = +(d[k] + +b.dataset.d).toFixed(1); if (!d[0] && !d[1]) delete p[sel];
   saveAdj(); showAdj(); play(sel);
 };
-const items = () => page === 6 ? GLYPHS.map((g, i) => ({ id: i, html: g })) : Array.from({ length: CELLS[page][1] - CELLS[page][0] }, (_, k) => ({ id: CELLS[page][0] + k, html: `<img src="book/c${CELLS[page][0] + k}.png" alt="">` }));
+const items = () => page === 6 ? GLYPHS.map((g, i) => ({ id: i, html: g })) : Array.from({ length: CELLS[page][1] - CELLS[page][0] }, (_, k) => ({ id: CELLS[page][0] + k, html: `<img src="book/n/k${CELLS[page][0] + k}.png" alt="">` }));
 const st = t => document.getElementById("st").textContent = t;
 let P = null, stopAt = null, timer = null;
 function drawGrid() {
