@@ -695,7 +695,7 @@ const BOOK_CELLS = BOOK_PAGES.flat().flatMap(r => r.split("|")).map((c, n) => { 
 // If a picture cannot load (offline before it was ever shown), the word is written instead of a broken image.
 // Each cell is our own drawing in a free font (book/n/k<n>.png: Amiri, Amiri Quran, Scheherazade New or Lateef, chosen cell by cell
 // to look like the book), in black until the app's colours are set.
-const bookImg = (it, black) => `<img class="cal" src="book/n/k${it.img}.png" alt="${it.w}" onerror="this.outerHTML='<span lang=ar>'+this.alt+'</span>'">`;
+const bookImg = (it, black) => `<img class="cal" src="book/n/${black ? "k" : "c"}${it.img}.png" alt="${it.w}" onerror="this.outerHTML='<span lang=ar>'+this.alt+'</span>'">`;
 // A letter's colour is its place in the word (start, middle, end, alone): the rule of lesson 2 itself. A letter that never joins
 // the next one (ا د ذ ر ز و…) ends a piece of the word; the joining stroke ـ counts as a neighbour.
 const NOJOIN = "اأإآٱدذرزوؤةىء";   // never joined to the letter after them (ء to neither side)
@@ -715,7 +715,7 @@ const wordInk = it => bookImg(it);          // the answer
 const KEPT = new Set([0, 1, 3, 5, 7, 9, 10, 11, 12, 14, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 126]);
 const lettersOf = w => [...w].filter(c => c !== "ـ");   // the joining stroke (ـ) is not a letter
 const WORD_CARDS = BOOK_CELLS.filter(it => KEPT.has(it.img))
-  .map(it => ({ ...it, mini: `<div class="mini ar"><span class="w">${wordInk(it)}</span></div>` }));
+  .map(it => ({ ...it, mini: `<div class="mini ar"><span class="w">${wordShow(it)}</span></div>` }));
 
 // ---------- Helpers
 // A number stays on the line of the word next to it (« page 7 », « 54 cases »): the spaces around it do not break.
@@ -936,7 +936,7 @@ function start(cards) {
 }
 function openRound() {
   if (mode === "letters" || mode === "fams" || mode === "words") loadSound(currentSoundKey()); else stopSound();
-  $("peek").textContent = mode === "letters" || mode === "fams" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir les signes" : "Voir les cases";
+  $("peek").textContent = mode === "letters" || mode === "fams" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir les signes" : "Voir les lettres liées";
   $("peek").dataset.page = mode === "letters" || mode === "fams" ? 1 : 2;
   show("play");
   render();
@@ -1134,7 +1134,7 @@ function renderQuiz() {
     const letters = [...new Set(lettersOf(it.w).map(c => L1(c, it.w)))];
     it.choices = it.choices || lessonChoices(letters, Math.max(8, letters.length + 4));
     $("stage").innerHTML = `<div class="card quiz enter" id="card">${cellSpeaker(it)}<span class="ans"><span class="big word ar" lang="ar">${wordShow(it)}</span></span>
-      <div class="grp"><span class="q">Tape chaque lettre de cette case</span><span class="chips letters">${it.choices.map(c => chip("multi", c, chipLabel(c), true)).join("")}</span>
+      <div class="grp"><span class="q">Tape chaque lettre, séparée</span><span class="chips letters">${it.choices.map(c => chip("multi", c, chipLabel(c), true)).join("")}</span>
       <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
     pick.multi = new Set();
   }
@@ -1304,7 +1304,7 @@ let choiceOf = "words";
 const PV_PLACES = `<span style="display:flex; gap:3px">${["début","milieu","fin"].map((t, i) => `<span style="padding:2px 4px; border-radius:99px; font:600 8px/1.2 system-ui, sans-serif; border:1px solid ${i === 1 ? "#1d1d1b" : "#b9b2a3"}; ${i === 1 ? "border-style:solid; background:#1d1d1b; color:#fff" : "border-style:dashed; background:#fff; color:#6b665c"}">${t}</span>`).join("")}</span>`;
 const CHOICE = {
   words: { title: "Séparer les lettres", write: "split", top: "بلب", tiles: ["ب","ت","ل","ن"],
-    choose: "Pour chaque case, choisis les lettres qui la composent.", text: "Trace les lettres de la case, séparées, puis vérifie si ton dessin est juste." },
+    choose: "Sépare les lettres liées : choisis chaque lettre qui les compose.", text: "Sépare les lettres liées : trace chaque lettre seule, puis vérifie si ton dessin est juste." },
   signs: { title: "Les signes", write: "sign", lesson: 1,
     choose: "Pour chaque signe, choisis son nom et comment il se lit.", text: "Trace le signe indiqué à sa place sur la lettre grise, puis vérifie si ton dessin est juste." },
   forms: { title: "Les formes", write: "form", top: "ـبـ", tiles: ["ب","ن"], places: true,
@@ -1350,7 +1350,7 @@ function startWrite(cards) {
 }
 function openWriteRound() {
   if (mode === "wletters" || wWords() || mode === "wwords" || (writing() && wKind === "split")) loadSound(currentSoundKey()); else stopSound();
-  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : mode === "wsigns" ? "Voir les signes" : wWords() || wKind === "split" ? "Voir les cases" : "Voir l’alphabet";
+  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : mode === "wsigns" ? "Voir les signes" : wWords() || wKind === "split" ? "Voir les lettres liées" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
   show("write");
@@ -1430,7 +1430,7 @@ function wReveal() {
   if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
   const c = $("wCard");
   // Soukoun and letter not read: the two ways, as on the sheet and as in the Mushaf.
-  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? (wKind === "split" ? "couleur" : "noir") : "vert"} ${wKind === "sign" ? "la lettre de la fiche" : `${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "la case" : "la lettre"}`}</span>`);
+  c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? (wKind === "trace" ? "noir" : "couleur") : "vert"} ${wKind === "sign" ? "la lettre de la fiche" : `${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "les lettres liées" : "la lettre"}`}</span>`);
   $("wHint").textContent = "Glisse à droite si c’était juste, à gauche si c’est à revoir";
   wButtons();
   wSwipe(c);
@@ -1523,11 +1523,11 @@ function showStats() {
   const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
-  const unit = ["letters", "fams", "wletters"].includes(mode) ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : mode === "signs" || mode === "wsigns" ? "signe" : "case";
-  const n = k => `${k} ${unit}${k > 1 ? "s" : ""}`, pl = (k, w) => `${w}${k > 1 ? "s" : ""}`;
+  const unit = ["letters", "fams", "wletters"].includes(mode) ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : mode === "signs" || mode === "wsigns" ? "signe" : "groupe";
+  const pl = (k, w) => w === "groupe" ? `groupe${k > 1 ? "s" : ""} de lettres liées` : `${w}${k > 1 ? "s" : ""}`, n = k => `${k} ${pl(k, unit)}`;
   const bad = done - good, win = done && skipped <= done && good / done >= PASSED;
   const name = writing() && wKind === "sign" ? "Les signes · écrire" : mode === "signs" ? "Les signes · choisir" : writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres · m’évaluer", fams: "Reconnaître les lettres · les familles", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
-  const fem = !(mode === "signs" || mode === "wsigns"), right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
+  const fem = !(mode === "signs" || mode === "wsigns" || unit === "groupe"), right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
   // Each score band has its own words and its own move of the logo; confetti from 80 %, twice for a perfect round.
   const all = good === seen && seen === deck.length, rate = done && skipped <= done ? good / done : 0;   // more skipped than answered: under 50 %
@@ -1539,7 +1539,7 @@ function showStats() {
   $("rSub").textContent = nb(`${name} · ${seen < deck.length ? `arrêté après ${seen} sur ${n(deck.length)}` : n(deck.length)}`);
   $("rTiles").innerHTML = `<span class="g"><b>${good}</b>${pl(good, right)}</span><span class="r"><b>${bad}</b>à revoir</span><span class="s"><b>${skipped}</b>${pl(skipped, "passée")}</span>`;
   $("rBar").innerHTML = seen ? [["g", good], ["r", bad], ["s", skipped]].map(([c, k]) => `<i class="${c}" style="width:${k / seen * 100}%"></i>`).join("") : "";
-  $("rLine").textContent = nb(done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${unit} ${did}`);
+  $("rLine").textContent = nb(done ? `${good} ${pl(good, right)} sur ${done} ${pl(done, unit)} ${pl(done, did)}` : `${fem ? "Aucune" : "Aucun"} ${pl(1, unit)} ${did}`);
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = nb(`Familles : ${done - famWrong} / ${done} justes`);
   // The online lesson page is the alphabet: no help for the signs, so no link after them.
@@ -1586,7 +1586,7 @@ function openPage(n, part = "book") {
         const cells = pg.flatMap(r => r.split("|")).map(() => BOOK_CELLS[n++]).filter(c => KEPT.has(c.img)), rows = [];
         for (let k = 0; k < cells.length; k += 6) rows.push(cells.slice(k, k + 6));
         return `<div class="bookpage"><span class="pn">Partie ${1 + i}</span><div class="words">${rows.map(row =>
-          `<div style="grid-template-columns:repeat(6, minmax(0, 1fr))">${row.map(c => `<span>${bookImg(c)}</span>`).join("")}</div>`).join("")}</div></div>`; }).join(""); })()}`;
+          `<div style="grid-template-columns:repeat(6, minmax(0, 1fr))">${row.map(c => `<span>${bookImg(c, true)}</span>`).join("")}</div>`).join("")}</div></div>`; }).join(""); })()}`;
   $("page").hidden = false;
   zoom(true);
 }
@@ -1756,7 +1756,7 @@ const FIRST_PAGE = { 1: 6, 2: 7 };
 document.querySelectorAll(".lessonbox[data-lesson]").forEach(d => {
   const n = +d.dataset.lesson, pages = LESSON_PAGES[n].map((u, i) => [u, FIRST_PAGE[n] + i]);
   d.innerHTML = `<div class="label">Leçon</div>
-    <div class="lrow"><span>${BOOK_ICON}Lire</span>${n === 2 ? `<button class="lbtn" data-part="forms">Les formes</button>` : ""}<button class="lbtn" data-part="book">${n === 2 ? "Les cases" : "Les lettres"}</button>${n === 1 ? SHEETS : FICHE1}</div>
+    <div class="lrow"><span>${BOOK_ICON}Lire</span>${n === 2 ? `<button class="lbtn" data-part="forms">Les formes</button>` : ""}<button class="lbtn" data-part="book">${n === 2 ? "Les lettres liées" : "Les lettres"}</button>${n === 1 ? SHEETS : FICHE1}</div>
     <div class="lrow"><span>${EAR_ICON}Écouter</span>${pages.map(([u, p], i) => `<a class="lbtn" href="${u}" target="_blank" rel="noopener">${pages.length > 1 ? `Partie ${i + 1}` : "La leçon"}</a>`).join("")}</div>`;
   // Lesson 2 has two things to read: the book's pages, and the table of forms the app adds (not in the book).
   d.querySelectorAll("button").forEach(b => b.onclick = () => openPage(n, b.dataset.part));
@@ -1821,10 +1821,10 @@ $("peek").onclick = () => mode === "signs" ? openPage(1, "signs") : openPage(+$(
 $("again").onclick = () => { wAskSound = writing() && wKind === "trace"; start(source); };
 // Tracer has no right or wrong: its end says the round is done, how many cards were traced, and offers another round.
 function traceEnd() {
-  const l2 = mode === "wwords", k = Math.min(wPos, wDeck.length), unit = l2 ? "case" : "lettre";
+  const l2 = mode === "wwords", k = Math.min(wPos, wDeck.length), unit = l2 ? "groupes de lettres liées" : "lettres";
   show("stats");
   $("party").className = "party m5"; $("party").innerHTML = confetti(0, 0) + MARK;
-  $("rTitle").textContent = `Bravo, tu as tracé ${k === pool(mode).length ? (l2 ? "toutes les cases" : "toutes les lettres") : `les ${k} ${unit}s`}`;
+  $("rTitle").textContent = `Bravo, tu as tracé ${k === pool(mode).length ? (l2 ? "toutes les lettres liées" : "toutes les lettres") : `les ${k} ${unit}`}`;
   $("rSub").textContent = nb(`${l2 ? "Lier les lettres" : "Écrire les lettres"} · tracer · ${k} ${unit}${k > 1 ? "s" : ""}`);
   $("rTiles").hidden = $("rBar").hidden = true; $("rLine").textContent = $("missed").innerHTML = "";
   $("famText").hidden = $("reviewLabel").hidden = $("review").hidden = true;
