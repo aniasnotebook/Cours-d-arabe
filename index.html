@@ -1582,9 +1582,11 @@ function openPage(n, part = "book") {
       <table class="table ar"><tr><th></th>${["iso","ini","med","fin"].map(p => `<th>${POS[p]}</th>`).join("")}</tr>
       ${FORM_LETTERS.map(g => `<tr><td class="n" lang="ar">${NAME_OF[g]}</td>${["iso","ini","med","fin"].map(p =>
         `<td lang="ar">${formOf(g, positions(g).includes(p) ? p : p === "ini" ? "iso" : "fin")}</td>`).join("")}</tr>`).join("")}</table>
-` : `${(() => { let n = 0; return BOOK_PAGES.map((pg, i) => `<div class="bookpage"><span class="pn">Partie ${1 + i}</span><div class="words">${pg.map(r =>
-        { const row = r.split("|").map(() => BOOK_CELLS[n++]).filter(c => KEPT.has(c.img));
-          return `<div style="grid-template-columns:repeat(${row.length}, minmax(0, 1fr))">${row.map(c => `<span>${bookImg(c)}</span>`).join("")}</div>`; }).join("")}</div></div>`).join(""); })()}`;
+` : `${(() => { let n = 0; return BOOK_PAGES.map((pg, i) => {   // the part's cells in order, 6 to a row, all the same size
+        const cells = pg.flatMap(r => r.split("|")).map(() => BOOK_CELLS[n++]).filter(c => KEPT.has(c.img)), rows = [];
+        for (let k = 0; k < cells.length; k += 6) rows.push(cells.slice(k, k + 6));
+        return `<div class="bookpage"><span class="pn">Partie ${1 + i}</span><div class="words">${rows.map(row =>
+          `<div style="grid-template-columns:repeat(6, minmax(0, 1fr))">${row.map(c => `<span>${bookImg(c)}</span>`).join("")}</div>`).join("")}</div></div>`; }).join(""); })()}`;
   $("page").hidden = false;
   zoom(true);
 }
