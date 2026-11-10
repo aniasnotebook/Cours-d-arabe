@@ -82,19 +82,19 @@
 <meta name="apple-mobile-web-app-title" content="Cours d’arabe">
 <style>
   /* Flashcard app layout: pick a lesson, set the round, then one card at a time with answers under the thumb. */
-  :root { --bg:#ffffff; --dot:#e2ddd0; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
+  :root { --bg:#ffffff; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
           --accent:#1f3f8f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
           --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#2fa84a; --pick:#1d1d1b; --on-pick:#fff;
           --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* a letter's colour says its place in the word: start (blue pen), middle (apple green), end (blood orange), alone */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
           --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark;
-          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; --dot:#2a2e33; } }
+          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; } }
   :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
-          --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; --dot:#2a2e33; }
+          --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
   * { box-sizing:border-box; }
   [hidden] { display:none !important; }
   html, body { height:100%; overscroll-behavior:none; touch-action:manipulation; }
-  body { margin:0; background:var(--bg) radial-gradient(var(--dot) 1.3px, transparent 1.3px) 0 0 / 22px 22px; color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
          display:flex; flex-direction:column; align-items:center; overflow:hidden;
          padding-block:max(12px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px));
          padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); }
@@ -127,7 +127,7 @@
   .lesson .sample { font-size:42px; line-height:1.4; text-align:center; direction:rtl; }
   .lesson .row { display:flex; align-items:center; justify-content:space-between; }
   .lesson b { font-size:18px; display:block; }
-  /* The home spreads its parts over a dotted notebook page; each card wears its lesson's number as a notebook tab, in blue pen. */
+  /* The home spreads its parts over the page; each card wears its lesson's number as a notebook tab, in blue pen. */
   #home > * { margin-top:0 !important; margin-bottom:0 !important; }
   #home { justify-content:space-evenly; padding-top:12px; padding-bottom:12px; }
   #home .bism { font-size:clamp(26px, 8.6vw, 34px); }
