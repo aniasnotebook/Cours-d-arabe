@@ -1756,7 +1756,7 @@ const FIRST_PAGE = { 1: 6, 2: 7 };
 document.querySelectorAll(".lessonbox[data-lesson]").forEach(d => {
   const n = +d.dataset.lesson, pages = LESSON_PAGES[n].map((u, i) => [u, FIRST_PAGE[n] + i]);
   d.innerHTML = `<div class="label">Leçon</div>
-    <div class="lrow"><span>${BOOK_ICON}Lire</span>${n === 2 ? `<button class="lbtn" data-part="forms">Les formes</button>` : ""}<button class="lbtn" data-part="book">${n === 2 ? "Les lettres liées" : "Les lettres"}</button>${n === 1 ? SHEETS : FICHE1}</div>
+    <div class="lrow"><span>${BOOK_ICON}Lire</span>${n === 2 ? `<button class="lbtn" data-part="forms">Formes</button>` : ""}<button class="lbtn" data-part="book">${n === 2 ? "Lettres liées" : "Lettres"}</button>${n === 1 ? SHEETS : FICHE1}</div>
     <div class="lrow"><span>${EAR_ICON}Écouter</span>${pages.map(([u, p], i) => `<a class="lbtn" href="${u}" target="_blank" rel="noopener">${pages.length > 1 ? `Partie ${i + 1}` : "La leçon"}</a>`).join("")}</div>`;
   // Lesson 2 has two things to read: the book's pages, and the table of forms the app adds (not in the book).
   d.querySelectorAll("button").forEach(b => b.onclick = () => openPage(n, b.dataset.part));

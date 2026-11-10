@@ -1,5 +1,5 @@
 // Works offline once opened: the page is fetched fresh when there is a connection, the copy is used otherwise.
-const CACHE = "cours-arabe-v161";
+const CACHE = "cours-arabe-v162";
 const CORE = ["./", "index.html", "manifest.webmanifest", "logo-192.png", "logo-512.png", "logo-touch.png",
   "fonts/Amiri-400-arabic.woff2", "fonts/Amiri-400-latin.woff2", "fonts/Amiri-700-arabic.woff2", "fonts/Amiri-700-latin.woff2", "fonts/NotoNaskhArabic-500-arabic.woff2", "fonts/NotoNaskhArabic-500-latin.woff2", "fonts/NotoNaskhArabic-600-arabic.woff2", "fonts/NotoNaskhArabic-600-latin.woff2"];   // the fonts ship with the app: nothing is asked from Google
 
