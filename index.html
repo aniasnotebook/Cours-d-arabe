@@ -1563,7 +1563,8 @@ function showStats() {
 const SHEETS = `<button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="fiche1-articulation">Articulation</button>`;
 // Lesson 2 shows the class's Fiche 1 too.
 const FICHE1 = `<button class="lbtn" data-part="fiche1">Fiche 1</button>`;
-const LESSON_PAGES = { 1: ["https://furqangroup.com/sa/pages/93"], 2: ["https://furqangroup.com/sa/pages/94", "https://furqangroup.com/sa/pages/95", "https://furqangroup.com/sa/pages/96"] };
+const yt = p => `https://www.youtube.com/watch?v=${SOUND_VIDEOS[p]}`;   // the teacher's video of each part, opened in YouTube
+const LESSON_PAGES = { 1: [yt(6)], 2: [yt(7), yt(8), yt(9)] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
 // The "Revoir la leçon" buttons (with the audio), on each lesson page and on the results.
 const lessonLinks = n => LESSON_PAGES[n].map((u, i, all) => `<a class="lessonlink" href="${u}" target="_blank" rel="noopener">Revoir la leçon${all.length > 1 ? ` · ${i + 1}/${all.length}` : ""} ${EXT}</a>`).join("");
