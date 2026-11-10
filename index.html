@@ -119,10 +119,6 @@
 
   /* Lesson header: the Arabic title of the lesson, in the app's own look. */
   .bism { text-align:center; font-size:clamp(24px, 7vw, 28px); line-height:1.6; }
-  .ribbons { width:100%; display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:0 10px; font-size:clamp(18px, 5.2vw, 22px); }
-  .ribbons span { line-height:1.6; }
-  .rg { color:var(--muted); } .rg::after { content:" ·"; }
-  .rr { color:var(--ink); font-weight:700; }
   .muted { color:var(--muted); margin:0; font-size:14px; }
   .center { text-align:center; }
 
@@ -618,7 +614,6 @@
 </div>
 <div class="scrim" id="page" hidden>
   <div class="paper">
-    <div class="ribbons ar" lang="ar" dir="rtl" id="pageHead"></div>
     <div id="sheet"></div>
     <p class="muted center" style="color:#6b665c">Tape pour fermer</p>
   </div>
@@ -1580,8 +1575,6 @@ document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("pag
 
 // ---------- The book's page
 function openPage(n, part = "book") {
-  $("pageHead").innerHTML = n === 1 ? `<span class="rg">الدَّرسُ الأَوَّل</span><span class="rr">حُرُوفُ الهِجَاءِ المُفۡرَدَة</span>`
-    : `<span class="rg">الدَّرسُ الثّاني</span><span class="rr">حُرُوفُ الهِجَاءِ المُرَكَّبة</span>`;
   $("sheet").innerHTML = part === "signs" ? `<img class="sheetpg" src="book/fiche1-signes-v2.jpg" alt="Les voyelles et les signes de lecture">`
     : part.startsWith("fiche1") ? [1, 2].map(i => `<img class="sheetpg" src="book/${part}-${i}.jpg" alt="">`).join("")
     : n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
