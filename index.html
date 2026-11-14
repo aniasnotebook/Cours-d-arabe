@@ -923,8 +923,11 @@ function signChoices(s, key = "fr") {
   for (const x of [...near, ...rest]) if (out.length < 4 && !out.some(o => o[key] === x[key])) out.push(x);
   return shuffle(out);
 }
+let lAskSound = false;   // Reconnaître asks at the start of each round whether the teacher checks each letter
+const lCheck = () => mode === "letters" && !famQuiz && autoOn();   // with the sound: Vérifier plays the letter, then the learner judges
 function start(cards) {
   if (writing()) return startWrite(cards);
+  lAskSound = mode === "letters" && !famQuiz;
   source = cards || (mode === "letters" || mode === "fams" ? LETTERS : mode === "forms" ? FORMS : mode === "signs" ? SIGNS : WORD_CARDS);
   const random = ["letters", "fams", "signs"].includes(mode) ? $("rand1").checked : $("rand2").checked;
   fromPage(source, from => {
@@ -987,14 +990,28 @@ function renderLetter() {
   $("bOk").onclick = () => answer(true);
   $("bUndo").onclick = undo;
   const c = $("card");
+  if (lCheck()) {   // like Me tester: say it, Vérifier plays the teacher, then « Je la reconnais » or « À revoir »
+    const judge = $("below").innerHTML;
+    const nm = c.querySelector(".arname"); if (nm) nm.style.visibility = "hidden";   // the name is the answer: shown with the teacher
+    $("hint").textContent = "Dis le nom de la lettre, puis vérifie";
+    $("below").querySelector(".actions").innerHTML = `<button class="act n" id="bSkip"><span>${ICONS.skip}</span>Passer</button>
+      <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
+      <button class="act go2" id="bCheck"><span>${ICONS.verify}</span>Vérifier</button>`;
+    $("bUndo").onclick = undo;
+    $("bSkip").onclick = () => { answers.push({ item: deck[pos], ok: false, skip: true }); render(); };
+    $("bCheck").onclick = () => {
+      if (nm) nm.style.visibility = ""; $("below").innerHTML = judge; $("bMiss").onclick = () => answer(false); $("bOk").onclick = () => answer(true); $("bUndo").onclick = undo;
+      bindSwipe(c); const b = c.querySelector(".spk"); if (b) playSound(deck[pos].g, b); };
+  }
   c.querySelectorAll(".chip").forEach(b => b.addEventListener("click", e => {
     e.stopPropagation();
     if (shown) return;
     guess.has(b.dataset.f) ? guess.delete(b.dataset.f) : guess.add(b.dataset.f);
     paintFams();
   }));
-  bindSwipe(c);
+  if (!lCheck()) bindSwipe(c);
   primeSound(deck[pos].g);
+  if (lAskSound && pos === 0) { lAskSound = false; askSound(renderLetter, true); }
 }
 
 const famRight = l => guess.size === l.fams.length && l.fams.every(f => guess.has(f));
@@ -1796,9 +1813,9 @@ document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
 });
 // Tracer asks on its first card: with or without the sound of each card, the learner listens while tracing (asked like the page breaks).
 let wAskSound = false;
-function askSound(go) {
+function askSound(go, check) {
   $("askT").textContent = "Écouter chaque lettre\u00a0?";
-  $("askP").textContent = "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
+  $("askP").textContent = check ? "Lance l’audio automatiquement après chaque lettre." : "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
   $("askNo").textContent = "Sans le son"; $("askYes").textContent = "Avec le son";
   $("ask").hidden = false;
   const set = on => { $("ask").hidden = true; wCardT0 = Date.now(); try { localStorage.setItem("autoSound", on ? "1" : "0"); } catch (e) {} if (on) loadSound(); go(); };
