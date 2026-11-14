@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Marquer le son</title>
+<style>
+@font-face { font-family: Amiri; src: url(fonts/Amiri-400-arabic.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E; }
+:root { --bg:#f4f3ef; --card:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --accent:#1f3f8f; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,sans-serif; padding:12px 12px calc(16px + env(safe-area-inset-bottom)); }
+h1 { font-size:18px; margin:4px 0 10px; }
+.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+select, button { font:inherit; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); padding:8px 14px; }
+button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+#player { width:100%; aspect-ratio:16/9; background:#111; border-radius:12px; overflow:hidden; margin:10px 0; }
+#player iframe { width:100%; height:100%; }
+.big { width:100%; height:84px; border-radius:20px; border:0; background:var(--accent); color:#fff; font-size:20px; font-weight:700; margin:8px 0; }
+.big:disabled { opacity:.4; }
+.hint { color:var(--muted); font-size:14px; margin:6px 0; }
+#cells { display:grid; grid-template-columns:repeat(auto-fill, minmax(64px, 1fr)); gap:6px; direction:rtl; margin-top:10px; }
+.c { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:4px 2px 2px; text-align:center; }
+.c b { display:block; font:400 26px/1.6 Amiri, serif; }
+.c small { display:block; font-size:11px; color:var(--muted); direction:ltr; font-variant-numeric:tabular-nums; }
+.c.next { border:2px solid var(--accent); background:#e8edf9; }
+.c.done { border-color:var(--ok); }
+.c.sel { outline:3px solid var(--ink); }
+#tune { background:var(--card); border-radius:14px; padding:4px 10px 10px; margin-top:10px; display:none; }
+#tune.on { display:block; }
+#out { width:100%; height:90px; font:12px ui-monospace, monospace; border-radius:12px; border:1px solid var(--line); padding:8px; }
+</style>
+</head>
+<body>
+<h1>Marquer le son</h1>
+<div class="row">
+  <select id="page"></select>
+  <span>Vitesse</span>
+  <button data-rate="1" class="on">1×</button><button data-rate="0.75">0,75×</button><button data-rate="0.5">0,5×</button>
+</div>
+<div id="player"><div id="yt"></div></div>
+<p class="hint" id="hint">Lance la vidéo, puis touche le bouton bleu chaque fois que le prof commence la carte en bleu.</p>
+<button class="big" id="mark">Le prof commence cette carte</button>
+<div class="row">
+  <button id="undo">Annuler le dernier</button>
+  <button id="restart">Reprendre au début</button>
+  <button id="end">Fin de la dernière carte</button>
+</div>
+<div id="tune">
+  <p class="hint" id="tuneT"></p>
+  <div class="row">
+    <button id="play">▶ Rejouer</button>
+    <button data-nudge="-0.2">Début −0,2 s</button><button data-nudge="0.2">Début +0,2 s</button>
+    <button data-nudge-end="-0.2">Fin −0,2 s</button><button data-nudge-end="0.2">Fin +0,2 s</button>
+  </div>
+  <div class="row" style="margin-top:8px"><button id="flag">Cette carte est mal écrite</button></div>
+</div>
+<div id="cells"></div>
+<p class="hint">Si une carte n’est pas écrite comme dans la vidéo, touche-la puis « Cette carte est mal écrite » : elle passe en orange.</p>
+<p class="hint">Quand une page est finie et que chaque carte sonne juste, touche « Copier » et colle le texte dans la conversation.</p>
+<div class="row"><button id="copy">Copier</button><button id="clear">Effacer cette page</button></div>
+<textarea id="out" readonly></textarea>
+<script src="marquer-data.js"></script>
+<script>
+// One page of the book at a time: the teacher's video plays, the learner taps when each card starts.
+// A tap comes a little after the sound starts, so each mark is moved back by REACT seconds; each card ends where the next one starts.
+const REACT = 0.25, $ = id => document.getElementById(id);
+let P = null, marks = [], ends = {}, flags = [], sel = -1, yt = null, stopAt = 0, timer = 0;
+const key = () => "marquer-" + P.page;
+const save = () => { try { localStorage.setItem(key(), JSON.stringify({ marks, ends, flags })); } catch (e) {} };
+const load = () => { try { const d = JSON.parse(localStorage.getItem(key()) || "{}"); marks = d.marks || []; ends = d.ends || {}; flags = d.flags || []; } catch (e) { marks = []; ends = {}; flags = []; } };
+const clipOf = i => { const s = marks[i]; if (s == null) return null; const e = ends[i] ?? (marks[i + 1] != null ? marks[i + 1] - 0.05 : s + 1.6); return [+s.toFixed(2), +e.toFixed(2)]; };
+const fmt = x => x == null ? "" : x.toFixed(1);
+
+PAGES.forEach((p, i) => $("page").insertAdjacentHTML("beforeend", `<option value="${i}">Page ${p.page} · leçon ${p.lessons} · ${p.cells.length} cartes</option>`));
+$("page").onchange = () => openPage(+$("page").value);
+
+function openPage(i) {
+  P = PAGES[i]; load(); sel = -1; $("tune").classList.remove("on");
+  if (yt && yt.loadVideoById) yt.cueVideoById(P.video); else if (window.YT && YT.Player) makePlayer();
+  draw();
+}
+function draw() {
+  $("cells").innerHTML = P.cells.map((c, i) => { const cl = clipOf(i);
+    return `<div class="c ${i === marks.length ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""}" data-i="${i}"${flags.includes(i) ? ' style="border-color:var(--miss);background:#fdebe1"' : ""}><b lang="ar">${c}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : "&nbsp;"}</small></div>`; }).join("");
+  $("mark").disabled = marks.length >= P.cells.length;
+  $("mark").textContent = marks.length >= P.cells.length ? "Toutes les cartes sont marquées" : `Le prof commence la carte ${marks.length + 1}`;
+  $("out").value = JSON.stringify({ page: P.page, video: P.video, clips: P.cells.map((_, i) => clipOf(i)), fix: flags });
+  const n = $("cells").querySelector(".next"); if (n && !sel_open()) n.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+const sel_open = () => $("tune").classList.contains("on");
+
+$("mark").onclick = () => { if (!yt || !yt.getCurrentTime) return; marks.push(Math.max(0, yt.getCurrentTime() - REACT * yt.getPlaybackRate())); save(); draw(); };
+$("undo").onclick = () => { marks.pop(); save(); draw(); };
+$("restart").onclick = () => { if (yt) { yt.seekTo(marks.length ? Math.max(0, marks[marks.length - 1] - 1) : 0, true); yt.playVideo(); } };
+$("end").onclick = () => { if (!yt || !marks.length) return; ends[marks.length - 1] = yt.getCurrentTime(); save(); draw(); };
+$("clear").onclick = () => { if (confirm("Effacer tous les repères de cette page ?")) { marks = []; ends = {}; save(); draw(); } };
+$("copy").onclick = async () => { $("out").select(); try { await navigator.clipboard.writeText($("out").value); $("copy").textContent = "Copié ✓"; } catch (e) { document.execCommand("copy"); } setTimeout(() => $("copy").textContent = "Copier", 1500); };
+document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { document.querySelectorAll("[data-rate]").forEach(x => x.classList.toggle("on", x === b)); yt && yt.setPlaybackRate(+b.dataset.rate); });
+
+// Tap a marked card: hear it alone, and move its start or end.
+$("cells").onclick = e => { const c = e.target.closest(".c"); if (!c) return; const i = +c.dataset.i; if (!clipOf(i)) return;
+  sel = i; $("tune").classList.add("on"); $("tuneT").textContent = `Carte ${i + 1} : ${P.cells[i]}`; draw(); playClip(i); };
+$("play").onclick = () => sel >= 0 && playClip(sel);
+$("flag").onclick = () => { if (sel < 0) return; flags = flags.includes(sel) ? flags.filter(x => x !== sel) : [...flags, sel]; save(); draw(); };   // the learner sees the book in the video: a card typed wrong is sent back to be fixed
+document.querySelectorAll("[data-nudge]").forEach(b => b.onclick = () => { if (sel < 0) return; marks[sel] = Math.max(0, marks[sel] + +b.dataset.nudge); save(); draw(); playClip(sel); });
+document.querySelectorAll("[data-nudge-end]").forEach(b => b.onclick = () => { if (sel < 0) return; const c = clipOf(sel); ends[sel] = c[1] + +b.dataset.nudgeEnd; save(); draw(); playClip(sel); });
+function playClip(i) { const c = clipOf(i); if (!c || !yt) return; yt.seekTo(c[0], true); yt.playVideo(); stopAt = c[1];
+  clearInterval(timer); timer = setInterval(() => { if (yt.getCurrentTime() >= stopAt) { yt.pauseVideo(); clearInterval(timer); } }, 40); }
+
+function makePlayer() { yt = new YT.Player("yt", { videoId: P.video, playerVars: { playsinline: 1, rel: 0, origin: location.origin } }); }
+window.onYouTubeIframeAPIReady = () => { if (P) makePlayer(); };
+const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(s);
+openPage(0);
+</script>
+</body>
+</html>
