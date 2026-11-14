@@ -100,13 +100,14 @@ button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
 <script src="marquer-data.js"></script>
 <script>
 // One page of the book at a time: the teacher's video plays, the learner taps when each card starts.
-// A tap comes a little after the sound starts, so each mark is moved back by REACT seconds; each card ends where the next one starts.
-const REACT = 0.25, $ = id => document.getElementById(id);
+// A tap comes a little after the sound starts, so each mark is moved back by REACT seconds; each card ends GAP seconds before the
+// next one starts. Both come from page 10, where the starts were moved back 0.2 s and the ends 0.4 s by hand, on average.
+const REACT = 0.45, GAP = 0.25, END_REACT = 0.4, $ = id => document.getElementById(id);
 let P = null, marks = [], ends = {}, flags = [], sel = -1, yt = null, stopAt = 0, timer = 0;
 const key = () => "marquer-" + P.page;
 const save = () => { try { localStorage.setItem(key(), JSON.stringify({ marks, ends, flags })); } catch (e) {} };
 const load = () => { try { const d = JSON.parse(localStorage.getItem(key()) || "{}"); marks = d.marks || []; ends = d.ends || {}; flags = d.flags || []; } catch (e) { marks = []; ends = {}; flags = []; } };
-const clipOf = i => { const s = marks[i]; if (s == null) return null; const e = ends[i] ?? (marks[i + 1] != null ? marks[i + 1] - 0.05 : s + 1.6); return [+s.toFixed(2), +e.toFixed(2)]; };
+const clipOf = i => { const s = marks[i]; if (s == null) return null; const e = Math.max(s + 0.3, ends[i] ?? (marks[i + 1] != null ? marks[i + 1] - GAP : s + 1.6)); return [+s.toFixed(2), +e.toFixed(2)]; };
 const fmt = x => x == null ? "" : x.toFixed(1);
 
 PAGES.forEach((p, i) => $("page").insertAdjacentHTML("beforeend", `<option value="${i}">Page ${p.page} · leçon ${p.lessons} · ${p.cells.length} cartes</option>`));
@@ -132,7 +133,7 @@ function draw() {
 $("mark").onclick = () => { if (!yt || !yt.getCurrentTime) return; marks.push(Math.max(0, yt.getCurrentTime() - REACT * yt.getPlaybackRate())); save(); draw(); };
 $("undo").onclick = () => { marks.pop(); save(); draw(); };
 $("back").onclick = () => { if (yt) { yt.seekTo(marks.length ? Math.max(0, marks[marks.length - 1] - 1.5) : 0, true); yt.playVideo(); } };
-$("end").onclick = () => { if (!yt || !marks.length) return; ends[marks.length - 1] = yt.getCurrentTime(); save(); draw(); };
+$("end").onclick = () => { if (!yt || !marks.length) return; ends[marks.length - 1] = Math.max(0, yt.getCurrentTime() - END_REACT * yt.getPlaybackRate()); save(); draw(); };
 $("clear").onclick = () => { if (confirm("Effacer tous les repères de cette page ?")) { marks = []; ends = {}; flags = []; save(); closeTune(); draw(); } };
 $("copy").onclick = async () => { $("out").select(); try { await navigator.clipboard.writeText($("out").value); $("copy").textContent = "Copié ✓"; } catch (e) { document.execCommand("copy"); } setTimeout(() => $("copy").textContent = "Copier", 1500); };
 document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { document.querySelectorAll("[data-rate]").forEach(x => x.classList.toggle("on", x === b)); yt && yt.setPlaybackRate(+b.dataset.rate); });
