@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=block">
 <style>
 :root { --bg:#f4f3ef; --card:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --accent:#1f3f8f; --ok:#2f7d4f; --miss:#c2410c; }
-* { box-sizing:border-box; }
+* { box-sizing:border-box; } [hidden] { display:none !important; }
 html, body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.35 system-ui,-apple-system,sans-serif; }
 .ar { font-family:"Amiri Quran", serif; direction:rtl; }
 /* Everything needed while marking stays on screen: the video, the card to mark, the buttons. Only the list scrolls. */
@@ -17,7 +17,24 @@ html, body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.35 sy
 select, button { font:inherit; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); padding:6px 12px; }
 select { flex:1; min-width:0; }
 button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
-#player { width:100%; aspect-ratio:16/9; background:#111; border-radius:12px; overflow:hidden; }
+.split { display:flex; gap:8px; align-items:stretch; }
+#player { flex:0 0 56%; aspect-ratio:16/9; align-self:flex-start; background:#111; border-radius:12px; overflow:hidden; }
+.side { flex:1; min-width:0; display:flex; flex-direction:column; }
+.side .now { flex-direction:column; margin-top:0; height:100%; }
+.side .card { width:auto; flex:1; }
+.side .big { flex:0 0 auto; min-height:58px; font-size:15px; }
+#tune .tools { margin-top:6px; }
+/* A wide screen: the video and the buttons on the left, the cards on the right, both in view. */
+@media (min-width:760px) {
+  body { display:grid; grid-template-columns:minmax(0, 1.1fr) minmax(0, 1fr); height:100vh; overflow:hidden; }
+  #top { height:100vh; overflow:auto; box-shadow:none; }
+  #list { height:100vh; overflow:auto; }
+  .split { flex-direction:column; }
+  #player { flex:none; width:100%; }
+  .side .now { flex-direction:row; }
+  .side .card { flex:none; width:120px; }
+  .side .big { flex:1; min-height:80px; font-size:18px; }
+}
 #player iframe { width:100%; height:100%; display:block; }
 .now { display:flex; gap:8px; align-items:stretch; margin-top:8px; }
 .card { width:96px; flex:none; background:var(--card); border:2px solid var(--accent); border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px; }
@@ -46,13 +63,14 @@ button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
 <div id="top">
   <div class="bar"><select id="page"></select>
     <button data-rate="1" class="on">1×</button><button data-rate="0.75">0,75×</button><button data-rate="0.5">0,5×</button></div>
+  <div class="split">
   <div id="player"><div id="yt"></div></div>
+  <div class="side">
   <div id="mark-mode">
     <div class="now">
       <div class="card"><b class="ar" id="nowCard"></b><small id="nowN"></small></div>
       <button class="big" id="mark">Le prof commence cette carte</button>
     </div>
-    <div class="tools"><button id="undo">↶ Annuler le dernier</button><button id="back">⏪ Revenir avant le dernier</button><button id="end">Fin de la dernière carte</button></div>
   </div>
   <div id="tune" hidden>
     <div class="now">
@@ -68,6 +86,9 @@ button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
       <button id="flag">Carte mal écrite</button>
     </div>
   </div>
+  </div>
+  </div>
+  <div class="tools" id="markTools"><button id="undo">↶ Annuler le dernier</button><button id="back">⏪ Revenir avant le dernier</button><button id="end">Fin de la dernière carte</button></div>
 </div>
 <div id="list">
   <p class="hint">Touche une carte déjà marquée (en vert) pour la réécouter seule et la régler. Si elle n’est pas écrite comme dans la vidéo, « Carte mal écrite » la passe en orange.</p>
@@ -118,8 +139,8 @@ document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { docume
 
 // Tap a marked card: the top panel switches to it, to hear it alone and move its start or end, the video still in view.
 $("cells").onclick = e => { const c = e.target.closest(".c"); if (!c) return; const i = +c.dataset.i; if (!clipOf(i)) return;
-  sel = i; $("mark-mode").hidden = true; $("tune").hidden = false; draw(); playClip(i); };
-function closeTune() { sel = -1; $("tune").hidden = true; $("mark-mode").hidden = false; }
+  sel = i; $("mark-mode").hidden = true; $("markTools").hidden = true; $("tune").hidden = false; draw(); playClip(i); };
+function closeTune() { sel = -1; $("tune").hidden = true; $("mark-mode").hidden = false; $("markTools").hidden = false; }
 $("done").onclick = () => { closeTune(); draw(); };
 $("play").onclick = () => sel >= 0 && playClip(sel);
 $("flag").onclick = () => { if (sel < 0) return; flags = flags.includes(sel) ? flags.filter(x => x !== sel) : [...flags, sel]; save(); draw(); };
