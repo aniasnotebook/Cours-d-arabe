@@ -5,61 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>Marquer le son</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri+Quran&display=block">
 <style>
-@font-face { font-family: Amiri; src: url(fonts/Amiri-400-arabic.woff2) format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E; }
-:root { --bg:#f4f3ef; --card:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --accent:#1f3f8f; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; }
+:root { --bg:#f4f3ef; --card:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --accent:#1f3f8f; --ok:#2f7d4f; --miss:#c2410c; }
 * { box-sizing:border-box; }
-body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,sans-serif; padding:12px 12px calc(16px + env(safe-area-inset-bottom)); }
-h1 { font-size:18px; margin:4px 0 10px; }
-.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-select, button { font:inherit; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); padding:8px 14px; }
+html, body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.35 system-ui,-apple-system,sans-serif; }
+.ar { font-family:"Amiri Quran", serif; direction:rtl; }
+/* Everything needed while marking stays on screen: the video, the card to mark, the buttons. Only the list scrolls. */
+#top { position:sticky; top:0; z-index:2; background:var(--bg); padding:max(8px, env(safe-area-inset-top)) 10px 8px; box-shadow:0 6px 12px -8px rgba(0,0,0,.25); }
+.bar { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+select, button { font:inherit; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); padding:6px 12px; }
+select { flex:1; min-width:0; }
 button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
-#player { width:100%; aspect-ratio:16/9; background:#111; border-radius:12px; overflow:hidden; margin:10px 0; }
-#player iframe { width:100%; height:100%; }
-.big { width:100%; height:84px; border-radius:20px; border:0; background:var(--accent); color:#fff; font-size:20px; font-weight:700; margin:8px 0; }
+#player { width:100%; aspect-ratio:16/9; background:#111; border-radius:12px; overflow:hidden; }
+#player iframe { width:100%; height:100%; display:block; }
+.now { display:flex; gap:8px; align-items:stretch; margin-top:8px; }
+.card { width:96px; flex:none; background:var(--card); border:2px solid var(--accent); border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px; }
+.card b { font-weight:400; font-size:34px; line-height:1.7; white-space:nowrap; }
+.card small { font-size:11px; color:var(--muted); }
+.big { flex:1; border:0; border-radius:16px; background:var(--accent); color:#fff; font-size:17px; font-weight:700; padding:8px; }
 .big:disabled { opacity:.4; }
-.hint { color:var(--muted); font-size:14px; margin:6px 0; }
-#cells { display:grid; grid-template-columns:repeat(auto-fill, minmax(64px, 1fr)); gap:6px; direction:rtl; margin-top:10px; }
-.c { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:4px 2px 2px; text-align:center; }
-.c b { display:block; font:400 26px/1.6 Amiri, serif; }
-.c small { display:block; font-size:11px; color:var(--muted); direction:ltr; font-variant-numeric:tabular-nums; }
+.tools { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.tools button { padding:6px 10px; font-size:14px; }
+#tune .card { border-color:var(--ink); }
+#tune .tools button { flex:1 1 auto; }
+#list { padding:10px; }
+.hint { color:var(--muted); font-size:13px; margin:4px 0 8px; }
+#cells { display:grid; grid-template-columns:repeat(auto-fill, minmax(66px, 1fr)); gap:6px; direction:rtl; }
+.c { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:2px; text-align:center; }
+.c b { display:block; font-weight:400; font-size:21px; line-height:1.8; white-space:nowrap; overflow:hidden; }
+.c small { display:block; font-size:10px; color:var(--muted); direction:ltr; font-variant-numeric:tabular-nums; }
 .c.next { border:2px solid var(--accent); background:#e8edf9; }
 .c.done { border-color:var(--ok); }
 .c.sel { outline:3px solid var(--ink); }
-#tune { background:var(--card); border-radius:14px; padding:4px 10px 10px; margin-top:10px; display:none; }
-#tune.on { display:block; }
-#out { width:100%; height:90px; font:12px ui-monospace, monospace; border-radius:12px; border:1px solid var(--line); padding:8px; }
+.c.fix { border-color:var(--miss); background:#fdebe1; }
+#out { width:100%; height:70px; font:11px ui-monospace, monospace; border-radius:12px; border:1px solid var(--line); padding:6px; margin-top:8px; }
 </style>
 </head>
 <body>
-<h1>Marquer le son</h1>
-<div class="row">
-  <select id="page"></select>
-  <span>Vitesse</span>
-  <button data-rate="1" class="on">1×</button><button data-rate="0.75">0,75×</button><button data-rate="0.5">0,5×</button>
-</div>
-<div id="player"><div id="yt"></div></div>
-<p class="hint" id="hint">Lance la vidéo, puis touche le bouton bleu chaque fois que le prof commence la carte en bleu.</p>
-<button class="big" id="mark">Le prof commence cette carte</button>
-<div class="row">
-  <button id="undo">Annuler le dernier</button>
-  <button id="restart">Reprendre au début</button>
-  <button id="end">Fin de la dernière carte</button>
-</div>
-<div id="tune">
-  <p class="hint" id="tuneT"></p>
-  <div class="row">
-    <button id="play">▶ Rejouer</button>
-    <button data-nudge="-0.2">Début −0,2 s</button><button data-nudge="0.2">Début +0,2 s</button>
-    <button data-nudge-end="-0.2">Fin −0,2 s</button><button data-nudge-end="0.2">Fin +0,2 s</button>
+<div id="top">
+  <div class="bar"><select id="page"></select>
+    <button data-rate="1" class="on">1×</button><button data-rate="0.75">0,75×</button><button data-rate="0.5">0,5×</button></div>
+  <div id="player"><div id="yt"></div></div>
+  <div id="mark-mode">
+    <div class="now">
+      <div class="card"><b class="ar" id="nowCard"></b><small id="nowN"></small></div>
+      <button class="big" id="mark">Le prof commence cette carte</button>
+    </div>
+    <div class="tools"><button id="undo">↶ Annuler le dernier</button><button id="back">⏪ Revenir avant le dernier</button><button id="end">Fin de la dernière carte</button></div>
   </div>
-  <div class="row" style="margin-top:8px"><button id="flag">Cette carte est mal écrite</button></div>
+  <div id="tune" hidden>
+    <div class="now">
+      <div class="card"><b class="ar" id="tuneCard"></b><small id="tuneN"></small></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:6px">
+        <button class="big" id="play">▶ Réécouter cette carte</button>
+        <button id="done">Retour au marquage</button>
+      </div>
+    </div>
+    <div class="tools">
+      <button data-nudge="-0.2">Début −0,2 s</button><button data-nudge="0.2">Début +0,2 s</button>
+      <button data-nudge-end="-0.2">Fin −0,2 s</button><button data-nudge-end="0.2">Fin +0,2 s</button>
+      <button id="flag">Carte mal écrite</button>
+    </div>
+  </div>
 </div>
-<div id="cells"></div>
-<p class="hint">Si une carte n’est pas écrite comme dans la vidéo, touche-la puis « Cette carte est mal écrite » : elle passe en orange.</p>
-<p class="hint">Quand une page est finie et que chaque carte sonne juste, touche « Copier » et colle le texte dans la conversation.</p>
-<div class="row"><button id="copy">Copier</button><button id="clear">Effacer cette page</button></div>
-<textarea id="out" readonly></textarea>
+<div id="list">
+  <p class="hint">Touche une carte déjà marquée (en vert) pour la réécouter seule et la régler. Si elle n’est pas écrite comme dans la vidéo, « Carte mal écrite » la passe en orange.</p>
+  <div id="cells"></div>
+  <p class="hint">Quand la page est finie et que chaque carte sonne juste : « Copier », puis colle le texte dans la conversation.</p>
+  <div class="bar"><button id="copy">Copier</button><button id="clear">Effacer cette page</button></div>
+  <textarea id="out" readonly></textarea>
+</div>
 <script src="marquer-data.js"></script>
 <script>
 // One page of the book at a time: the teacher's video plays, the learner taps when each card starts.
@@ -76,36 +92,40 @@ PAGES.forEach((p, i) => $("page").insertAdjacentHTML("beforeend", `<option value
 $("page").onchange = () => openPage(+$("page").value);
 
 function openPage(i) {
-  P = PAGES[i]; load(); sel = -1; $("tune").classList.remove("on");
-  if (yt && yt.loadVideoById) yt.cueVideoById(P.video); else if (window.YT && YT.Player) makePlayer();
+  P = PAGES[i]; load(); closeTune();
+  if (yt && yt.cueVideoById) yt.cueVideoById(P.video); else if (window.YT && YT.Player) makePlayer();
   draw();
 }
 function draw() {
+  const n = marks.length, total = P.cells.length;
+  $("nowCard").textContent = n < total ? P.cells[n] : "✓";
+  $("nowN").textContent = n < total ? `carte ${n + 1} / ${total}` : "page finie";
+  $("mark").disabled = n >= total;
+  $("mark").textContent = n >= total ? "Toutes les cartes sont marquées" : "Le prof commence cette carte";
   $("cells").innerHTML = P.cells.map((c, i) => { const cl = clipOf(i);
-    return `<div class="c ${i === marks.length ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""}" data-i="${i}"${flags.includes(i) ? ' style="border-color:var(--miss);background:#fdebe1"' : ""}><b lang="ar">${c}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : "&nbsp;"}</small></div>`; }).join("");
-  $("mark").disabled = marks.length >= P.cells.length;
-  $("mark").textContent = marks.length >= P.cells.length ? "Toutes les cartes sont marquées" : `Le prof commence la carte ${marks.length + 1}`;
+    return `<div class="c ${i === n ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""} ${flags.includes(i) ? "fix" : ""}" data-i="${i}"><b class="ar">${c}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : i + 1}</small></div>`; }).join("");
   $("out").value = JSON.stringify({ page: P.page, video: P.video, clips: P.cells.map((_, i) => clipOf(i)), fix: flags });
-  const n = $("cells").querySelector(".next"); if (n && !sel_open()) n.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  if (sel >= 0) { $("tuneCard").textContent = P.cells[sel]; const cl = clipOf(sel); $("tuneN").textContent = `carte ${sel + 1} · ${fmt(cl[0])}–${fmt(cl[1])}`; $("flag").classList.toggle("on", flags.includes(sel)); }
 }
-const sel_open = () => $("tune").classList.contains("on");
 
 $("mark").onclick = () => { if (!yt || !yt.getCurrentTime) return; marks.push(Math.max(0, yt.getCurrentTime() - REACT * yt.getPlaybackRate())); save(); draw(); };
 $("undo").onclick = () => { marks.pop(); save(); draw(); };
-$("restart").onclick = () => { if (yt) { yt.seekTo(marks.length ? Math.max(0, marks[marks.length - 1] - 1) : 0, true); yt.playVideo(); } };
+$("back").onclick = () => { if (yt) { yt.seekTo(marks.length ? Math.max(0, marks[marks.length - 1] - 1.5) : 0, true); yt.playVideo(); } };
 $("end").onclick = () => { if (!yt || !marks.length) return; ends[marks.length - 1] = yt.getCurrentTime(); save(); draw(); };
-$("clear").onclick = () => { if (confirm("Effacer tous les repères de cette page ?")) { marks = []; ends = {}; save(); draw(); } };
+$("clear").onclick = () => { if (confirm("Effacer tous les repères de cette page ?")) { marks = []; ends = {}; flags = []; save(); closeTune(); draw(); } };
 $("copy").onclick = async () => { $("out").select(); try { await navigator.clipboard.writeText($("out").value); $("copy").textContent = "Copié ✓"; } catch (e) { document.execCommand("copy"); } setTimeout(() => $("copy").textContent = "Copier", 1500); };
 document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { document.querySelectorAll("[data-rate]").forEach(x => x.classList.toggle("on", x === b)); yt && yt.setPlaybackRate(+b.dataset.rate); });
 
-// Tap a marked card: hear it alone, and move its start or end.
+// Tap a marked card: the top panel switches to it, to hear it alone and move its start or end, the video still in view.
 $("cells").onclick = e => { const c = e.target.closest(".c"); if (!c) return; const i = +c.dataset.i; if (!clipOf(i)) return;
-  sel = i; $("tune").classList.add("on"); $("tuneT").textContent = `Carte ${i + 1} : ${P.cells[i]}`; draw(); playClip(i); };
+  sel = i; $("mark-mode").hidden = true; $("tune").hidden = false; draw(); playClip(i); };
+function closeTune() { sel = -1; $("tune").hidden = true; $("mark-mode").hidden = false; }
+$("done").onclick = () => { closeTune(); draw(); };
 $("play").onclick = () => sel >= 0 && playClip(sel);
-$("flag").onclick = () => { if (sel < 0) return; flags = flags.includes(sel) ? flags.filter(x => x !== sel) : [...flags, sel]; save(); draw(); };   // the learner sees the book in the video: a card typed wrong is sent back to be fixed
+$("flag").onclick = () => { if (sel < 0) return; flags = flags.includes(sel) ? flags.filter(x => x !== sel) : [...flags, sel]; save(); draw(); };
 document.querySelectorAll("[data-nudge]").forEach(b => b.onclick = () => { if (sel < 0) return; marks[sel] = Math.max(0, marks[sel] + +b.dataset.nudge); save(); draw(); playClip(sel); });
 document.querySelectorAll("[data-nudge-end]").forEach(b => b.onclick = () => { if (sel < 0) return; const c = clipOf(sel); ends[sel] = c[1] + +b.dataset.nudgeEnd; save(); draw(); playClip(sel); });
-function playClip(i) { const c = clipOf(i); if (!c || !yt) return; yt.seekTo(c[0], true); yt.playVideo(); stopAt = c[1];
+function playClip(i) { const c = clipOf(i); if (!c || !yt || !yt.seekTo) return; yt.seekTo(c[0], true); yt.playVideo(); stopAt = c[1];
   clearInterval(timer); timer = setInterval(() => { if (yt.getCurrentTime() >= stopAt) { yt.pauseVideo(); clearInterval(timer); } }, 40); }
 
 function makePlayer() { yt = new YT.Player("yt", { videoId: P.video, playerVars: { playsinline: 1, rel: 0, origin: location.origin } }); }
