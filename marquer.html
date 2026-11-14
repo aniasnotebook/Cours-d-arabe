@@ -11,9 +11,9 @@
 * { box-sizing:border-box; } [hidden] { display:none !important; }
 html, body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.35 system-ui,-apple-system,sans-serif; }
 @font-face { font-family:Naskh; font-weight:500; src:url(fonts/NotoNaskhArabic-500-arabic.woff2) format("woff2"); }
-/* The Naskh of the teacher's video: letters side by side (بخل), the kasra of a lone ع or غ under its lower loop. */
-.ar { font-family:Naskh, "Noto Naskh Arabic", serif; font-weight:500; direction:rtl; }
-body.p9 .ar, .ar.q { font-family:"Amiri Quran", serif; font-weight:400; }   /* also the small alif, yâ and wâw of lesson 7, written beside the letter as in the book */   /* the detached letters of page 9 keep their madd marks */
+.ar { font-family:"Amiri Quran", serif; direction:rtl; }
+/* Only the cards flagged as not looking like the video: the Naskh of the video (بخل side by side, kasra of a lone ع or غ under its lower loop). */
+.ar.nk { font-family:Naskh, "Noto Naskh Arabic", serif; font-weight:500; }   /* the detached letters of page 9 keep their madd marks */
 /* Everything needed while marking stays on screen: the video, the card to mark, the buttons. Only the list scrolls. */
 #top { position:sticky; top:0; z-index:2; background:var(--bg); padding:max(8px, env(safe-area-inset-top)) 10px 8px; box-shadow:0 6px 12px -8px rgba(0,0,0,.25); }
 .bar { display:flex; gap:6px; align-items:center; margin-bottom:6px; }
@@ -125,14 +125,14 @@ function openPage(i) {
 }
 function draw() {
   const n = marks.length, total = P.cells.length;
-  $("nowCard").textContent = n < total ? P.cells[n] : "✓"; $("nowCard").classList.toggle("q", n < total && /[\u0670\u06e5\u06e6]/.test(P.cells[n]));
+  $("nowCard").textContent = n < total ? P.cells[n] : "✓"; $("nowCard").classList.toggle("nk", (P.naskh || []).includes(n));
   $("nowN").textContent = n < total ? `carte ${n + 1} / ${total}` : "page finie";
   $("mark").disabled = n >= total;
   $("mark").textContent = n >= total ? "Toutes les cartes sont marquées" : "Le prof commence cette carte";
   $("cells").innerHTML = P.cells.map((c, i) => { const cl = clipOf(i);
-    return `<div class="c ${i === n ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""} ${flags.includes(i) ? "fix" : ""} ${(P.upd || []).includes(i) ? "isupd" : ""}" data-i="${i}">${(P.upd || []).includes(i) ? '<span class="upd">corrigée</span>' : ""}<b class="ar${/[\u0670\u06e5\u06e6]/.test(c) ? " q" : ""}">${c}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : i + 1}</small></div>`; }).join("");
+    return `<div class="c ${i === n ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""} ${flags.includes(i) ? "fix" : ""} ${(P.upd || []).includes(i) ? "isupd" : ""}" data-i="${i}">${(P.upd || []).includes(i) ? '<span class="upd">corrigée</span>' : ""}<b class="ar${(P.naskh || []).includes(i) ? " nk" : ""}">${c}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : i + 1}</small></div>`; }).join("");
   $("out").value = JSON.stringify({ page: P.page, video: P.video, clips: P.cells.map((_, i) => clipOf(i)), fix: flags });
-  if (sel >= 0) { $("tuneCard").textContent = P.cells[sel]; $("tuneCard").classList.toggle("q", /[\u0670\u06e5\u06e6]/.test(P.cells[sel])); const cl = clipOf(sel); $("tuneN").textContent = `carte ${sel + 1} · ${fmt(cl[0])}–${fmt(cl[1])}`; $("flag").classList.toggle("on", flags.includes(sel)); }
+  if (sel >= 0) { $("tuneCard").textContent = P.cells[sel]; $("tuneCard").classList.toggle("nk", (P.naskh || []).includes(sel)); const cl = clipOf(sel); $("tuneN").textContent = `carte ${sel + 1} · ${fmt(cl[0])}–${fmt(cl[1])}`; $("flag").classList.toggle("on", flags.includes(sel)); }
 }
 
 $("mark").onclick = () => { if (!yt || !yt.getCurrentTime) return; marks.push(Math.max(0, yt.getCurrentTime() - REACT * yt.getPlaybackRate())); save(); draw(); };
