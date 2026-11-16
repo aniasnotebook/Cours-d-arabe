@@ -125,7 +125,7 @@ function openPage(i) {
   if (yt && yt.cueVideoById) yt.cueVideoById(P.video); else if (window.YT && YT.Player) makePlayer();
   draw();
 }
-const fc = i => (P.naskh || []).includes(i) ? " nk" : (P.sch || []).includes(i) ? " sh" : "";
+const fc = i => (P.sch || []).includes(i) ? " sh" : "";   // two fonts only: the Quran font, Scheherazade where it is closer to the book
 function draw() {
   const n = marks.length, total = P.cells.length;
   $("nowCard").textContent = n < total ? P.cells[n] : "✓"; $("nowCard").className = "ar" + (n < total ? fc(n) : "");
