@@ -127,16 +127,22 @@ function openPage(i) {
   draw();
 }
 const fc = i => (P.sch || []).includes(i) ? " sh" : "";   // two fonts only: the Quran font, Scheherazade where it is closer to the book
+// A card can also mix the two, as chosen by the owner: "sq" = Scheherazade up to the last letter, then the Quran font (and "qs" the reverse).
+const MARKS = /[\u064b-\u0652\u0670\u06d6-\u06ed]/;
+const cellHtml = i => { const t = P.cells[i], m = (P.mix || {})[i]; if (!m) return t;
+  const g = [...t]; let last = g.length - 1; while (last > 0 && MARKS.test(g[last])) last--;
+  const [a, b] = m === "sq" ? ["sh", ""] : ["", "sh"];
+  return `<span class="ar ${a}">${g.slice(0, last).join("")}\u200d</span><span class="ar ${b}">\u200d${g.slice(last).join("")}</span>`; };
 function draw() {
   const n = marks.length, total = P.cells.length;
-  $("nowCard").textContent = n < total ? P.cells[n] : "✓"; $("nowCard").className = "ar" + (n < total ? fc(n) : "");
+  $("nowCard").innerHTML = n < total ? cellHtml(n) : "✓"; $("nowCard").className = "ar" + (n < total ? fc(n) : "");
   $("nowN").textContent = n < total ? `carte ${n + 1} / ${total}` : "page finie";
   $("mark").disabled = n >= total;
   $("mark").textContent = n >= total ? "Toutes les cartes sont marquées" : "Le prof commence cette carte";
   $("cells").innerHTML = P.cells.map((c, i) => { const cl = clipOf(i);
-    return `<div class="c ${i === n ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""} ${flags.includes(i) ? "fix" : ""} ${(P.upd || []).includes(i) ? "isupd" : ""}" data-i="${i}">${(P.upd || []).includes(i) ? '<span class="upd">corrigée</span>' : ""}<b class="ar${fc(i)}">${c}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : i + 1}</small></div>`; }).join("");
+    return `<div class="c ${i === n ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""} ${flags.includes(i) ? "fix" : ""} ${(P.upd || []).includes(i) ? "isupd" : ""}" data-i="${i}">${(P.upd || []).includes(i) ? '<span class="upd">corrigée</span>' : ""}<b class="ar${fc(i)}">${cellHtml(i)}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : i + 1}</small></div>`; }).join("");
   $("out").value = JSON.stringify({ page: P.page, video: P.video, clips: P.cells.map((_, i) => clipOf(i)), fix: flags });
-  if (sel >= 0) { $("tuneCard").textContent = P.cells[sel]; $("tuneCard").className = "ar" + fc(sel); const cl = clipOf(sel); $("tuneN").textContent = `carte ${sel + 1} · ${fmt(cl[0])}–${fmt(cl[1])}`; $("flag").classList.toggle("on", flags.includes(sel)); }
+  if (sel >= 0) { $("tuneCard").innerHTML = cellHtml(sel); $("tuneCard").className = "ar" + fc(sel); const cl = clipOf(sel); $("tuneN").textContent = `carte ${sel + 1} · ${fmt(cl[0])}–${fmt(cl[1])}`; $("flag").classList.toggle("on", flags.includes(sel)); }
 }
 
 $("mark").onclick = () => { if (!yt || !yt.getCurrentTime) return; marks.push(Math.max(0, yt.getCurrentTime() - REACT * yt.getPlaybackRate())); save(); draw(); };
