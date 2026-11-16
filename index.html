@@ -568,6 +568,7 @@
     <button class="go" id="goLire"><span class="tile ar bk" lang="ar" id="lxTileR"></span><span class="t"><span id="lxLire"></span><small>Avec ou sans le son</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goEcrire"><span class="tile ar bk" lang="ar" id="lxTileW"></span><span class="t"><span id="lxEcrire"></span><small>Tracer</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px"><span>أَ <span style="color:var(--p-ini)">حَ</span> <span style="color:var(--p-fin)">دٌ</span></span></span><span class="t">Séparer les mots<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
+    <div class="settings randset" id="lxRand1" hidden><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randL1"></label></div>
     <div class="lessonbox" id="lxBox"></div>
   </section>
 
@@ -577,7 +578,7 @@
     <h2 class="ttl" id="lxsTitle"></h2>
     <p class="muted center">Par où veux-tu commencer&nbsp;?</p>
     <div id="lxsList"></div>
-    <div class="settings randset" id="lxsRand"><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randLx" checked></label></div>
+    <div class="settings randset" id="lxsRand"><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randLx"></label></div>
   </section>
 
   <!-- Lesson 2 -->
@@ -2007,6 +2008,7 @@ function openLx(n) {
     <div class="lrow"><span>${EAR_ICON}Écouter</span>${pages.map((pg, i) => `<a class="lbtn" href="https://www.youtube.com/watch?v=${BOOK_VIDEOS[pg]}" target="_blank" rel="noopener">${pages.length > 1 ? `Partie ${i + 1}` : "La leçon"}</a>`).join("")}</div>`;
   $("lxRead").onclick = () => openLxPage();
   $("goSep").hidden = n !== 5;
+  $("lxRand1").hidden = L.parts.length > 1; $("randL1").checked = lxRand[n];
   show("lx");
 }
 function startLire(cards, from, keep) {
@@ -2060,10 +2062,13 @@ function sepBox(it, anim) {
   return anim ? `<span class="sepbox anim"><span class="jw">${bookInk(it)}</span><span class="pcs">${pcs}</span></span>` : `<span class="sepbox"><span class="pcs">${pcs}</span></span>`;
 }
 // Cartes aléatoires: the whole lesson mixed across its parts, or one part mixed within itself (a sentence's words stay together).
+// Each lesson keeps its own choice (on by default, as in lessons 1 and 2): on the start screen, or on the lesson's
+// own screen when it has one part only (lesson 3).
+const lxRand = { 3: true, 4: true, 5: true };
 let lxMixed = false;   // the whole lesson mixed: its parts are gone, so no pause between parts
 function lxMix(items) {
-  lxMixed = $("randLx").checked && new Set(items.map(it => it.les)).size > 1;
-  if (!$("randLx").checked) return items;
+  lxMixed = lxRand[lxN] && new Set(items.map(it => it.les)).size > 1;
+  if (!lxRand[lxN]) return items;
   const groups = []; items.forEach(it => { const g = groups[groups.length - 1]; if (it.ctx && g && g[0].key === it.key) g.push(it); else groups.push([it]); });
   return shuffle(groups).flat();
 }
@@ -2089,6 +2094,7 @@ function openStart(w) {
   const L = LX[lxN], go = l => { try { localStorage.removeItem(lxStopKey(w)); } catch (e) {} lxMode = w === "s" ? "sep" : "lire"; lxWKind = w === "sw" ? "split" : "trace"; w === "w" || w === "sw" ? startText(null, l) : startLire(null, l); };
   if (L.parts.length < 2) return go();
   let stop = 0; try { stop = +localStorage.getItem(lxStopKey(w)) || 0; } catch (e) {}
+  $("randLx").checked = lxRand[lxN];
   $("lxsTitle").textContent = w === "s" ? "Séparer les mots · choisir" : w === "sw" ? "Séparer les mots · écrire" : w === "w" ? L.ecrire : L.lire;
   const n = l => BOOK_ITEMS.filter(it => it.les === l).length;
   const pv = t => `<span class="pv"><span class="mc bk" lang="ar"><span>${t}</span></span></span>`;   // the part's first card, in our colours
@@ -2103,6 +2109,8 @@ function openStart(w) {
 $("goLire").onclick = () => openStart("r");
 $("goEcrire").onclick = () => openStart("w");
 $("goSep").onclick = () => openChoice("sep");
+$("randLx").onchange = () => { lxRand[lxN] = $("randLx").checked; };
+$("randL1").onchange = () => { lxRand[lxN] = $("randL1").checked; };
 // The lesson as the app writes it: every card of each part, in the book's order.
 function openLxPage(at) {
   const L = LX[lxN];
