@@ -135,14 +135,14 @@ const cellHtml = i => { const t = P.cells[i], m = (P.mix || {})[i]; if (!m) retu
   return `<span class="ar ${a}">${g.slice(0, last).join("")}\u200d</span><span class="ar ${b}">\u200d${g.slice(last).join("")}</span>`; };
 function draw() {
   const n = marks.length, total = P.cells.length;
-  $("nowCard").innerHTML = n < total ? cellHtml(n) : "✓"; $("nowCard").className = "ar" + (n < total ? fc(n) : "");
+  $("nowCard").innerHTML = n < total ? cellHtml(n) : "✓"; $("nowCard").style.fontSize = n < total && [...P.cells[n]].length > 14 ? ([...P.cells[n]].length > 30 ? "15px" : "22px") : ""; $("nowCard").className = "ar" + (n < total ? fc(n) : "");
   $("nowN").textContent = n < total ? `carte ${n + 1} / ${total}` : "page finie";
   $("mark").disabled = n >= total;
   $("mark").textContent = n >= total ? "Toutes les cartes sont marquées" : "Le prof commence cette carte";
   $("cells").innerHTML = P.cells.map((c, i) => { const cl = clipOf(i);
-    return `<div class="c ${i === n ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""} ${flags.includes(i) ? "fix" : ""} ${(P.upd || []).includes(i) ? "isupd" : ""}" data-i="${i}">${(P.upd || []).includes(i) ? '<span class="upd">corrigée</span>' : ""}<b class="ar${fc(i)}">${cellHtml(i)}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : i + 1}</small></div>`; }).join("");
+    return `<div style="${[...c].length > 14 ? `grid-column:span ${[...c].length > 30 ? 4 : 2}` : ""}" class="c ${i === n ? "next" : ""} ${cl ? "done" : ""} ${i === sel ? "sel" : ""} ${flags.includes(i) ? "fix" : ""} ${(P.upd || []).includes(i) ? "isupd" : ""}" data-i="${i}">${(P.upd || []).includes(i) ? '<span class="upd">corrigée</span>' : ""}<b class="ar${fc(i)}">${cellHtml(i)}</b><small>${cl ? fmt(cl[0]) + "–" + fmt(cl[1]) : i + 1}</small></div>`; }).join("");
   $("out").value = JSON.stringify({ page: P.page, video: P.video, clips: P.cells.map((_, i) => clipOf(i)), fix: flags });
-  if (sel >= 0) { $("tuneCard").innerHTML = cellHtml(sel); $("tuneCard").className = "ar" + fc(sel); const cl = clipOf(sel); $("tuneN").textContent = `carte ${sel + 1} · ${fmt(cl[0])}–${fmt(cl[1])}`; $("flag").classList.toggle("on", flags.includes(sel)); }
+  if (sel >= 0) { $("tuneCard").innerHTML = cellHtml(sel); $("tuneCard").style.fontSize = [...P.cells[sel]].length > 14 ? ([...P.cells[sel]].length > 30 ? "15px" : "22px") : ""; $("tuneCard").className = "ar" + fc(sel); const cl = clipOf(sel); $("tuneN").textContent = `carte ${sel + 1} · ${fmt(cl[0])}–${fmt(cl[1])}`; $("flag").classList.toggle("on", flags.includes(sel)); }
 }
 
 $("mark").onclick = () => { if (!yt || !yt.getCurrentTime) return; marks.push(Math.max(0, yt.getCurrentTime() - REACT * yt.getPlaybackRate())); save(); draw(); };
