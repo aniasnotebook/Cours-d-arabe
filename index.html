@@ -7,6 +7,9 @@
 <title>Cours d’arabe</title>
 <style>
 /* Amiri and Noto Naskh Arabic, SIL Open Font License 1.1 (free to use and to ship with the app). */
+/* The book's two scripts for lessons 3 to 12, same licence (texts in fonts/). */
+@font-face { font-family:"Amiri Quran"; src:url(fonts/AmiriQuran-400-arabic.woff2) format("woff2"); font-display:swap; }
+@font-face { font-family:"Scheherazade New"; src:url(fonts/ScheherazadeNew-400-arabic.woff2) format("woff2"); font-display:swap; }
 @font-face {
   font-family: 'Amiri';
   font-style: normal;
@@ -128,15 +131,22 @@
   .lesson .row { display:flex; align-items:center; justify-content:space-between; }
   .lesson b { font-size:18px; display:block; }
   /* The home spreads its parts over the page; each card wears its lesson's number as a notebook tab, in blue pen. */
+  /* The lessons are stacked like folders: each card hides the bottom of the one before; the lesson in progress shows whole. */
   #home > * { margin-top:0 !important; margin-bottom:0 !important; }
-  #home { justify-content:space-evenly; padding-top:12px; padding-bottom:12px; }
-  #home .bism { font-size:clamp(26px, 8.6vw, 34px); }
-  #home .lesson { flex:none; position:relative; margin-top:36px !important; gap:10px; padding:16px 18px; border-top-right-radius:0; border-top-color:var(--accent); }
+  #home { justify-content:flex-start; gap:0; padding-top:8px; padding-bottom:24px; }
+  #home .bism { font-size:clamp(26px, 8.6vw, 34px); margin:4px 0 14px !important; }
+  #home .lesson { flex:none; position:relative; margin-top:36px !important; gap:8px; padding:14px 18px 40px; border-top-right-radius:0; border-top-color:var(--accent);
+                  border-bottom-left-radius:0; border-bottom-right-radius:0; box-shadow:0 -4px 10px rgba(30,40,70,.08); }
+  #home .lesson + .lesson { margin-top:-2px !important; }
+  #home .lesson:not(.cur) .sample { display:none; }
+  #home .lesson:last-child { padding-bottom:16px; border-bottom-left-radius:20px; border-bottom-right-radius:20px; }
   #home .sample { font-size:clamp(40px, 13vw, 52px); }
+  #home .sample.bk { font-size:clamp(34px, 10vw, 44px); }
+  .bk { font-family:"Amiri Quran", Amiri, serif; direction:rtl; } .bk.sh, .bk .sh { font-family:"Scheherazade New", serif; } .bk .am { font-family:Amiri, serif; }
+  .card.swipe .glyph.bk { line-height:2.1; white-space:nowrap; font-size:var(--gs, 110px); } .card.swipe .glyph.bk.wrap { white-space:normal; text-align:center; padding:0 14px; line-height:1.9; }
   .ltab { position:absolute; top:-36px; right:-1px; height:36px; min-width:120px; padding:6px 18px 0; display:flex; align-items:center; justify-content:center;
           background:var(--accent); color:var(--on-accent); border-radius:14px 14px 0 0; font:700 18px/1 Amiri, serif; direction:rtl; }
-  @media (max-height:640px) { #home { padding-top:34px; padding-bottom:4px; } #home .bism { font-size:24px; line-height:1.4; } #home .lesson { margin-top:32px !important; gap:4px; padding:10px 16px; }
-    #home .sample { font-size:36px; line-height:1.25; } #home .ltab { top:-32px; height:32px; font-size:17px; } #home .ltitle { font-size:19px; line-height:1.35; } }
+
   .ltitle { display:block; width:100%; text-align:center; font:400 clamp(20px, 6.2vw, 24px)/1.5 Amiri, serif; color:var(--accent); direction:rtl; }
   .chev { font-size:26px; color:var(--accent); }
 
@@ -430,6 +440,22 @@
   img.cal { height:1.25em; vertical-align:middle; } .mini img.cal { height:1.6em; } .wcard .prompt img.cal { height:1.4em; }
   .wcard .model.guide img.cal { opacity:.25; }
   .words img { display:block; width:100%; height:auto; }
+  #lxsList .pv .mc { width:auto; min-width:64px; max-width:90%; height:84px; padding:0 8px; font-size:46px; line-height:1.6; }
+  #lxsList .pick .lvl.part { color:var(--accent); } #lxsList .pick.on { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  #lxsList .picks.row { grid-template-columns:1fr; } #lxsList .picks.row .pick { flex-direction:row; align-items:center; gap:12px; }
+  #lxsList .picks.row .pv { width:96px; height:84px; flex:none; } #lxsList .picks.row .pv .mc { height:64px; font-size:38px; } #lxsList .picks.row .tx { display:flex; flex-direction:column; gap:4px; flex:1; }
+  .chips.sep .chip { font-size:30px; line-height:1.9; min-width:58px; justify-content:center; padding:0 10px; }
+  .sepbox { display:grid; place-items:center; direction:rtl; max-width:100%; --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* the card stays light in dark mode: the light inks */ .sepbox > * { grid-area:1 / 1; white-space:nowrap; }
+  .sepbox .pcs { display:flex; flex-wrap:wrap; direction:rtl; justify-content:center; gap:.45em; } .sepbox .ws { width:.6em; }
+  .sepbox.anim .jw { animation:sepJ 3.4s ease forwards; } .sepbox.anim .pcs { animation:sepP 3.4s ease forwards; }
+  @keyframes sepJ { 0%,12% { opacity:1; } 20%,58% { opacity:0; } 64%,74% { opacity:1; } 82%,100% { opacity:0; } }
+  @keyframes sepP { 0%,12% { opacity:0; gap:0; } 20% { opacity:1; gap:0; } 34%,50% { opacity:1; gap:.45em; } 60% { opacity:1; gap:0; } 64%,74% { opacity:0; gap:0; } 82% { opacity:1; gap:0; } 100% { opacity:1; gap:.45em; } }
+  @media (prefers-reduced-motion: reduce) { .sepbox.anim .jw, .sepbox.anim .pcs { animation:none; } .sepbox.anim .jw { opacity:0; } }
+  .card .bk, .wcard .bk, .paper .bk, .pv .mc.bk, .go .tile.bk { --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* white cards in both themes */
+  .ctxo { color:#c9c3b6; } .ctxw .sepbox { display:inline-grid; vertical-align:middle; }
+  .wip { display:inline-block; vertical-align:middle; margin-left:6px; padding:2px 7px; border-radius:99px; background:#f6e3b4; color:#7a5300; font:700 11px/1.4 system-ui, sans-serif; }
+  .lxwords { direction:rtl; display:flex; flex-wrap:wrap; border-top:1px solid #333; border-right:1px solid #333; }
+  .lxwords > span { flex:1 0 auto; min-width:16.6%; border-left:1px solid #333; border-bottom:1px solid #333; text-align:center; font-size:26px; line-height:1.9; padding:0 6px; }
   .bookpage { margin-bottom:14px; } .bookpage .pn { display:block; font:600 12px/1.6 system-ui, sans-serif; color:#6b665c; text-align:center; }
   @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } .enter { animation:none; } }
   /* The logo: three cards. In the top-right corner (Arabic reads from the right), hidden during a round. */
@@ -506,6 +532,21 @@
       <span class="sample ar" lang="ar"><span style="color:var(--p-ini)">ت</span><span style="color:var(--p-med)">ح</span><span style="color:var(--p-fin)">ت</span> <span style="color:var(--p-ini)">ب</span><span style="color:var(--p-med)">ل</span><span style="color:var(--p-fin)">ب</span></span>
       <span class="row"><span><b>Leçon 2 · Les lettres liées</b><span class="muted">Les formes, séparer et lier les lettres</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
+    <button class="lesson" data-open="3">
+      <span class="ltab" lang="ar">الدَّرسُ الثّالِث</span><span class="ltitle" lang="ar">الحُرُوفُ المُقَطَّعَة</span>
+      <span class="sample ar bk" lang="ar">الٓمٓ · <span style='color:var(--p-ini)'>ح‍</span><span style='color:var(--p-fin)'>‍مٓ</span></span>
+      <span class="row"><span><b>Leçon 3 · Les lettres détachées<span class="wip">En vérification</span></b><span class="muted">Le signe de madd : lire le nom de la lettre en allongeant</span></span><span class="chev" aria-hidden="true">›</span></span>
+    </button>
+    <button class="lesson" data-open="4">
+      <span class="ltab" lang="ar">الدَّرسُ الرّابِع</span><span class="ltitle" lang="ar">الحَرَكَات · التَّنْوِين · الأَلِفُ وَاليَاءُ وَالوَاوُ الصَّغِيرَة · حُرُوفُ المَدِّ وَاللِّين · السُّكُون · الشَّدَّة</span>
+      <span class="sample ar bk" lang="ar">بَ بٍ بَٰ بَا أَبۡ أَبَّ</span>
+      <span class="row"><span><b>Leçon 4 · Les sons<span class="wip">En vérification</span></b><span class="muted">Lettres + signes : voyelles, fathatân, kasratân, dammatân, prolongation, soukoun, chedda (leçons 4, 5, 7, 8, 10 et 12 du livre)</span></span><span class="chev" aria-hidden="true">›</span></span>
+    </button>
+    <button class="lesson" data-open="5">
+      <span class="ltab" lang="ar">الدَّرسُ الخامِس</span><span class="ltitle" lang="ar">تَدْرِيبَاتٌ عَلَى الحَرَكَاتِ وَالتَّنْوِين · المَدِّ وَاللِّين · السُّكُون</span>
+      <span class="sample ar bk" lang="ar"><span style='color:var(--p-iso)'>أَ</span><span style='color:var(--p-ini)'>بَ‍</span><span style='color:var(--p-fin)'>‍دً</span>ا · <span style='color:var(--p-ini)'>خَ‍</span><span style='color:var(--p-fin)'>‍وۡ</span>فٍ · أَ<span style='color:var(--p-ini)'>نۡ‍</span><span style='color:var(--p-fin)'>‍تَ</span></span>
+      <span class="row"><span><b>Leçon 5 · Les mots<span class="wip">En vérification</span></b><span class="muted">Des mots du livre : voyelles, fathatân, kasratân, dammatân, prolongation, soukoun (leçons 6, 9 et 11 du livre)</span></span><span class="chev" aria-hidden="true">›</span></span>
+    </button>
   </section>
 
   <!-- Lesson 1 -->
@@ -517,6 +558,26 @@
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:var(--q-name); font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goS1"><span class="tile"><span class="sfont" lang="ar" style="font-size:22px; color:#d6301f">◌ُ</span></span><span class="t">Les signes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="1"></div>
+  </section>
+
+  <!-- Lessons 3 to 5 -->
+  <section class="screen mid" id="lx" hidden>
+    <button class="ico home" aria-label="Accueil"></button>
+    <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
+    <div class="label">Exercices</div>
+    <button class="go" id="goLire"><span class="tile ar bk" lang="ar" id="lxTileR"></span><span class="t"><span id="lxLire"></span><small>Avec ou sans le son</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goEcrire"><span class="tile ar bk" lang="ar" id="lxTileW"></span><span class="t"><span id="lxEcrire"></span><small>Tracer</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px"><span>أَ <span style="color:var(--p-ini)">حَ</span> <span style="color:var(--p-fin)">دٌ</span></span></span><span class="t">Séparer les mots<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
+    <div class="lessonbox" id="lxBox"></div>
+  </section>
+
+  <!-- Lessons 3 to 5: where to start -->
+  <section class="screen mid" id="lxs" hidden>
+    <div class="toprow"><button class="ico back" aria-label="Retour à la leçon" data-back="lx"></button><button class="ico home" aria-label="Accueil"></button></div>
+    <h2 class="ttl" id="lxsTitle"></h2>
+    <p class="muted center">Par où veux-tu commencer&nbsp;?</p>
+    <div id="lxsList"></div>
+    <div class="settings randset" id="lxsRand"><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randLx" checked></label></div>
   </section>
 
   <!-- Lesson 2 -->
@@ -619,6 +680,7 @@
   </div>
 </div>
 
+<script src="lecons-data.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const ICONS = {
@@ -756,7 +818,7 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = new Set(), pick = {}, checked = false;
 
-function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
+function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","lx","lxs","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
 
 // ---------- The logo: an orange card, a green card and the ba card in blue pen, drawn so each card can move.
 const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
@@ -790,6 +852,7 @@ const CELL_CLIPS = [[10.9,12.8],[12.7,15.6],[15.5,18.2],[18.1,20.8],[20.7,23.4],
 let ytP = null, ytReady = false, ytTimer = null, ytWarm = 0, ytVid = null;   // ytWarm: 0 not yet, 1 warming, 2 warm
 // A sound's key is the letter (lesson 1) or "c" + the box number (lesson 2).
 const soundAt = k => {
+  if (k[0] === "b") { const it = BOOK_KEY[k]; return it && { v: BOOK_VIDEOS[it.pg], t: it.c }; }
   if (k[0] === "c") { const n = +k.slice(1), t = CELL_CLIPS[n]; return t && { v: SOUND_VIDEOS[bookPage({ img: n })], t }; }
   const i = GLYPHS.indexOf(k); return i < 0 ? null : { v: SOUND_VIDEOS[6], t: SOUND_CLIPS[i] };
 };
@@ -805,7 +868,7 @@ function loadSound(k) {
       onStateChange: e => { ytNote("s" + e.data); if (e.data === 1 && ytEndAt && ytFresh) armEnd(); if (ytWarm === 1 && e.data === 1) { ytP.pauseVideo(); ytWarm = 2; const k = currentSoundKey(); if (k) primeSound(k); setTimeout(autoSound, 100); } } } }); };
   const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.onerror = () => ytP = null; document.head.appendChild(sc);
 }
-const currentSoundKey = () => { const it = writing() ? wDeck[wPos] : deck[pos]; return !it ? null : it.w !== undefined ? "c" + it.img : it.g && !it.p ? it.g : null; };
+const currentSoundKey = () => { const it = writing() ? wDeck[wPos] : deck[pos]; return !it ? null : it.key ? it.key : it.w !== undefined ? "c" + it.img : it.g && !it.p ? it.g : null; };
 // Lesson 2 boxes: just the speaker.
 const cellSpeaker = it => `<span class="tops"><button class="spk" data-g="c${it.img}" aria-label="Écouter">${ICONS.speaker}</button></span>`;
 // The two buttons on a lesson 1 card: hear the letter, see how to pronounce it.
@@ -924,9 +987,10 @@ function signChoices(s, key = "fr") {
   return shuffle(out);
 }
 let lAskSound = false;   // Reconnaître asks at the start of each round whether the teacher checks each letter
-const lCheck = () => mode === "letters" && !famQuiz && autoOn();   // with the sound: Vérifier plays the letter, then the learner judges
+const lCheck = () => (mode === "letters" && !famQuiz || mode === "lire") && autoOn();   // with the sound: Vérifier plays the letter, then the learner judges
 function start(cards) {
   if (writing()) return startWrite(cards);
+  if (mode === "lire" || mode === "sep") return startLire(cards);
   lAskSound = mode === "letters" && !famQuiz;
   source = cards || (mode === "letters" || mode === "fams" ? LETTERS : mode === "forms" ? FORMS : mode === "signs" ? SIGNS : WORD_CARDS);
   const random = ["letters", "fams", "signs"].includes(mode) ? $("rand1").checked : $("rand2").checked;
@@ -938,8 +1002,9 @@ function start(cards) {
   });
 }
 function openRound() {
-  if (mode === "letters" || mode === "fams" || mode === "words") loadSound(currentSoundKey()); else stopSound();
-  $("peek").textContent = mode === "letters" || mode === "fams" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir les signes" : "Voir les lettres liées";
+  if (mode === "letters" || mode === "fams" || mode === "words" || mode === "lire" || mode === "sep") loadSound(currentSoundKey()); else stopSound();
+  $("peek").hidden = false;
+  $("peek").textContent = mode === "lire" || mode === "sep" ? "Voir la leçon" : mode === "letters" || mode === "fams" ? "Voir l’alphabet" : mode === "forms" ? "Voir les formes" : mode === "signs" ? "Voir les signes" : "Voir les lettres liées";
   $("peek").dataset.page = mode === "letters" || mode === "fams" ? 1 : 2;
   show("play");
   render();
@@ -956,14 +1021,17 @@ function render() {
   const good = answers.filter(a => a.ok).length, bad = answers.filter(a => !a.ok && !a.skip).length;
   $("count").textContent = `${pos + 1} / ${deck.length}`;
   $("barFill").style.width = `${pos / deck.length * 100}%`;
-  $("nGood").textContent = mode === "letters" ? `${good} reconnue${good > 1 ? "s" : ""}` : `${good} juste${good > 1 ? "s" : ""}`;
+  $("nGood").textContent = mode === "lire" ? `${good} lue${good > 1 ? "s" : ""}` : mode === "letters" ? `${good} reconnue${good > 1 ? "s" : ""}` : `${good} juste${good > 1 ? "s" : ""}`;
   $("nBad").textContent = `${bad} à revoir`;
   stopSound();
-  if (mode === "letters") renderLetter(); else renderQuiz();
+  if (mode === "letters" || mode === "lire") renderLetter(); else renderQuiz();
 }
 
 // ---------- Lesson 1: swipe cards
 function letterCard(l, id, cls) {
+  if (l.key) return `<div class="card swipe ${cls}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
+    <span class="glyph ar bk${l.f === "s" ? " sh" : ""}${[...l.t].length > 22 ? " wrap" : ""}" lang="ar" style="--gs:${bookSize(l.t)}">${bookInk(l)}</span>
+    <span class="tops"><button class="spk" data-g="${l.key}" aria-label="Écouter">${ICONS.speaker}</button></span></div>`;
   const fams = famQuiz ? `<div class="fams" data-fams>
       <span class="q">Cette lettre est :</span>
       <span class="chips">${["emph","madd","nolink"].map(f => `<button class="chip" data-f="${f}">${ICONS.plus}${FAM[f]}</button>`).join("")}</span>
@@ -980,11 +1048,12 @@ function letterCard(l, id, cls) {
 function renderLetter() {
   const next = deck[pos + 1];
   $("stage").innerHTML = (next ? letterCard(next, "", "under") : "") + letterCard(deck[pos], "card", "");
-  $("below").innerHTML = `<p class="hint" id="hint">${SWIPE_HINT}</p>
+  const lire = mode === "lire";
+  $("below").innerHTML = `<p class="hint" id="hint">${lire ? "Lis la carte à voix haute : glisse à droite si tu l’as bien lue,<br>à gauche si elle est à revoir" : SWIPE_HINT}</p>
     <div class="actions">
       <button class="act m" id="bMiss"><span>${ICONS.x}</span>À revoir</button>
       <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
-      <button class="act k" id="bOk"><span>${ICONS.check}</span>Je la reconnais</button>
+      <button class="act k" id="bOk"><span>${ICONS.check}</span>${lire ? "Je l’ai lue" : "Je la reconnais"}</button>
     </div>`;
   $("bMiss").onclick = () => answer(false);
   $("bOk").onclick = () => answer(true);
@@ -993,7 +1062,7 @@ function renderLetter() {
   if (lCheck()) {   // like Me tester: say it, Vérifier plays the teacher, then « Je la reconnais » or « À revoir »
     const judge = $("below").innerHTML;
     const nm = c.querySelector(".arname"); if (nm) nm.style.visibility = "hidden";   // the name is the answer: shown with the teacher
-    $("hint").textContent = "Dis le nom de la lettre, puis vérifie";
+    $("hint").textContent = lire ? "Lis la carte à voix haute, puis vérifie" : "Dis le nom de la lettre, puis vérifie";
     $("below").querySelector(".actions").innerHTML = `<button class="act n" id="bSkip"><span>${ICONS.skip}</span>Passer</button>
       <button class="act u" id="bUndo" ${pos ? "" : "disabled"}><span>${ICONS.undo}</span>Retour</button>
       <button class="act go2" id="bCheck"><span>${ICONS.verify}</span>Vérifier</button>`;
@@ -1001,7 +1070,7 @@ function renderLetter() {
     $("bSkip").onclick = () => { answers.push({ item: deck[pos], ok: false, skip: true }); render(); };
     $("bCheck").onclick = () => {
       if (nm) nm.style.visibility = ""; $("below").innerHTML = judge; $("bMiss").onclick = () => answer(false); $("bOk").onclick = () => answer(true); $("bUndo").onclick = undo;
-      bindSwipe(c); const b = c.querySelector(".spk"); if (b) playSound(deck[pos].g, b); };
+      bindSwipe(c); const b = c.querySelector(".spk"); if (b) playSound(deck[pos].key || deck[pos].g, b); };
   }
   c.querySelectorAll(".chip").forEach(b => b.addEventListener("click", e => {
     e.stopPropagation();
@@ -1010,7 +1079,7 @@ function renderLetter() {
     paintFams();
   }));
   if (!lCheck()) bindSwipe(c);
-  primeSound(deck[pos].g);
+  primeSound(deck[pos].key || deck[pos].g);
   if (lAskSound && pos === 0) { lAskSound = false; askSound(renderLetter, true); }
 }
 
@@ -1147,6 +1216,13 @@ function renderQuiz() {
     $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="ans"><span class="fhead"><span class="big ar" lang="ar">${formOf(it.g, it.p)}</span></span></span>
       <div class="grp"><span class="q">Quelle lettre ?</span><span class="chips letters">${it.choices.map(c => chip("letter", c, showLetter(c), true)).join("")}</span></div>
       <div class="grp"><span class="q">Où dans le mot ? Tape chaque place possible</span><span class="chips">${["ini","med","fin"].map(p => chip("pos", p, POS[p])).join("")}</span></div></div>`;
+  } else if (mode === "sep") {
+    it.choices = it.choices || sepChoices(it);
+    const sh = it.f === "s" ? " sh" : "";
+    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="tops"><button class="spk" data-g="${it.key}" aria-label="Écouter">${ICONS.speaker}</button></span><span class="ans"><span class="big word ar bk${sh}" lang="ar" style="font-size:calc(${bookSize(it.ctx || it.t)} * .8); line-height:2">${sepShow(it)}</span></span>
+      <div class="grp"><span class="q">Tape chaque lettre ${it.ctx ? "du mot en noir " : ""}avec son signe</span><span class="chips letters sep">${it.choices.map(c => chip("multi", c, `<span class="bk${sh}">${c}</span>`, true)).join("")}</span>
+      <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
+    pick.multi = new Set();
   } else {
     const letters = [...new Set(lettersOf(it.w).map(c => L1(c, it.w)))];
     it.choices = it.choices || lessonChoices(letters, Math.max(8, letters.length + 4));
@@ -1235,6 +1311,21 @@ function check() {
     });
     card.querySelector(".chips:not(.letters)").classList.add("tagged");
     card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${ok ? "Juste" : "À revoir"}</span>`);
+  } else if (mode === "sep") {
+    const want = new Set(piecesOf(it.t));
+    const missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
+    ok = !missed.length && !extra.length;
+    const verdict = ok ? "Juste" : `À revoir : ${[missed.length && `${missed.length} oubliée${missed.length > 1 ? "s" : ""}`, extra.length && `${extra.length} en trop`].filter(Boolean).join(", ")}`;
+    const big = ans.querySelector(".big"); big.innerHTML = sepShow(it, sepBox(it, true));
+    chips.forEach(o => {
+      const v = o.dataset.v, inWord = want.has(v), chosen = pick.multi.has(v);
+      o.className = "chip ar" + (inWord && chosen ? " right" : inWord ? " missed" : chosen ? " wrong" : " off");
+      if (inWord && !chosen) o.innerHTML += `<span class="tag">oubliée</span>`;
+      if (!inWord && chosen) o.innerHTML += `<span class="tag">en trop</span>`;
+    });
+    card.querySelector(".chips").classList.add("tagged");
+    card.querySelector(".note").remove();
+    card.insertAdjacentHTML("afterbegin", `<span class="verdict ${ok ? "good" : "bad"}">${!ok && (!pick.multi.size || missed.length === want.size) ? "À revoir" : verdict}</span>`);
   } else {
     const want = new Set(lettersOf(it.w).map(c => L1(c, it.w)));
     const missed = [...want].filter(c => !pick.multi.has(c)), extra = [...pick.multi].filter(c => !want.has(c));
@@ -1274,7 +1365,7 @@ function check() {
 // ---------- Writing (no automatic check: the learner compares the drawing with the book's letter).
 // Tracing: the letter is in grey under the drawing, no score. Testing: the red name (or the separate letters of a word),
 // a blank card, then the book's letter in green over the drawing, and the learner says if it was right.
-const writing = () => mode === "wletters" || mode === "wwords" || mode === "wforms" || mode === "wsigns";
+const writing = () => mode === "wletters" || mode === "wwords" || mode === "wforms" || mode === "wsigns" || mode === "wtext";
 let wKind = "trace", wDeck = [], wSource = [], wPos = 0, wAnswers = [], wStrokes = [], wShown = false;
 const wWords = () => mode === "wwords";
 const wLesson2 = () => mode === "wwords" || mode === "wforms";
@@ -1284,14 +1375,17 @@ const signWrite = (it, guide) => { const [b, f] = SIGN_WRITE[it.id], one = guide
   // The marks are the sheet's own drawings (book/sg/mk-*.png), the same on every phone, with a real « / » between.
   const mk = (n, h) => `<img src="book/sg/mk-${n}.png" alt="" style="height:${h}em">`, M = it.id === "soukoun" ? ["soukoun", "soukounM"] : ["nonlue", "nonlueM"];
   return guide ? b : `<span class="onetwo${b === "ا" ? " tall" : ""}">${b}<span class="marks">${mk(M[0], .16)}<i class="sl">/</i>${mk(M[1], it.id === "soukoun" ? .17 : .2)}</span></span>`; };   // sheet left, Mushaf right, as in Choisir   // soukoun, letter not read: « sheet / Mushaf », like the two ya
-const wModel = (it, guide) => wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(170px, 40vw, 21vh)">${signWrite(it, guide)}</span>`
+const wModel = (it, guide) => mode === "wtext" && wKind === "split" ? `<span class="ar bk${it.f === "s" ? " sh" : ""}" lang="ar" style="font-size:calc(${bookSize(it.t)} * .7); line-height:2">${sepBox(it)}</span>`
+  : mode === "wtext" ? `<span class="ar bk${it.f === "s" ? " sh" : ""}" lang="ar" style="font-size:calc(${bookSize(it.t)} * 1.1); line-height:2.1; white-space:nowrap">${guide ? bookHtml(it) : bookInk(it)}</span>`
+  : wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(170px, 40vw, 21vh)">${signWrite(it, guide)}</span>`
   : wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
   : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:baseline; gap:0.35em; white-space:nowrap; font-size:min(${lettersOf(it.w).length > 3 ? 46 : 60}px, 14vw, 9vh)">${inked(it.w, it.k, "")}</span>`
   : wWords() ? `<span class="ar" lang="ar" style="font-size:min(130px, 30vw, 17vh)">${wKind === "trace" ? wordShow(it) : wordInk(it)}</span>`
   : `<span class="ar" lang="ar" style="font-size:min(210px, 48vw, 26vh)">${glyph(it.g)}</span>`;
 const SWAP = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h11l-3-3"/><path d="M17 17H6l3 3"/></svg>';
 let wArabic = false;
-const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><b>${it.fr}</b></span>`
+const wPrompt = it => mode === "wtext" && wKind === "split" ? `<span class="prompt ar bk${it.f === "s" ? " sh" : ""}" lang="ar" style="font-size:calc(${bookSize(it.ctx || it.t)} * .55); line-height:2">${sepShow(it)}</span>`
+  : mode === "wtext" ? `<span class="prompt"></span>` : wKind === "sign" ? `<span class="prompt pform"><b>${it.fr}</b></span>`
   : wKind === "form" ? `<span class="prompt pform"><span class="ar" lang="ar">${showLetter(it.g)}</span><b>${POS[it.p]}</b></span>`
   : wKind === "split" ? `<span class="prompt ar" lang="ar">${wordShow(it)}</span>`
   : wWords() ? `<span class="prompt sep ar" lang="ar" dir="rtl">${inked(it.w, it.k)}</span>`
@@ -1300,7 +1394,7 @@ const wPrompt = it => wKind === "sign" ? `<span class="prompt pform"><b>${it.fr}
       <span class="tip">${SWAP}${wArabic ? `Tape pour revenir à « ${it.fr} »` : "Tape pour le nom en arabe"}</span></button>`;
 
 function openWriting(lesson) {
-  mode = lesson === 1 ? "wletters" : "wwords";
+  mode = lesson === 1 ? "wletters" : "wwords"; choiceOf = ""; $("cwRand").hidden = false;
   $("cwTitle").textContent = lesson === 1 ? "Écrire les lettres" : "Lier les lettres";
   $("cwBack").dataset.back = "l" + lesson;
   bindRand($("cwRand"), lesson);
@@ -1324,6 +1418,8 @@ const CHOICE = {
     choose: "Sépare les lettres liées : choisis chaque lettre qui les compose.", text: "Sépare les lettres liées : trace chaque lettre seule, puis vérifie si ton dessin est juste." },
   signs: { title: "Les signes", write: "sign", lesson: 1,
     choose: "Pour chaque signe, choisis son nom et comment il se lit.", text: "Trace le signe indiqué à sa place sur la lettre grise, puis vérifie si ton dessin est juste." },
+  sep: { title: "Séparer les mots", write: "split", back: "lx", top: "أَحَدٌ", tiles: ["أَ", "حَ", "دٌ", "حِ"],
+    choose: "Sépare le mot : choisis chaque lettre avec son signe.", text: "Sépare le mot : écris chaque lettre avec son signe, puis vérifie si ton dessin est juste." },
   forms: { title: "Les formes", write: "form", top: "ـبـ", tiles: ["ب","ن"], places: true,
     choose: "Pour chaque forme, choisis la lettre et sa place dans le mot.", text: "Trace la forme de la lettre à la place indiquée, puis vérifie si ton dessin est juste." },
 };
@@ -1331,7 +1427,8 @@ function openChoice(which) {
   const c = CHOICE[which];
   choiceOf = which; mode = which;
   $("cwTitle").textContent = c.title;
-  $("cwBack").dataset.back = c.lesson === 1 ? "l1" : "l2";
+  $("cwBack").dataset.back = c.back || (c.lesson === 1 ? "l1" : "l2");
+  $("cwRand").hidden = !!c.back;
   bindRand($("cwRand"), c.lesson || 2);
   $("pkA").dataset.w = "choose"; $("pkB").dataset.w = c.write; setLevel($("pkB"), 2);
   $("cwTraceName").textContent = "Choisir"; $("cwTestName").textContent = "Écrire";
@@ -1357,6 +1454,7 @@ function openChoice(which) {
 }
 
 function startWrite(cards) {
+  if (mode === "wtext") return startText(cards);
   wSource = cards || (mode === "wforms" ? FORMS : mode === "wsigns" ? SIGNS : wWords() ? WORD_CARDS : LETTERS);
   const random = wLesson2() ? $("rand2").checked : $("rand1").checked;
   fromPage(wSource, from => {
@@ -1366,8 +1464,9 @@ function startWrite(cards) {
   });
 }
 function openWriteRound() {
-  if (mode === "wletters" || wWords() || mode === "wwords" || (writing() && wKind === "split")) loadSound(currentSoundKey()); else stopSound();
-  $("wPeek").textContent = mode === "wforms" ? "Voir les formes" : mode === "wsigns" ? "Voir les signes" : wWords() || wKind === "split" ? "Voir les lettres liées" : "Voir l’alphabet";
+  if (mode === "wletters" || wWords() || mode === "wwords" || mode === "wtext" || (writing() && wKind === "split")) loadSound(currentSoundKey()); else stopSound();
+  $("wPeek").hidden = false;
+  $("wPeek").textContent = mode === "wtext" ? "Voir la leçon" : mode === "wforms" ? "Voir les formes" : mode === "wsigns" ? "Voir les signes" : wWords() || wKind === "split" ? "Voir les lettres liées" : "Voir l’alphabet";
   $("wTally").style.justifyContent = wKind === "trace" ? "center" : "";
   $("wGood").hidden = $("wBad").hidden = wKind === "trace";
   show("write");
@@ -1387,14 +1486,14 @@ function wRender() {
   $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("wBad").textContent = `${wAnswers.filter(a => !a.ok && !a.skip).length} à revoir`;
   stopSound();
-  $("wStage").innerHTML = `<div class="wcard enter${wKind === "sign" && it.alt ? " two" : ""}" id="wCard">${wPrompt(it)}${mode === "wletters" && wKind === "trace" ? soundTops(it.g) : it.w !== undefined ? cellSpeaker(it) : ""}<span class="line"></span>
+  $("wStage").innerHTML = `<div class="wcard enter${wKind === "sign" && it.alt ? " two" : ""}" id="wCard">${wPrompt(it)}${mode === "wtext" ? `<span class="tops"><button class="spk" data-g="${it.key}" aria-label="Écouter">${ICONS.speaker}</button></span>` : mode === "wletters" && wKind === "trace" ? soundTops(it.g) : it.w !== undefined ? cellSpeaker(it) : ""}<span class="line"></span>
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" || wKind === "sign" ? `<span class="model guide">${wModel(it, true)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
   clearTimeout(autoT); autoT = setTimeout(autoSound, 450); wCardT0 = Date.now();
   if (wAskSound && $("ask").hidden) { wAskSound = false; askSound(autoSound); }   // after the card has slid in, so the small video lands in its corner
   $("wHint").innerHTML = wKind === "trace"
-    ? `Repasse sur ${wWords() ? "les lettres liées" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
+    ? `Repasse sur ${mode === "wtext" ? "la carte" : wWords() ? "les lettres liées" : "la lettre"} avec ton doigt : la carte suivante vient toute seule`
     : wTask();
   wButtons();
   wCanvas();
@@ -1403,7 +1502,7 @@ function wRender() {
   const sk = currentSoundKey(); if (sk) primeSound(sk);
 }
 // What to write, under the card.
-const wTask = () => wKind === "sign" ? "Ajoute ce signe sur la lettre grise, à sa place" : wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? "Écris chaque lettre séparée, comme dans l’alphabet"
+const wTask = () => wKind === "sign" ? "Ajoute ce signe sur la lettre grise, à sa place" : wKind === "form" ? "Écris la forme de la lettre à cette place" : wKind === "split" ? (mode === "wtext" ? "Écris chaque lettre avec son signe, séparée" : "Écris chaque lettre séparée, comme dans l’alphabet")
   : wWords() ? "Écris ces lettres liées, d’un seul trait" : "Dessine la lettre de mémoire";
 function wNameSwitch() {
   const b = $("wName"); if (!b) return;
@@ -1444,7 +1543,7 @@ function wReveal() {
   wShown = true;
   $("wCard").classList.add("shown");
   if (mode === "wletters" && !$("wCard").querySelector(".tops")) $("wCard").insertAdjacentHTML("beforeend", soundTops(wDeck[wPos].g));   // after the answer, not before
-  if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
+  if (wKind === "split" && mode !== "wtext") $("wCard").querySelector(".prompt").innerHTML = wordInk(wDeck[wPos]);   // the word takes the letters' inks
   const c = $("wCard");
   // Soukoun and letter not read: the two ways, as on the sheet and as in the Mushaf.
   c.insertAdjacentHTML("beforeend", `<span class="model answer" id="wAnswer">${wModel(wDeck[wPos])}</span><span class="say" id="wSay">En gris ton dessin, en ${wWords() ? (wKind === "trace" ? "noir" : "couleur") : "vert"} ${wKind === "sign" ? "la lettre de la fiche" : `${wKind === "form" ? "la forme" : wKind === "split" ? "les lettres" : wWords() ? "les lettres liées" : "la lettre"}`}</span>`);
@@ -1470,7 +1569,7 @@ function wSwipe(c) {
     else { c.style.transform = ""; tint(c, 0); }
   };
 }
-function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split") $("wCard").querySelector(".prompt").innerHTML = wordShow(wDeck[wPos]); const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); if (wKind !== "trace") { stopSound(); c?.querySelector(".tops")?.remove(); } $("wWays")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
+function wHide() { wShown = false; $("wCard")?.classList.remove("shown"); if (wKind === "split" && mode !== "wtext") $("wCard").querySelector(".prompt").innerHTML = wordShow(wDeck[wPos]); const c = $("wCard"); c.onpointerdown = c.onpointermove = c.onpointerup = c.onpointercancel = null; $("wAnswer")?.remove(); $("wSay")?.remove(); if (wKind !== "trace") { stopSound(); c?.querySelector(".tops")?.remove(); } $("wWays")?.remove(); $("wHint").textContent = wTask(); wButtons(); }
 function wFly(ok) {
   const c = $("wCard"); if (!c || c.dataset.gone) return;   // a double tap answers once
   c.dataset.gone = 1; tint(c, ok ? 100 : -100);
@@ -1540,10 +1639,10 @@ function showStats() {
   const seen = answers.length, skipped = answers.filter(a => a.skip).length, done = seen - skipped, good = answers.filter(a => a.ok).length;
   const famWrong = mode === "letters" && famQuiz ? answers.filter(a => !a.famOk).length : 0;
   const toReview = answers.filter(a => !a.skip && (!a.ok || (mode === "letters" && famQuiz && !a.famOk))).map(a => a.item);
-  const unit = ["letters", "fams", "wletters"].includes(mode) ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : mode === "signs" || mode === "wsigns" ? "signe" : "groupe";
+  const unit = mode === "lire" || mode === "sep" || mode === "wtext" ? "carte" : ["letters", "fams", "wletters"].includes(mode) ? "lettre" : mode === "forms" || mode === "wforms" ? "forme" : mode === "signs" || mode === "wsigns" ? "signe" : "groupe";
   const pl = (k, w) => w === "groupe" ? `groupe${k > 1 ? "s" : ""} de lettres liées` : `${w}${k > 1 ? "s" : ""}`, n = k => `${k} ${pl(k, unit)}`;
   const bad = done - good, win = done && skipped <= done && good / done >= PASSED;
-  const name = writing() && wKind === "sign" ? "Les signes · écrire" : mode === "signs" ? "Les signes · choisir" : writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres · m’évaluer", fams: "Reconnaître les lettres · les familles", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
+  const name = mode === "lire" ? `Leçon ${lxN} · lire` : mode === "sep" ? "Séparer les mots · choisir" : mode === "wtext" && wKind === "split" ? "Séparer les mots · écrire" : writing() && wKind === "sign" ? "Les signes · écrire" : mode === "signs" ? "Les signes · choisir" : writing() && wKind === "form" ? "Les formes · écrire" : writing() && wKind === "split" ? "Séparer les lettres · écrire" : { letters: "Reconnaître les lettres · m’évaluer", fams: "Reconnaître les lettres · les familles", wletters: "Écrire les lettres", forms: "Les formes · choisir", words: "Séparer les lettres · choisir", wwords: "Lier les lettres" }[mode];
   const fem = !(mode === "signs" || mode === "wsigns" || unit === "groupe"), right = mode === "letters" ? "reconnue" : "juste", did = (writing() ? "écrit" : "répondu") + (fem ? "e" : "");
   show("stats");
   // Each score band has its own words and its own move of the logo; confetti from 80 %, twice for a perfect round.
@@ -1560,7 +1659,7 @@ function showStats() {
   $("famText").hidden = !(mode === "letters" && famQuiz && done);
   $("famText").textContent = nb(`Familles : ${done - famWrong} / ${done} justes`);
   // The online lesson page is the alphabet: no help for the signs, so no link after them.
-  $("lessonLinks").innerHTML = mode === "signs" || mode === "wsigns" ? "" : lessonLinks(["letters", "fams", "wletters"].includes(mode) ? 1 : 2);
+  $("lessonLinks").innerHTML = mode === "lire" || mode === "sep" || mode === "wtext" ? "" : mode === "signs" || mode === "wsigns" ? "" : lessonLinks(["letters", "fams", "wletters"].includes(mode) ? 1 : 2);
   $("reviewLabel").hidden = !toReview.length;
   $("missed").innerHTML = toReview.map(i => i.mini).join("");
   $("review").hidden = !toReview.length;
@@ -1729,6 +1828,19 @@ function deckOf(src, random, from = 7) {
 }
 let pausedAt = -1;
 function pageBreak(done, d, src, finish) {
+  if (d[0] && d[0].les !== undefined) {   // lessons 3 to 5: a part is a lesson of the book
+    if (lxMixed) return false;
+    if (!done || done >= d.length || pausedAt === done || d[done - 1].les === d[done].les) return false;
+    pausedAt = done;
+    const ps = LX[lxN].parts, a = ps.indexOf(d[done - 1].les), b = ps.indexOf(d[done].les);
+    $("askT").textContent = nb(`Partie ${a + 1} terminée : ${PART_NAME[ps[a]].toLowerCase()}`);
+    $("askP").textContent = nb(`Continuer avec la partie ${b + 1}, ${PART_NAME[ps[b]].toLowerCase()}, ou voir tes résultats\u00a0?`);
+    $("askNo").textContent = "Continuer"; $("askYes").textContent = "Résultats";
+    $("ask").hidden = false;
+    $("askNo").onclick = () => { $("ask").hidden = true; wCardT0 = Date.now(); if (writing()) autoSound(); };
+    $("askYes").onclick = () => { $("ask").hidden = true; lxKeep(ps[b]); finish(); };
+    return true;
+  }
   if (!fullBook(src) || !done || done >= d.length || pausedAt === done) return false;
   const page = bookPage(d[done - 1]), next = bookPage(d[done]);
   if (page === next) return false;
@@ -1789,7 +1901,7 @@ bindRand(document.querySelector('.randset[data-lesson="1"]'), 1);
 // bars, or three red bars for the hardest of all (Lier les lettres · Me tester).
 function setLevel(b, n) { b.querySelector(".lvl")?.remove(); b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${n}"><span>${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>Niveau ${n}</span>`); }
 document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) => setLevel(b, i + 1)));
-document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => show("l" + b.dataset.open));
+document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { const n = +b.dataset.open; try { localStorage.setItem("lastLesson", n); } catch (e) {} markCur(); n > 2 ? openLx(n) : show("l" + n); });
 $("go1").onclick = () => show("c1");
 document.addEventListener("click", e => {
   const b = e.target.closest(".pron, .spk"); if (!b) return;
@@ -1804,6 +1916,7 @@ $("goS1").onclick = () => openChoice("signs");
 $("goS1").querySelector(".tile").innerHTML = signHtml(SIGNS[2], 24);   // a damma over the sheet's dotted circle
 $("goW2").onclick = () => openWriting(2);
 document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
+  if (choiceOf === "sep") return openStart(b.dataset.w === "choose" ? "s" : "sw");
   if (b.dataset.w === "choose") { mode = choiceOf; famQuiz = false; return start(); }
   if (b.dataset.w === "split") mode = "wwords";
   if (b.dataset.w === "form") mode = "wforms";
@@ -1814,8 +1927,9 @@ document.querySelectorAll("[data-w]").forEach(b => b.onclick = () => {
 // Tracer asks on its first card: with or without the sound of each card, the learner listens while tracing (asked like the page breaks).
 let wAskSound = false;
 function askSound(go, check) {
-  $("askT").textContent = "Écouter chaque lettre\u00a0?";
-  $("askP").textContent = check ? "Lance l’audio automatiquement après chaque lettre." : "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
+  const u = (mode === "lire" || mode === "wtext") ? LX[lxN].unit : "lettre";
+  $("askT").textContent = `Écouter chaque ${u}\u00a0?`;
+  $("askP").textContent = check ? `Lance l’audio automatiquement après chaque ${u}.` : "Le son se lance tout seul sur chaque carte, pendant que tu traces.";
   $("askNo").textContent = "Sans le son"; $("askYes").textContent = "Avec le son";
   $("ask").hidden = false;
   const set = on => { $("ask").hidden = true; wCardT0 = Date.now(); try { localStorage.setItem("autoSound", on ? "1" : "0"); } catch (e) {} if (on) loadSound(); go(); };
@@ -1824,20 +1938,25 @@ function askSound(go, check) {
 document.querySelectorAll(".ico.back").forEach(b => { b.innerHTML = ICONS.back; b.onclick = () => show(b.dataset.back); });
 $("wRestart").innerHTML = ICONS.restart;
 $("wRestart").onclick = () => askThen("restart", () => { const go = () => startWrite(wSource === LETTERS || wSource === WORD_CARDS ? null : wSource); wAskSound = wKind === "trace"; go(); });   // Tracer asks for the sound again
-$("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show("cw"));
-$("wPeek").onclick = () => openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : mode === "wsigns" ? "signs" : "book");
+$("wStop").onclick = () => askThen(wKind !== "trace" ? "stop" : "quit", () => wKind !== "trace" ? showStats() : show(mode === "wtext" ? lxBack() : "cw"));
+$("wPeek").onclick = () => mode === "wtext" ? openLxPage(wDeck[Math.min(wPos, wDeck.length - 1)].les) : openPage(wLesson2() ? 2 : 1, mode === "wforms" ? "forms" : mode === "wsigns" ? "signs" : "book");
 $("goForms").onclick = () => openChoice("forms");
 $("goWords").onclick = () => openChoice("words");
 $("restart").onclick = () => askThen("restart", () => start(source));
 $("pBack").innerHTML = $("wTopBack").innerHTML = ICONS.back;
-$("pBack").onclick = () => askThen("quit", () => show(mode === "letters" || mode === "fams" ? "c1" : mode === "words" || mode === "forms" || mode === "signs" ? "cw" : "l2"));
-$("wTopBack").onclick = () => askThen("quit", () => show("cw"));
+$("pBack").onclick = () => askThen("quit", () => show(mode === "lire" || mode === "sep" ? lxBack() : mode === "letters" || mode === "fams" ? "c1" : mode === "words" || mode === "forms" || mode === "signs" ? "cw" : "l2"));
+$("wTopBack").onclick = () => askThen("quit", () => show(mode === "wtext" ? lxBack() : "cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = () => askThen("stop", showStats);
-$("peek").onclick = () => mode === "signs" ? openPage(1, "signs") : openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
+$("peek").onclick = () => mode === "lire" || mode === "sep" ? openLxPage(deck[Math.min(answers.length, deck.length - 1)].les) : mode === "signs" ? openPage(1, "signs") : openPage(+$("peek").dataset.page, mode === "forms" ? "forms" : "book");
 $("again").onclick = () => { wAskSound = writing() && wKind === "trace"; start(source); };
 // Tracer has no right or wrong: its end says the round is done, how many cards were traced, and offers another round.
 function traceEnd() {
+  if (mode === "wtext") { const k = Math.min(wPos, wDeck.length);
+    show("stats"); $("party").className = "party m5"; $("party").innerHTML = confetti(0, 0) + MARK;
+    $("rTitle").textContent = `Bravo, tu as tracé ${k} carte${k > 1 ? "s" : ""}`; $("rSub").textContent = nb(`Leçon ${lxN} · tracer`);
+    $("rTiles").hidden = $("rBar").hidden = true; $("rLine").textContent = $("missed").innerHTML = $("lessonLinks").innerHTML = "";
+    $("famText").hidden = $("reviewLabel").hidden = $("review").hidden = true; $("again").className = "primary"; return; }
   const l2 = mode === "wwords", k = Math.min(wPos, wDeck.length), unit = l2 ? "groupes de lettres liées" : "lettres";
   show("stats");
   $("party").className = "party m5"; $("party").innerHTML = confetti(0, 0) + MARK;
@@ -1860,6 +1979,138 @@ document.addEventListener("keydown", e => {
 });
 // Start last, once everything above is set up (a reload can go straight back into a round).
 if (!remembered()) show("gate"); else if (!backToPlace()) show("home");
+// ---------- Lessons 3 to 5: the book's cards (lecons-data.js), read with the teacher's video or traced.
+const BOOK_KEY = {}; BOOK_ITEMS.forEach(it => { it.key = "b" + it.pg + ":" + it.n; it.fams = []; BOOK_KEY[it.key] = it; });
+const PART_NAME = { 3: "Les lettres détachées", 4: "Les voyelles", 5: "Fathatân, kasratân, dammatân", 7: "Les petits alif, wâw et yâ", 8: "Les lettres de prolongation", 10: "Le soukoun", 12: "La chedda",
+  6: "Voyelles, fathatân, kasratân, dammatân", 9: "Lettres de prolongation", 11: "Soukoun" };
+const LX = { 3: { parts: [3], unit: "lettre", read: "Lettres", lire: "Lire les lettres détachées", ecrire: "Écrire les lettres détachées", tile: "الٓمٓ" },
+  4: { parts: [4, 5, 7, 8, 10, 12], unit: "syllabe", read: "Sons", lire: "Lire les sons", ecrire: "Écrire les sons", tile: "بَ" },
+  5: { parts: [6, 9, 11], unit: "mot", read: "Mots", lire: "Lire les mots", ecrire: "Écrire les mots", tile: "أَحَدٌ" } };
+let lxN = 3;
+const MARKS_RE = /[\u064b-\u0652\u0670\u06d6-\u06ed]/;
+// A card in the font closest to the book: Scheherazade, the Quran font, a mix of both, or word by word.
+function bookHtml(it) { if (it.h) return it.h; if (!it.m) return it.t;
+  const g = [...it.t]; let last = g.length - 1; while (last > 0 && MARKS_RE.test(g[last])) last--;
+  const [a, b] = it.m === "sq" ? ["sh", ""] : ["", "sh"];
+  return `<span class="${a}">${g.slice(0, last).join("")}\u200d</span><span class="${b}">\u200d${g.slice(last).join("")}</span>`; }
+const bookSize = t => { const n = [...t].length; return n <= 4 ? "min(130px, 30vw, 17vh)" : n <= 9 ? "min(96px, 22vw, 13vh)" : n <= 16 ? "min(64px, 15vw, 9vh)" : n <= 26 ? "min(42px, 10vw, 6vh)" : "min(32px, 7.4vw, 4.6vh)"; };
+const lxItems = (n, part) => (part ? [part] : LX[n].parts).flatMap(l => BOOK_ITEMS.filter(it => it.les === l));   // one part, or the whole lesson
+function markCur() { let n = 1; try { n = +localStorage.getItem("lastLesson") || 1; } catch (e) {} document.querySelectorAll("#home .lesson").forEach(b => b.classList.toggle("cur", +b.dataset.open === n)); }
+markCur();
+function openLx(n) {
+  lxN = n; const L = LX[n];
+  $("lxLire").textContent = L.lire; $("lxEcrire").textContent = L.ecrire;
+  $("lxTileR").innerHTML = $("lxTileW").innerHTML = `<span>${inkText(L.tile)}</span>`; $("lxTileR").style.fontSize = $("lxTileW").style.fontSize = n === 4 ? "28px" : "17px";
+  const pages = [...new Set(BOOK_ITEMS.filter(it => L.parts.includes(it.les)).map(it => it.pg))];
+  $("lxBox").innerHTML = `<div class="label">Leçon</div>
+    <div class="lrow"><span>${BOOK_ICON}Lire</span><button class="lbtn" id="lxRead">${L.read}</button></div>
+    <div class="lrow"><span>${EAR_ICON}Écouter</span>${pages.map((pg, i) => `<a class="lbtn" href="https://www.youtube.com/watch?v=${BOOK_VIDEOS[pg]}" target="_blank" rel="noopener">${pages.length > 1 ? `Partie ${i + 1}` : "La leçon"}</a>`).join("")}</div>`;
+  $("lxRead").onclick = () => openLxPage();
+  $("goSep").hidden = n !== 5;
+  show("lx");
+}
+function startLire(cards, from, keep) {
+  mode = lxMode; famQuiz = false;
+  source = cards && cards.length ? cards : lxMix(mode === "sep" ? sepDeck(lxItems(lxN, from)) : lxItems(lxN, from));
+  deck = source.slice(); answers = []; pausedAt = -1; lAskSound = !keep && mode === "lire";
+  deck.forEach(i => delete i.choices);
+  openRound();
+}
+function startText(cards, from, keep) {
+  mode = "wtext"; wKind = lxWKind;
+  wSource = cards && cards.length ? cards : lxMix(wKind === "split" ? sepDeck(lxItems(lxN, from)) : lxItems(lxN, from));
+  wDeck = wSource.slice(); wAnswers = []; wPos = 0; pausedAt = -1; wAskSound = !keep && wKind === "trace";
+  openWriteRound();
+}
+// Séparer les mots: a word cut into its letters, each with its signs (vowel, soukoun, chedda, tanwîn, small letters).
+const SEP_MARK = /[\u064b-\u065f\u0670\u06d6-\u06ed\u08f0-\u08ff]/;
+// Each word as its units: a letter with its signs. A bare joining stroke (ـ) is not a letter; one carrying a sign is (the
+// hamza's seat in يَوۡمَـِٕذٍ, ءَآلۡـٰٔنَ).
+const unitsOf = t => t.split(" ").filter(Boolean).map(w => { const u = []; for (const c of w) { if (c === "\u200d" || c === "\u200c") continue; if (SEP_MARK.test(c) && u.length) u[u.length - 1] += c; else u.push(c); } return u; });
+const piecesOf = t => unitsOf(t).flat().filter(u => u !== "ـ");
+// Our colours on a book card: each letter in the ink of its place in its word (beginning, middle, end; alone stays black),
+// as in Séparer les lettres. Zero-width joiners keep the letters joined across the colours. sh(i) gives a unit its font.
+function inkText(t, sh = () => "") {
+  let k = 0;
+  return t.split(" ").map(w => { const u = unitsOf(w)[0] || [], base = u.map(x => [...x][0]).join("");
+    return u.map((x, i) => { const p = placeAt(base, i), c = sh(k++), Z = "\u200d";
+      if (x === "ـ") return c ? `<span class="${c}">ـ</span>` : "ـ";
+      return p === "iso" && !c ? x : `<span${c ? ` class="${c}"` : ""}${p === "iso" ? "" : ` style="color:var(--p-${p})"`}>${p === "fin" || p === "med" ? Z : ""}${x}${p === "ini" || p === "med" ? Z : ""}</span>`; }).join(""); }).join(" ");
+}
+function bookInk(it) {
+  if (it.h) return it.h.replace(/>([^<]+)</g, (m, tx) => ">" + inkText(tx) + "<");
+  if (it.m === "sq") { const n = unitsOf(it.t).flat().length; return inkText(it.t, k => k < n - 1 ? "sh" : ""); }
+  return inkText(it.t);
+}
+// The chips: the word's own pieces, the same letters with another vowel, and look-alike letters with the same signs.
+function sepChoices(it) {
+  const want = [...new Set(piecesOf(it.t))], n = Math.min(12, Math.max(8, want.length + 4)), sk = /\u0652/.test(it.t) ? "\u0652" : "\u06e1";
+  const vowels = ["\u064e", "\u0650", "\u064f"].concat(/[\u0652\u06e1]/.test(it.t) ? [sk] : []);
+  const other = [], look = [];
+  want.forEach(p => { const b = [...p][0], m = p.slice(b.length);
+    vowels.forEach(v => { if (!m.includes(v) && b !== "ا" && b !== "ى") other.push(b + v + m.replace(/[\u064e\u0650\u064f\u0652\u06e1]/g, "")); });
+    const g = L1_LOOKALIKE.find(x => x.includes(b)); if (g) g.filter(c => c !== b && c !== YA).forEach(c => look.push(c + m)); });
+  const pool = shuffle([...new Set([...other, ...look])].filter(c => !want.includes(c)));
+  return shuffle([...want, ...pool.slice(0, Math.max(0, n - want.length))]);
+}
+// The word joined, then cut: each piece in the ink of its place (beginning, middle, end), as in Séparer les lettres.
+function sepBox(it, anim) {
+  const pcs = unitsOf(it.t).map(u => { const base = u.map(x => [...x][0]).join("");
+    return u.map((p, i) => p === "ـ" ? "" : `<span style="color:${inkOf(base, i)}">${p}</span>`).join(""); }).join(`<span class="ws"></span>`);   // a wider gap between words
+  return anim ? `<span class="sepbox anim"><span class="jw">${bookInk(it)}</span><span class="pcs">${pcs}</span></span>` : `<span class="sepbox"><span class="pcs">${pcs}</span></span>`;
+}
+// Cartes aléatoires: the whole lesson mixed across its parts, or one part mixed within itself (a sentence's words stay together).
+let lxMixed = false;   // the whole lesson mixed: its parts are gone, so no pause between parts
+function lxMix(items) {
+  lxMixed = $("randLx").checked && new Set(items.map(it => it.les)).size > 1;
+  if (!$("randLx").checked) return items;
+  const groups = []; items.forEach(it => { const g = groups[groups.length - 1]; if (it.ctx && g && g[0].key === it.key) g.push(it); else groups.push([it]); });
+  return shuffle(groups).flat();
+}
+// A sentence is separated one word at a time: one card per word, the sentence shown with that word in black.
+function sepDeck(items) {
+  return items.flatMap(it => { const ws = it.t.split(" ").filter(Boolean); if (ws.length < 2) return [it];
+    return ws.map((w, j) => { const wf = it.h ? (j === ws.length - 1 ? "am" : "sh") : "";
+      return { ...it, t: w, h: wf ? `<span class="${wf}">${w}</span>` : undefined, m: undefined, ctx: it.t, wi: j, wf }; }); });
+}
+// The card's text: the word, or its sentence with the other words in grey (inner replaces the word, for the answer).
+function sepShow(it, inner) {
+  if (!it.ctx) return inner || bookHtml(it);
+  const ws = it.ctx.split(" ").filter(Boolean);
+  return ws.map((w, j) => { const f = it.h && !it.wf ? "" : it.wf ? (j === ws.length - 1 ? "am" : "sh") : "";
+    return j === it.wi ? (inner ? `<span class="ctxw">${inner}</span>` : `<span class="${f}">${w}</span>`) : `<span class="ctxo ${f}">${w}</span>`; }).join(" ");
+}
+// Before a round: where to start, the whole lesson or one of its parts (the part a stopped round reached is marked).
+const lxStopKey = w => `stop:lx${lxN}:${w}`;
+function lxKeep(l) { try { localStorage.setItem(lxStopKey(writing() ? (wKind === "split" ? "sw" : "w") : mode === "sep" ? "s" : "r"), l); } catch (e) {} }
+let lxMode = "lire", lxWKind = "trace";
+const lxBack = () => LX[lxN].parts.length > 1 || mode === "sep" || wKind === "split" ? "lxs" : "lx";
+function openStart(w) {
+  const L = LX[lxN], go = l => { try { localStorage.removeItem(lxStopKey(w)); } catch (e) {} lxMode = w === "s" ? "sep" : "lire"; lxWKind = w === "sw" ? "split" : "trace"; w === "w" || w === "sw" ? startText(null, l) : startLire(null, l); };
+  if (L.parts.length < 2) return go();
+  let stop = 0; try { stop = +localStorage.getItem(lxStopKey(w)) || 0; } catch (e) {}
+  $("lxsTitle").textContent = w === "s" ? "Séparer les mots · choisir" : w === "sw" ? "Séparer les mots · écrire" : w === "w" ? L.ecrire : L.lire;
+  const n = l => BOOK_ITEMS.filter(it => it.les === l).length;
+  const pv = t => `<span class="pv"><span class="mc bk" lang="ar"><span>${t}</span></span></span>`;   // the part's first card, in our colours
+  const pick = (l, k) => { const it = l ? BOOK_ITEMS.find(x => x.les === l) : null, cnt = l ? n(l) : L.parts.reduce((a, p) => a + n(p), 0);
+    const tag = `<span class="lvl part">${l ? `Partie ${k + 1}` : "Tout"}</span>`, name = l ? PART_NAME[l] : "Toute la leçon";
+    const sub = `<small>${l && l === stop ? "Reprendre ici · " : ""}${cnt} cartes</small>`;
+    return `<button class="pick${l && l === stop ? " on" : ""}" data-l="${l || 0}">${pv(l ? bookInk(it) : inkText(L.tile))}<span class="tx">${tag}<b>${name} <i>›</i></b>${sub}</span></button>`; };
+  $("lxsList").innerHTML = `<div class="picks row">${pick(0)}${L.parts.map((l, k) => pick(l, k)).join("")}</div>`;
+  $("lxsList").querySelectorAll("button").forEach(b => b.onclick = () => go(+b.dataset.l || undefined));
+  show("lxs");
+}
+$("goLire").onclick = () => openStart("r");
+$("goEcrire").onclick = () => openStart("w");
+$("goSep").onclick = () => openChoice("sep");
+// The lesson as the app writes it: every card of each part, in the book's order.
+function openLxPage(at) {
+  const L = LX[lxN];
+  $("sheet").innerHTML = L.parts.map((l, k) => `<div class="bookpage" data-l="${l}"><span class="pn">${L.parts.length > 1 ? `Partie ${k + 1} · ` : ""}${PART_NAME[l]}</span>
+    <div class="lxwords">${BOOK_ITEMS.filter(it => it.les === l).map(it => `<span class="bk${it.f === "s" ? " sh" : ""}" lang="ar">${bookHtml(it)}</span>`).join("")}</div></div>`).join("");
+  $("page").hidden = false; zoom(true);
+  const t = at && $("sheet").querySelector(`[data-l="${at}"]`); $("page").querySelector(".paper").scrollTop = t ? t.offsetTop - 14 : 0;
+}
 </script>
 </body>
 </html>
