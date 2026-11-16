@@ -105,7 +105,7 @@ button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
   <div class="bar"><button id="copy">Copier</button><button id="clear">Effacer cette page</button></div>
   <textarea id="out" readonly></textarea>
 </div>
-<script src="marquer-data.js"></script>
+<script>document.write('<script src="marquer-data.js?' + Date.now() + '"><\/script>')</script>   <!-- always the latest cards, never a copy kept by the browser -->
 <script>
 // One page of the book at a time: the teacher's video plays, the learner taps when each card starts.
 // A tap comes a little after the sound starts, so each mark is moved back by REACT seconds; each card ends GAP seconds before the
