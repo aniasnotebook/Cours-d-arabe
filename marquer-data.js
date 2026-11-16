@@ -1511,6 +1511,9 @@ const PAGES = [
 8,
 9
 ],
-"done": true
+"done": true,
+"html": {
+"6": "<span class=\"ar sh\">وَهُوَ ٱلۡغَفُورُ ٱلۡوَدُودُ ذُو ٱلۡعَرۡشِ </span><span class=\"am\">ٱلۡمَجِيدُ</span>"
+}
 }
 ];

@@ -15,6 +15,8 @@ html, body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.35 sy
 /* Only the cards flagged as not looking like the video: the Naskh of the video (بخل side by side, kasra of a lone ع or غ under its lower loop). */
 .ar.nk { font-family:Naskh, "Noto Naskh Arabic", serif; font-weight:500; }
 /* Scheherazade: small alif, yâ and wâw beside the vowel as in the book, and a tanwîn drawn like the book's. */
+@font-face { font-family:AmiriApp; src:url(fonts/Amiri-400-arabic.woff2) format("woff2"); }
+.am { font-family:AmiriApp, serif !important; }
 .ar.sh { font-family:"Scheherazade New", serif; font-weight:400; }   /* the detached letters of page 9 keep their madd marks */
 /* Everything needed while marking stays on screen: the video, the card to mark, the buttons. Only the list scrolls. */
 #top { position:sticky; top:0; z-index:2; background:var(--bg); padding:max(8px, env(safe-area-inset-top)) 10px 8px; box-shadow:0 6px 12px -8px rgba(0,0,0,.25); }
@@ -129,7 +131,8 @@ function openPage(i) {
 const fc = i => (P.sch || []).includes(i) ? " sh" : "";   // two fonts only: the Quran font, Scheherazade where it is closer to the book
 // A card can also mix the two, as chosen by the owner: "sq" = Scheherazade up to the last letter, then the Quran font (and "qs" the reverse).
 const MARKS = /[\u064b-\u0652\u0670\u06d6-\u06ed]/;
-const cellHtml = i => { const t = P.cells[i], m = (P.mix || {})[i]; if (!m) return t;
+const cellHtml = i => { const t = P.cells[i], m = (P.mix || {})[i]; if ((P.html || {})[i]) return P.html[i];   // a card written word by word in chosen fonts
+  if (!m) return t;
   const g = [...t]; let last = g.length - 1; while (last > 0 && MARKS.test(g[last])) last--;
   const [a, b] = m === "sq" ? ["sh", ""] : ["", "sh"];
   return `<span class="ar ${a}">${g.slice(0, last).join("")}\u200d</span><span class="ar ${b}">\u200d${g.slice(last).join("")}</span>`; };
