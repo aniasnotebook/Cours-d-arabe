@@ -117,7 +117,7 @@ const load = () => { try { const d = JSON.parse(localStorage.getItem(key()) || "
 const clipOf = i => { const s = marks[i]; if (s == null) return null; const e = Math.max(s + 0.3, ends[i] ?? (marks[i + 1] != null ? marks[i + 1] - GAP : s + 1.6)); return [+s.toFixed(2), +e.toFixed(2)]; };
 const fmt = x => x == null ? "" : x.toFixed(1);
 
-PAGES.forEach((p, i) => $("page").insertAdjacentHTML("beforeend", `<option value="${i}">Page ${p.page} · leçon ${p.lessons} · ${p.cells.length} cartes${p.upd && p.upd.length ? ` · ${p.upd.length} corrigée${p.upd.length > 1 ? "s" : ""}` : ""}</option>`));
+PAGES.forEach((p, i) => $("page").insertAdjacentHTML("beforeend", `<option value="${i}">${p.done ? "✅ " : ""}Page ${p.page} · leçon ${p.lessons} · ${p.cells.length} cartes${p.upd && p.upd.length ? ` · ${p.upd.length} corrigée${p.upd.length > 1 ? "s" : ""}` : ""}</option>`));
 $("page").onchange = () => openPage(+$("page").value);
 
 function openPage(i) {
@@ -161,7 +161,7 @@ function playClip(i) { const c = clipOf(i); if (!c || !yt || !yt.seekTo) return;
 function makePlayer() { yt = new YT.Player("yt", { videoId: P.video, playerVars: { playsinline: 1, rel: 0, origin: location.origin } }); }
 window.onYouTubeIframeAPIReady = () => { if (P) makePlayer(); };
 const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(s);
-openPage(0);
+{ const k = Math.max(0, PAGES.findIndex(p => !p.done)); $("page").value = k; openPage(k); }   // the first page still to mark
 </script>
 </body>
 </html>

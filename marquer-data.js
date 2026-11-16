@@ -29,7 +29,8 @@ const PAGES = [
 6,
 10,
 11
-]
+],
+"done": true
 },
 {
 "page": 10,
@@ -122,7 +123,8 @@ const PAGES = [
 "naskh": [
 7,
 13
-]
+],
+"done": true
 },
 {
 "page": 11,
@@ -209,7 +211,8 @@ const PAGES = [
 "upd": [
 64,
 65
-]
+],
+"done": true
 },
 {
 "page": 12,
@@ -283,7 +286,8 @@ const PAGES = [
 "sch": [
 24,
 26
-]
+],
+"done": true
 },
 {
 "page": 13,
@@ -382,7 +386,8 @@ const PAGES = [
 50
 ],
 "naskh": [],
-"sch": []
+"sch": [],
+"done": true
 },
 {
 "page": 14,
@@ -453,7 +458,8 @@ const PAGES = [
 "عُوْا",
 "عِيْ"
 ],
-"upd": []
+"upd": [],
+"done": false
 },
 {
 "page": 15,
@@ -531,7 +537,8 @@ const PAGES = [
 "كَيْ",
 "مَوْ"
 ],
-"upd": []
+"upd": [],
+"done": false
 },
 {
 "page": 16,
@@ -590,7 +597,8 @@ const PAGES = [
 ],
 "upd": [
 10
-]
+],
+"done": false
 },
 {
 "page": 17,
@@ -657,7 +665,8 @@ const PAGES = [
 ],
 "upd": [
 26
-]
+],
+"done": false
 },
 {
 "page": 18,
@@ -715,7 +724,8 @@ const PAGES = [
 "إِظْ",
 "أُظْ"
 ],
-"upd": []
+"upd": [],
+"done": false
 },
 {
 "page": 19,
@@ -779,7 +789,8 @@ const PAGES = [
 ],
 "sch": [
 50
-]
+],
+"done": false
 },
 {
 "page": 20,
@@ -841,7 +852,8 @@ const PAGES = [
 "sch": [
 14,
 21
-]
+],
+"done": false
 },
 {
 "page": 21,
@@ -905,7 +917,8 @@ const PAGES = [
 23,
 25,
 26
-]
+],
+"done": false
 },
 {
 "page": 22,
@@ -971,6 +984,7 @@ const PAGES = [
 "sch": [
 1,
 22
-]
+],
+"done": false
 }
 ];
