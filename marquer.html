@@ -84,6 +84,7 @@ button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
       <div class="card"><b class="ar" id="tuneCard"></b><small id="tuneN"></small></div>
       <div style="flex:1; display:flex; flex-direction:column; gap:6px">
         <button class="big" id="play">▶ Réécouter cette carte</button>
+        <button id="auto">▶▶ Écouter à la suite</button>
         <button id="done">Retour au marquage</button>
       </div>
     </div>
@@ -95,7 +96,7 @@ button.on { background:var(--ink); color:#fff; border-color:var(--ink); }
   </div>
   </div>
   </div>
-  <div class="tools" id="markTools"><button id="undo">↶ Annuler le dernier</button><button id="back">⏪ Revenir avant le dernier</button><button id="end">Fin de la dernière carte</button></div>
+  <div class="tools" id="markTools"><button id="undo">↶ Annuler le dernier</button><button id="back">⏪ Revenir avant le dernier</button><button id="end">Fin de la dernière carte</button><button id="review">▶▶ Revoir la page carte par carte</button></div>
 </div>
 <div id="list">
   <p class="hint">Touche une carte déjà marquée (en vert) pour la réécouter seule et la régler. Si elle n’est pas écrite comme dans la vidéo, « Carte mal écrite » la passe en orange.</p>
@@ -148,15 +149,26 @@ document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { docume
 
 // Tap a marked card: the top panel switches to it, to hear it alone and move its start or end, the video still in view.
 $("cells").onclick = e => { const c = e.target.closest(".c"); if (!c) return; const i = +c.dataset.i; if (!clipOf(i)) return;
+  if (autoOn) { clearTimeout(autoT); sel = i; return autoStep(); }   // during the review: jump there and go on
   sel = i; $("mark-mode").hidden = true; $("markTools").hidden = true; $("tune").hidden = false; draw(); playClip(i); };
-function closeTune() { sel = -1; $("tune").hidden = true; $("mark-mode").hidden = false; $("markTools").hidden = false; }
+function closeTune() { autoStop(); sel = -1; $("tune").hidden = true; $("mark-mode").hidden = false; $("markTools").hidden = false; }
 $("done").onclick = () => { closeTune(); draw(); };
-$("play").onclick = () => sel >= 0 && playClip(sel);
+$("play").onclick = () => { if (sel < 0) return; if (autoOn) { clearTimeout(autoT); autoStep(); } else playClip(sel); };
 $("flag").onclick = () => { if (sel < 0) return; flags = flags.includes(sel) ? flags.filter(x => x !== sel) : [...flags, sel]; save(); draw(); };
-document.querySelectorAll("[data-nudge]").forEach(b => b.onclick = () => { if (sel < 0) return; marks[sel] = Math.max(0, marks[sel] + +b.dataset.nudge); save(); draw(); playClip(sel); });
-document.querySelectorAll("[data-nudge-end]").forEach(b => b.onclick = () => { if (sel < 0) return; const c = clipOf(sel); ends[sel] = c[1] + +b.dataset.nudgeEnd; save(); draw(); playClip(sel); });
-function playClip(i) { const c = clipOf(i); if (!c || !yt || !yt.seekTo) return; yt.seekTo(c[0], true); yt.playVideo(); stopAt = c[1];
-  clearInterval(timer); timer = setInterval(() => { if (yt.getCurrentTime() >= stopAt) { yt.pauseVideo(); clearInterval(timer); } }, 40); }
+document.querySelectorAll("[data-nudge]").forEach(b => b.onclick = () => { if (sel < 0) return; marks[sel] = Math.max(0, marks[sel] + +b.dataset.nudge); save(); draw(); if (autoOn) { clearTimeout(autoT); autoStep(); } else playClip(sel); });
+document.querySelectorAll("[data-nudge-end]").forEach(b => b.onclick = () => { if (sel < 0) return; const c = clipOf(sel); ends[sel] = c[1] + +b.dataset.nudgeEnd; save(); draw(); if (autoOn) { clearTimeout(autoT); autoStep(); } else playClip(sel); });
+function playClip(i, then) { const c = clipOf(i); if (!c || !yt || !yt.seekTo) return; yt.seekTo(c[0], true); yt.playVideo(); stopAt = c[1];
+  clearInterval(timer); timer = setInterval(() => { if (yt.getCurrentTime() >= stopAt) { yt.pauseVideo(); clearInterval(timer); if (then) then(); } }, 40); }
+// Review: the cards play one after the other, each shown in the top panel with its buttons, a short pause between two.
+// Any button on the card (move its start or end, mark it wrong) works while it plays; « Pause » stops on the card.
+let autoOn = false, autoT = 0;
+function autoStep() { if (!autoOn) return; if (sel < 0 || !clipOf(sel)) return autoStop();
+  draw(); document.querySelector(`.c[data-i="${sel}"]`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  playClip(sel, () => { autoT = setTimeout(() => { const n = sel + 1; if (n < P.cells.length && clipOf(n)) { sel = n; autoStep(); } else autoStop(); }, 700); }); }
+function autoStart(i) { sel = i; $("mark-mode").hidden = true; $("markTools").hidden = true; $("tune").hidden = false; autoOn = true; $("auto").textContent = "⏸ Pause"; autoStep(); }
+function autoStop() { autoOn = false; clearTimeout(autoT); $("auto").textContent = "▶▶ Écouter à la suite"; }
+$("auto").onclick = () => autoOn ? (autoStop(), clearInterval(timer), yt && yt.pauseVideo()) : autoStart(Math.max(0, sel));
+$("review").onclick = () => clipOf(0) && autoStart(0);
 
 function makePlayer() { yt = new YT.Player("yt", { videoId: P.video, playerVars: { playsinline: 1, rel: 0, origin: location.origin } }); }
 window.onYouTubeIframeAPIReady = () => { if (P) makePlayer(); };
