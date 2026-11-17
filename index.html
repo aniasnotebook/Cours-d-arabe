@@ -565,7 +565,7 @@
     <button class="ico home" aria-label="Accueil"></button>
     <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
     <div class="label">Exercices</div>
-    <button class="go" id="goLire"><span class="tile ar bk" lang="ar" id="lxTileR"></span><span class="t"><span id="lxLire"></span><small>Avec ou sans le son</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goLire"><span class="tile ar bk" lang="ar" id="lxTileR"></span><span class="t"><span id="lxLire"></span><small>Avec ou sans l’audio</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goEcrire"><span class="tile ar bk" lang="ar" id="lxTileW"></span><span class="t"><span id="lxEcrire"></span><small>Tracer</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px"><span>أَ <span style="color:var(--p-ini)">حَ</span> <span style="color:var(--p-fin)">دٌ</span></span></span><span class="t">Séparer les mots<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="settings randset" id="lxRand1" hidden><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randL1"></label></div>
@@ -2001,7 +2001,7 @@ markCur();
 function openLx(n) {
   lxN = n; const L = LX[n];
   $("lxLire").textContent = L.lire; $("lxEcrire").textContent = L.ecrire;
-  $("lxTileR").innerHTML = $("lxTileW").innerHTML = `<span>${inkText(L.tile)}</span>`; $("lxTileR").style.fontSize = $("lxTileW").style.fontSize = n === 4 ? "28px" : "17px";
+  $("lxTileR").innerHTML = $("lxTileW").innerHTML = `<span>${inkText(L.tile)}</span>`; $("lxTileR").style.fontSize = $("lxTileW").style.fontSize = n === 4 ? "24px" : "17px";
   const pages = [...new Set(BOOK_ITEMS.filter(it => L.parts.includes(it.les)).map(it => it.pg))];
   $("lxBox").innerHTML = `<div class="label">Leçon</div>
     <div class="lrow"><span>${BOOK_ICON}Lire</span><button class="lbtn" id="lxRead">${L.read}</button></div>
