@@ -88,10 +88,10 @@
   :root { --bg:#f4f3ef; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
           --accent:#1f3f8f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
           --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#2fa84a; --pick:#1d1d1b; --on-pick:#fff;
-          --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#8a3fb8; }   /* a letter's colour says its place in the word: start (blue pen), middle (apple green), end (blood orange), alone */
+          --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#1d1d1b; }   /* a letter's colour says its place in the word: start (blue pen), middle (apple green), end (blood orange), alone */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
           --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark;
-          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; --p-solo:#c69be6; } }
+          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; --p-solo:#ece9e2; } }
   :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
           --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
   * { box-sizing:border-box; }
@@ -445,7 +445,7 @@
   #lxsList .picks.row { grid-template-columns:1fr; } #lxsList .picks.row .pick { flex-direction:row; align-items:center; gap:12px; }
   #lxsList .picks.row .pv { width:96px; height:84px; flex:none; } #lxsList .picks.row .pv .mc { height:64px; font-size:38px; } #lxsList .picks.row .tx { display:flex; flex-direction:column; gap:4px; flex:1; }
   .chips.sep .chip { font-size:30px; line-height:1.9; min-width:58px; justify-content:center; padding:0 10px; }
-  .sepbox { display:grid; place-items:center; direction:rtl; max-width:100%; --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#8a3fb8; }   /* the card stays light in dark mode: the light inks */ .sepbox > * { grid-area:1 / 1; white-space:nowrap; }
+  .sepbox { display:grid; place-items:center; direction:rtl; max-width:100%; --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#1d1d1b; }   /* the card stays light in dark mode: the light inks */ .sepbox > * { grid-area:1 / 1; white-space:nowrap; }
   .sepbox .pcs { display:flex; flex-wrap:wrap; direction:rtl; justify-content:center; gap:.45em; }
   .sepbox { width:100%; } .sepbox > * { min-width:0; max-width:100%; } .card .ans .big:has(.sepbox) { display:block; width:100%; white-space:normal; }   /* the cut word wraps inside the card */
   .ctxw .sepbox { width:auto; } .sepbox .ws { width:.6em; }
@@ -453,7 +453,7 @@
   @keyframes sepJ { 0%,12% { opacity:1; } 20%,58% { opacity:0; } 64%,74% { opacity:1; } 82%,100% { opacity:0; } }
   @keyframes sepP { 0%,12% { opacity:0; gap:0; } 20% { opacity:1; gap:0; } 34%,50% { opacity:1; gap:.45em; } 60% { opacity:1; gap:0; } 64%,74% { opacity:0; gap:0; } 82% { opacity:1; gap:0; } 100% { opacity:1; gap:.45em; } }
   @media (prefers-reduced-motion: reduce) { .sepbox.anim .jw, .sepbox.anim .pcs { animation:none; } .sepbox.anim .jw { opacity:0; } }
-  .card .bk, .wcard .bk, .paper .bk, .pv .mc.bk, .go .tile.bk { --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#8a3fb8; }
+  .card .bk, .wcard .bk, .paper .bk, .pv .mc.bk, .go .tile.bk { --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#1d1d1b; }
   .ink { display:inline-block; overflow:visible; } .ink path { stroke-width:0; stroke-linejoin:round; } .ar .ink path { stroke-width:var(--sw); }   /* the cards' bold, as the browser draws it */
   .ink .i { fill:var(--p-ini); stroke:var(--p-ini); } .ink .m { fill:var(--p-med); stroke:var(--p-med); } .ink .f { fill:var(--p-fin); stroke:var(--p-fin); } .ink .s { fill:var(--p-solo); stroke:var(--p-solo); }
   .inkw { white-space:inherit; }   /* white cards in both themes */
