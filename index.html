@@ -88,10 +88,10 @@
   :root { --bg:#f4f3ef; --card:#fff; --surface:#fff; --ink:#1d1d1b; --muted:#6b665c; --line:#e2dccf; --faint:#b9b2a3;
           --accent:#1f3f8f; --on-accent:#fff; --ok:#2f7d4f; --ok-bg:#e3f1e7; --miss:#c2410c; --miss-bg:#fdebe1;
           --scrim:rgba(0,0,0,.55); --glyph:#1d1d1b; --q-name:#2fa84a; --pick:#1d1d1b; --on-pick:#fff;
-          --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* a letter's colour says its place in the word: start (blue pen), middle (apple green), end (blood orange), alone */
+          --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#8a3fb8; }   /* a letter's colour says its place in the word: start (blue pen), middle (apple green), end (blood orange), alone */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
           --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark;
-          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; } }
+          --p-ini:#8fa8f0; --p-med:#5cc977; --p-fin:#f2875f; --p-iso:#ece9e2; --p-solo:#c69be6; } }
   :root[data-theme="dark"] { --bg:#16181a; --surface:#22262a; --ink:#ece9e2; --muted:#a19d94; --line:#343a3f; --faint:#6d6a64;
           --accent:#8fa8f0; --on-accent:#0d1530; --ok:#6cc08d; --ok-bg:#1d3326; --miss:#f39a6b; --miss-bg:#3b261b; --pick:#ece9e2; --on-pick:#16181a; color-scheme:dark; }
   * { box-sizing:border-box; }
@@ -445,7 +445,7 @@
   #lxsList .picks.row { grid-template-columns:1fr; } #lxsList .picks.row .pick { flex-direction:row; align-items:center; gap:12px; }
   #lxsList .picks.row .pv { width:96px; height:84px; flex:none; } #lxsList .picks.row .pv .mc { height:64px; font-size:38px; } #lxsList .picks.row .tx { display:flex; flex-direction:column; gap:4px; flex:1; }
   .chips.sep .chip { font-size:30px; line-height:1.9; min-width:58px; justify-content:center; padding:0 10px; }
-  .sepbox { display:grid; place-items:center; direction:rtl; max-width:100%; --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* the card stays light in dark mode: the light inks */ .sepbox > * { grid-area:1 / 1; white-space:nowrap; }
+  .sepbox { display:grid; place-items:center; direction:rtl; max-width:100%; --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#8a3fb8; }   /* the card stays light in dark mode: the light inks */ .sepbox > * { grid-area:1 / 1; white-space:nowrap; }
   .sepbox .pcs { display:flex; flex-wrap:wrap; direction:rtl; justify-content:center; gap:.45em; }
   .sepbox { width:100%; } .sepbox > * { min-width:0; max-width:100%; } .card .ans .big:has(.sepbox) { display:block; width:100%; white-space:normal; }   /* the cut word wraps inside the card */
   .ctxw .sepbox { width:auto; } .sepbox .ws { width:.6em; }
@@ -453,7 +453,10 @@
   @keyframes sepJ { 0%,12% { opacity:1; } 20%,58% { opacity:0; } 64%,74% { opacity:1; } 82%,100% { opacity:0; } }
   @keyframes sepP { 0%,12% { opacity:0; gap:0; } 20% { opacity:1; gap:0; } 34%,50% { opacity:1; gap:.45em; } 60% { opacity:1; gap:0; } 64%,74% { opacity:0; gap:0; } 82% { opacity:1; gap:0; } 100% { opacity:1; gap:.45em; } }
   @media (prefers-reduced-motion: reduce) { .sepbox.anim .jw, .sepbox.anim .pcs { animation:none; } .sepbox.anim .jw { opacity:0; } }
-  .card .bk, .wcard .bk, .paper .bk, .pv .mc.bk, .go .tile.bk { --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; }   /* white cards in both themes */
+  .card .bk, .wcard .bk, .paper .bk, .pv .mc.bk, .go .tile.bk { --p-ini:#1f3f8f; --p-med:#2fa84a; --p-fin:#e5603a; --p-iso:#1d1d1b; --p-solo:#8a3fb8; }
+  .ink { display:inline-block; overflow:visible; } .ink path { stroke-width:0; stroke-linejoin:round; } .ar .ink path { stroke-width:var(--sw); }   /* the cards' bold, as the browser draws it */
+  .ink .i { fill:var(--p-ini); stroke:var(--p-ini); } .ink .m { fill:var(--p-med); stroke:var(--p-med); } .ink .f { fill:var(--p-fin); stroke:var(--p-fin); } .ink .s { fill:var(--p-solo); stroke:var(--p-solo); }
+  .inkw { white-space:inherit; }   /* white cards in both themes */
   .ctxo { color:#c9c3b6; } .ctxw .sepbox { display:inline-grid; vertical-align:middle; }
   #home .sample.bk { padding-bottom:6px; }   /* room for the kasra under the letters */
   .wip { display:inline-block; vertical-align:middle; margin-left:6px; padding:2px 7px; border-radius:99px; background:#f6e3b4; color:#7a5300; font:700 11px/1.4 system-ui, sans-serif; }
@@ -685,6 +688,7 @@
 </div>
 
 <script src="lecons-data.js"></script>
+<script src="lecons-ink.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const ICONS = {
@@ -2040,20 +2044,17 @@ const SEP_MARK = /[\u064b-\u065f\u0670\u06d6-\u06ed\u08f0-\u08ff]/;
 // hamza's seat in يَوۡمَـِٕذٍ, ءَآلۡـٰٔنَ).
 const unitsOf = t => t.split(" ").filter(Boolean).map(w => { const u = []; for (const c of w) { if (c === "\u200d" || c === "\u200c") continue; if (SEP_MARK.test(c) && u.length) u[u.length - 1] += c; else u.push(c); } return u; });
 const piecesOf = t => unitsOf(t).flat().filter(u => u !== "ـ");
-// Our colours on a book card: each letter in the ink of its place in its word (beginning, middle, end; alone stays black),
-// as in Séparer les lettres. Zero-width joiners keep the letters joined across the colours. sh(i) gives a unit its font.
-function inkText(t, sh = () => "") {
-  let k = 0;
-  return t.split(" ").map(w => { const u = unitsOf(w)[0] || [], base = u.map(x => [...x][0]).join("");
-    return u.map((x, i) => { const p = placeAt(base, i), c = sh(k++), Z = "\u200d";
-      if (x === "ـ") return c ? `<span class="${c}">ـ</span>` : "ـ";
-      return p === "iso" && !c ? x : `<span${c ? ` class="${c}"` : ""}${p === "iso" ? "" : ` style="color:var(--p-${p})"`}>${p === "fin" || p === "med" ? Z : ""}${x}${p === "ini" || p === "med" ? Z : ""}</span>`; }).join(""); }).join(" ");
+// Our colours on a book card: each letter in the ink of its place in its word (beginning, middle, end, alone), drawn
+// glyph by glyph as the font draws it (lecons-ink.js, built from the app's fonts), so the colours follow the calligraphy.
+function inkWord([w, top, bot, gl]) {
+  return `<svg class="ink" viewBox="0 ${-top} ${w} ${top - bot}" style="width:${w / 1000}em; height:${(top - bot) / 1000}em; vertical-align:${bot / 1000}em" aria-hidden="true">${gl.map(([f, g, x, y, c]) =>
+    `<path class="${c}" style="--sw:${INK_STROKE[f]}" transform="matrix(${INK_SCALE[f]},0,0,${-INK_SCALE[f]},${x},${-y})" d="${INK_PATHS[f][g]}"/>`).join("")}</svg>`;
 }
-function bookInk(it) {
-  if (it.h) return it.h.replace(/>([^<]+)</g, (m, tx) => ">" + inkText(tx) + "<");
-  if (it.m === "sq") { const n = unitsOf(it.t).flat().length; return inkText(it.t, k => k < n - 1 ? "sh" : ""); }
-  return inkText(it.t);
-}
+const inkWords = (ws, t) => `<span class="inkw" role="img" aria-label="${t}">${ws.map(inkWord).join(" ")}</span>`;
+// A card whose text changed since lecons-ink.js was built stays in plain text (rebuild it with build-ink.py).
+const inkText = t => INK["t:" + t] ? inkWords(INK["t:" + t][1], t) : t;
+const bookInk = it => { const e = INK[it.key], full = it.ctx || it.t; if (!e || e[0] !== full) return bookHtml(it);
+  return it.ctx ? inkWords([e[1][it.wi]], it.t) : inkWords(e[1], it.t); };
 // The chips: the word's own pieces, the same letters with another vowel, and look-alike letters with the same signs.
 function sepChoices(it) {
   const want = [...new Set(piecesOf(it.t))], n = Math.min(12, Math.max(8, want.length + 4)), sk = /\u0652/.test(it.t) ? "\u0652" : "\u06e1";
@@ -2068,7 +2069,7 @@ function sepChoices(it) {
 // The word joined, then cut: each piece in the ink of its place (beginning, middle, end), as in Séparer les lettres.
 function sepBox(it, anim) {
   const pcs = unitsOf(it.t).map(u => { const base = u.map(x => [...x][0]).join("");
-    return u.map((p, i) => p === "ـ" ? "" : `<span style="color:${inkOf(base, i)}">${p}</span>`).join(""); }).join(`<span class="ws"></span>`);   // a wider gap between words
+    return u.map((p, i) => p === "ـ" ? "" : `<span style="color:var(--p-${placeAt(base, i) === "iso" ? "solo" : placeAt(base, i)})">${p}</span>`).join(""); }).join(`<span class="ws"></span>`);   // a wider gap between words
   return anim ? `<span class="sepbox anim"><span class="jw">${bookInk(it)}</span><span class="pcs">${pcs}</span></span>` : `<span class="sepbox"><span class="pcs">${pcs}</span></span>`;
 }
 // Cartes aléatoires: the whole lesson mixed across its parts, or one part mixed within itself (a sentence's words stay together).
