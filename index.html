@@ -546,11 +546,11 @@
     </button>
     <button class="lesson" data-open="4">
       <span class="ltab" lang="ar">الدُّرُوسُ ٤، ٥، ٧، ٨، ١٠، ١٢</span><span class="ltitle" lang="ar">الحُرُوفُ المُتَحَرِّكَةُ (الحرَكات ـَـ ـِـ ـُـ) · الحُرُوفُ المُنَوّنَة التنوين ـًـ ـٍـ ـٌـ · الألِفُ الصّغيرةُ وَاليَاءُ الصّغيرةُ وَالواوُ الصّغيرة . · حُرُوفُ المَدِّ وَاللّين · السُّكُونۡ ( ۡ ) · الشَّدَّة (<span class="sgn"> ّ</span>)</span>
-      <span class="row"><span><b>Chapitre 4 · Les sons<span class="wip">En vérification</span></b><span class="muted">Lettres + signes : voyelles, fathatân, kasratân, dammatân, prolongation, soukoun, chedda (leçons 4, 5, 7, 8, 10 et 12 du livre)</span></span><span class="chev" aria-hidden="true">›</span></span>
+      <span class="row"><span><b>Chapitre 4 · Les sons</b><span class="muted">Lettres + signes : voyelles, fathatân, kasratân, dammatân, prolongation, soukoun, chedda (leçons 4, 5, 7, 8, 10 et 12 du livre)</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
     <button class="lesson" data-open="5">
       <span class="ltab" lang="ar">الدُّرُوسُ ٦، ٩</span><span class="ltitle" lang="ar">تَدريبَاتٌ عَلى الحَرَكاتِ وَالتَّنۡوين · تدريبَاتٌ على التّنوينِ وأحرُفِ <span class="shk">المَدِّ</span> الثلاثة وحَرۡفَي اللين .</span>
-      <span class="row"><span><b>Chapitre 5 · Les mots<span class="wip">En vérification</span></b><span class="muted">Des mots du livre : voyelles, fathatân, kasratân, dammatân, prolongation (leçons 6 et 9 du livre)</span></span><span class="chev" aria-hidden="true">›</span></span>
+      <span class="row"><span><b>Chapitre 5 · Les mots</b><span class="muted">Des mots du livre : voyelles, fathatân, kasratân, dammatân, prolongation (leçons 6 et 9 du livre)</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
   </section>
 
@@ -572,7 +572,7 @@
     <div class="label">Exercices</div>
     <button class="go" id="goLire"><span class="tile ar bk" lang="ar" id="lxTileR"></span><span class="t"><span id="lxLire"></span><small>Avec ou sans l’audio</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goEcrire"><span class="tile ar bk" lang="ar" id="lxTileW"></span><span class="t"><span id="lxEcrire"></span><small>Tracer</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px" id="sepTile"></span><span class="t">Séparer les mots<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px" id="sepTile"></span><span class="t">Séparer les mots <span class="wip">En vérification</span><small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="settings randset" id="lxRand1" hidden><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randL1"></label></div>
     <div class="lessonbox" id="lxBox"></div>
   </section>
@@ -873,7 +873,15 @@ function loadSound(k) {
   window.onYouTubeIframeAPIReady = () => { ytP = new YT.Player("ytFrame", { videoId: ytVid, playerVars: { playsinline: 1, controls: 0, rel: 0, disablekb: 1, origin: location.origin },
     events: { onReady: () => { ytReady = true; ytWarm = 1; ytP.mute(); ytP.playVideo(); },
       onStateChange: e => { ytNote("s" + e.data); if (e.data === 1 && ytEndAt && ytFresh) armEnd(); if (ytWarm === 1 && e.data === 1) { ytP.pauseVideo(); ytWarm = 2; const k = currentSoundKey(); if (k) primeSound(k); setTimeout(autoSound, 100); } } } }); };
+  if (window.YT && YT.Player) return window.onYouTubeIframeAPIReady();   // the player is being rebuilt: the API is already here
   const sc = document.createElement("script"); sc.src = "https://www.youtube.com/iframe_api"; sc.onerror = () => ytP = null; document.head.appendChild(sc);
+}
+// A player that got stuck (a black video that never starts, or calls that fail) is thrown away and built again, so the
+// next tap works without reloading the page.
+function ytRebuild() {
+  try { if (ytP && ytP.destroy) ytP.destroy(); } catch (e) {}
+  ytP = null; ytReady = false; ytWarm = 0; ytVid = null; $("ytBox").innerHTML = '<div id="ytFrame"></div>';
+  loadSound(currentSoundKey());
 }
 const currentSoundKey = () => { const it = writing() ? wDeck[wPos] : deck[pos]; return !it ? null : it.key ? it.key : it.w !== undefined ? "c" + it.img : it.g && !it.p ? it.g : null; };
 // Lesson 2 boxes: just the speaker.
@@ -894,16 +902,19 @@ function playSound(g, btn) {
   else { ytP.seekTo(t[0], true); ytP.playVideo(); ytNote("play"); }
   // The player reports its time late: just after a jump it can still give the end of the last sound, which would close
   // this one at once. So the end only counts once the reported time is inside this clip; a long timer is the last resort.
-  ytEndAt = t[1]; ytFresh = false; ytAsked = performance.now(); clearTimeout(ytEnd); clearTimeout(ytLast); ytLast = setTimeout(stopSound, (t[1] - t[0] + 5) * 1000);
-  const asked = ytAsked; let kicks = 0;
-  clearInterval(ytTimer); ytTimer = setInterval(() => { const ct = ytP.getCurrentTime();
+  ytEndAt = t[1]; ytFresh = false; ytAsked = performance.now(); clearTimeout(ytEnd); clearTimeout(ytLast); ytLast = setTimeout(stopSound, (t[1] - t[0] + 8) * 1000);
+  const asked = ytAsked, tapped = !navigator.userActivation || navigator.userActivation.isActive; let kicks = 0;   // asked by a tap: a phone cannot be blocking it
+  const failed = msg => { stopSound(); ytRebuild(); const h = $("write").hidden ? $("hint") : $("wHint"); if (h) h.textContent = msg; };
+  clearInterval(ytTimer); ytTimer = setInterval(() => { let ct, st; try { ct = ytP.getCurrentTime(); st = ytP.getPlayerState(); } catch (e) { return failed("Le son n’a pas pu démarrer : touche le haut-parleur pour réessayer."); }
     // Still not playing a moment later (a play request can get lost while the player was busy): ask again, 3 times at most.
-    const waited = performance.now() - asked, st = ytP.getPlayerState();
+    const waited = performance.now() - asked;
     if (!ytFresh && kicks < 2 && waited > 1500 * (kicks + 1) && (st === 2 || st === 5)) { kicks++; ytP.playVideo(); ytNote("kick"); }
+    if (!ytFresh && waited > 6000 && (tapped || st === -1 || st === 3)) return failed("Le son n’a pas pu démarrer : touche le haut-parleur pour réessayer.");   // never loaded
     if (!ytFresh && waited > 6000) {   // the phone wants a tap first
-      const log = ytLog.join(" · "); stopSound(); const h = $("write").hidden ? $("hint") : $("wHint");
+      stopSound(); const h = $("write").hidden ? $("hint") : $("wHint");
       if (h) h.innerHTML = `Le téléphone a bloqué le son : il démarre dès que tu traces ou que tu touches le haut-parleur.`; }
-    if (!ytFresh) { if (ct < t[0] - 0.3 || ct >= t[1] || ytP.getPlayerState() !== 1) return; ytFresh = true; if (ytP.getPlayerState() === 1) armEnd(); }
+    if (!ytFresh) { if (ct < t[0] - 0.3 || ct >= t[1] || st !== 1) return; ytFresh = true; armEnd();
+      clearTimeout(ytLast); ytLast = setTimeout(stopSound, (t[1] - Math.max(ct, t[0]) + 0.6) * 1000); }   // playing: it stops on time even if the player reports its time late
     if (ct >= t[1]) stopSound(); }, 50);
 }
 let ytEnd = 0, ytEndAt = 0, ytFresh = false, ytLast = 0, ytAsked = 0, ytLog = [];
@@ -1037,7 +1048,7 @@ function render() {
 // ---------- Lesson 1: swipe cards
 function letterCard(l, id, cls) {
   if (l.key) return `<div class="card swipe ${cls}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
-    <span class="glyph ar bk${l.f === "s" ? " sh" : ""}${[...l.t].length > 22 ? " wrap" : ""}" lang="ar" style="--gs:${bookSize(l.t)}">${bookInk(l)}</span>
+    <span class="glyph ar bk${l.f === "s" ? " sh" : ""}${[...l.t].length > 22 ? " wrap" : ""}" lang="ar" style="--gs:${bookSize(l.t)}">${bookHtml(l)}</span>
     ${l.c ? `<span class="tops"><button class="spk" data-g="${l.key}" aria-label="Écouter">${ICONS.speaker}</button></span>` : ""}</div>`;
   const fams = famQuiz ? `<div class="fams" data-fams>
       <span class="q">Cette lettre est :</span>
@@ -1383,7 +1394,7 @@ const signWrite = (it, guide) => { const [b, f] = SIGN_WRITE[it.id], one = guide
   const mk = (n, h) => `<img src="book/sg/mk-${n}.png" alt="" style="height:${h}em">`, M = it.id === "soukoun" ? ["soukoun", "soukounM"] : ["nonlue", "nonlueM"];
   return guide ? b : `<span class="onetwo${b === "ا" ? " tall" : ""}">${b}<span class="marks">${mk(M[0], .16)}<i class="sl">/</i>${mk(M[1], it.id === "soukoun" ? .17 : .2)}</span></span>`; };   // sheet left, Mushaf right, as in Choisir   // soukoun, letter not read: « sheet / Mushaf », like the two ya
 const wModel = (it, guide) => mode === "wtext" && wKind === "split" ? `<span class="ar bk${it.f === "s" ? " sh" : ""}" lang="ar" style="font-size:calc(${bookSize(it.t)} * .7); line-height:2">${sepBox(it)}</span>`
-  : mode === "wtext" ? `<span class="ar bk${it.f === "s" ? " sh" : ""}" lang="ar" style="font-size:calc(${bookSize(it.t)} * 1.1); line-height:2.1; white-space:nowrap">${guide ? bookHtml(it) : bookInk(it)}</span>`
+  : mode === "wtext" ? `<span class="ar bk${it.f === "s" ? " sh" : ""}" lang="ar" style="font-size:calc(${bookSize(it.t)} * 1.1); line-height:2.1; white-space:nowrap">${bookHtml(it)}</span>`
   : wKind === "sign" ? `<span class="ar sfont" lang="ar" style="font-size:min(170px, 40vw, 21vh)">${signWrite(it, guide)}</span>`
   : wKind === "form" ? `<span class="ar" lang="ar" style="font-size:min(150px, 34vw, 19vh)">${formOf(it.g, it.p)}</span>`
   : wKind === "split" ? `<span class="ar" lang="ar" dir="rtl" style="display:flex; flex-wrap:nowrap; justify-content:center; align-items:baseline; gap:0.35em; white-space:nowrap; font-size:min(${lettersOf(it.w).length > 3 ? 46 : 60}px, 14vw, 9vh)">${inked(it.w, it.k, "")}</span>`
@@ -2015,7 +2026,7 @@ markCur();
 function openLx(n) {
   lxN = n; const L = LX[n];
   $("lxLire").textContent = L.lire; $("lxEcrire").textContent = L.ecrire;
-  $("lxTileR").innerHTML = $("lxTileW").innerHTML = `<span>${bookInk(BOOK_KEY[L.tile])}</span>`;   // the small pictures: a card of the chapter, as the cards draw it
+  $("lxTileR").innerHTML = $("lxTileW").innerHTML = `<span>${bookHtml(BOOK_KEY[L.tile])}</span>`;   // the small pictures: a card of the chapter, as the cards draw it
   $("sepTile").innerHTML = sepBox(BOOK_KEY["b12:21"]); $("lxTileR").style.fontSize = $("lxTileW").style.fontSize = n === 4 ? "24px" : "17px";
   const pages = [...new Set(BOOK_ITEMS.filter(it => L.parts.includes(it.les)).map(it => it.pg))];
   $("lxBox").innerHTML = `<div class="label">Leçon</div>
@@ -2048,7 +2059,7 @@ const SEP_MARK = /[\u064b-\u065f\u0670\u06d6-\u06ed\u08f0-\u08ff]/;
 // hamza's seat in يَوۡمَـِٕذٍ, ءَآلۡـٰٔنَ).
 const unitsOf = t => t.split(" ").filter(Boolean).map(w => { const u = []; for (const c of w) { if (c === "\u200d" || c === "\u200c") continue; if (SEP_MARK.test(c) && u.length) u[u.length - 1] += c; else u.push(c); } return u; });
 const piecesOf = t => unitsOf(t).flat().filter(u => u !== "ـ");
-// Our colours on a book card: each letter in the ink of its place in its word (beginning, middle, end, alone), drawn
+// Séparer les mots only (the other exercises show the cards in black): each letter in the ink of its place in its word (beginning, middle, end, alone), drawn
 // glyph by glyph as the font draws it (lecons-ink.js, built from the app's fonts), so the colours follow the calligraphy.
 function inkWord([w, top, bot, gl]) {
   return `<svg class="ink" viewBox="0 ${-top} ${w} ${top - bot}" style="width:${w / 1000}em; height:${(top - bot) / 1000}em; vertical-align:${bot / 1000}em" aria-hidden="true">${gl.map(([f, g, x, y, c]) =>
@@ -2117,7 +2128,7 @@ function openStart(w) {
   const pick = (l, k) => { const it = l ? BOOK_ITEMS.find(x => x.les === l) : null, cnt = l ? n(l) : L.parts.reduce((a, p) => a + n(p), 0);
     const tag = `<span class="lvl part">${l ? `Partie ${k + 1}` : "Tout"}</span>`, name = l ? PART_NAME[l] : "Tout le chapitre";
     const sub = `<small>${l && l === stop ? "Reprendre ici · " : ""}${cnt} cartes</small>`;
-    return `<button class="pick${l && l === stop ? " on" : ""}" data-l="${l || 0}">${pv(bookInk(l ? it : BOOK_KEY[L.tile]))}<span class="tx">${tag}<b>${name} <i>›</i></b>${sub}</span></button>`; };
+    return `<button class="pick${l && l === stop ? " on" : ""}" data-l="${l || 0}">${pv(bookHtml(l ? it : BOOK_KEY[L.tile]))}<span class="tx">${tag}<b>${name} <i>›</i></b>${sub}</span></button>`; };
   $("lxsList").innerHTML = `<div class="picks row">${pick(0)}${L.parts.map((l, k) => pick(l, k)).join("")}</div>`;
   $("lxsList").querySelectorAll("button").forEach(b => b.onclick = () => go(+b.dataset.l || undefined));
   show("lxs");
