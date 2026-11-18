@@ -1,4 +1,4 @@
-// The cards of pages 9 to 22, typed from the book (letters and signs only), checked against it, and the teacher's video for each page.
+// The cards of pages 9 to 23, typed from the book (letters and signs only), checked against it, and the teacher's video for each page.
 const PAGES = [
 {
 "page": 9,
@@ -1515,5 +1515,60 @@ const PAGES = [
 "html": {
 "6": "<span class=\"ar sh\">وَهُوَ ٱلۡغَفُورُ ٱلۡوَدُودُ ذُو ٱلۡعَرۡشِ </span><span class=\"am\">ٱلۡمَجِيدُ</span>"
 }
+},
+{
+"page": 23,
+"lessons": "12",
+"video": "rOQw7-GLh28",
+"cells": [
+"إِتَّ",
+"إِتِّ",
+"إِتُّ",
+"أُتَّ",
+"أُتِّ",
+"أُتُّ",
+"أَتًّا",
+"أَتٍّ",
+"أَتٌّ",
+"إِتًّا",
+"إِتٍّ",
+"إِتٌّ",
+"أُتًّا",
+"أُتٍّ",
+"أُتٌّ",
+"أَثَّ",
+"أَثِّ",
+"أَثُّ",
+"إِثَّ",
+"إِثِّ",
+"إِثُّ",
+"أُثَّ",
+"أُثِّ",
+"أُثُّ",
+"أَثًّا",
+"أَثٍّ",
+"أَثٌّ",
+"إِثًّا",
+"إِثٍّ",
+"إِثٌّ",
+"أُثًّا",
+"أُثٍّ",
+"أُثٌّ",
+"أَجَّ",
+"أَجِّ",
+"أَجُّ",
+"إِجَّ",
+"إِجِّ",
+"إِجُّ",
+"أُجَّ",
+"أُجِّ",
+"أُجُّ",
+"أَجًّا",
+"أَجٍّ",
+"أَجٌّ",
+"إِجًّا",
+"إِجٍّ",
+"إِجٌّ"
+]
 }
 ];

@@ -862,7 +862,7 @@ const CELL_CLIPS = [[10.9,12.8],[12.7,15.6],[15.5,18.2],[18.1,20.8],[20.7,23.4],
 let ytP = null, ytReady = false, ytTimer = null, ytWarm = 0, ytVid = null;   // ytWarm: 0 not yet, 1 warming, 2 warm
 // A sound's key is the letter (lesson 1) or "c" + the box number (lesson 2).
 const soundAt = k => {
-  if (k[0] === "b") { const it = BOOK_KEY[k]; return it && { v: BOOK_VIDEOS[it.pg], t: it.c }; }
+  if (k[0] === "b") { const it = BOOK_KEY[k]; return it && it.c ? { v: BOOK_VIDEOS[it.pg], t: it.c } : null; }   // a card not yet timed has no sound
   if (k[0] === "c") { const n = +k.slice(1), t = CELL_CLIPS[n]; return t && { v: SOUND_VIDEOS[bookPage({ img: n })], t }; }
   const i = GLYPHS.indexOf(k); return i < 0 ? null : { v: SOUND_VIDEOS[6], t: SOUND_CLIPS[i] };
 };
@@ -1041,7 +1041,7 @@ function render() {
 function letterCard(l, id, cls) {
   if (l.key) return `<div class="card swipe ${cls}" ${id ? `id="${id}"` : ""} role="button" tabindex="0" aria-label="Carte">
     <span class="glyph ar bk${l.f === "s" ? " sh" : ""}${[...l.t].length > 22 ? " wrap" : ""}" lang="ar" style="--gs:${bookSize(l.t)}">${bookInk(l)}</span>
-    <span class="tops"><button class="spk" data-g="${l.key}" aria-label="Écouter">${ICONS.speaker}</button></span></div>`;
+    ${l.c ? `<span class="tops"><button class="spk" data-g="${l.key}" aria-label="Écouter">${ICONS.speaker}</button></span>` : ""}</div>`;
   const fams = famQuiz ? `<div class="fams" data-fams>
       <span class="q">Cette lettre est :</span>
       <span class="chips">${["emph","madd","nolink"].map(f => `<button class="chip" data-f="${f}">${ICONS.plus}${FAM[f]}</button>`).join("")}</span>
@@ -1229,7 +1229,7 @@ function renderQuiz() {
   } else if (mode === "sep") {
     it.choices = it.choices || sepChoices(it);
     const sh = it.f === "s" ? " sh" : "";
-    $("stage").innerHTML = `<div class="card quiz enter" id="card"><span class="tops"><button class="spk" data-g="${it.key}" aria-label="Écouter">${ICONS.speaker}</button></span><span class="ans"><span class="big word ar bk${sh}" lang="ar" style="font-size:calc(${bookSize(it.ctx || it.t)} * .8); line-height:2">${sepShow(it)}</span></span>
+    $("stage").innerHTML = `<div class="card quiz enter" id="card">${it.c ? `<span class="tops"><button class="spk" data-g="${it.key}" aria-label="Écouter">${ICONS.speaker}</button></span>` : ""}<span class="ans"><span class="big word ar bk${sh}" lang="ar" style="font-size:calc(${bookSize(it.ctx || it.t)} * .8); line-height:2">${sepShow(it)}</span></span>
       <div class="grp"><span class="q">Tape chaque lettre ${it.ctx ? "du mot en noir " : ""}avec son signe</span><span class="chips letters sep">${it.choices.map(c => chip("multi", c, `<span class="bk${sh}">${c}</span>`, true)).join("")}</span>
       <span class="note">Une lettre présente deux fois se tape une seule fois.</span></div></div>`;
     pick.multi = new Set();
@@ -1497,7 +1497,7 @@ function wRender() {
   $("wGood").textContent = `${good} juste${good > 1 ? "s" : ""}`;
   $("wBad").textContent = `${wAnswers.filter(a => !a.ok && !a.skip).length} à revoir`;
   stopSound();
-  $("wStage").innerHTML = `<div class="wcard enter${wKind === "sign" && it.alt ? " two" : ""}" id="wCard">${wPrompt(it)}${mode === "wtext" ? `<span class="tops"><button class="spk" data-g="${it.key}" aria-label="Écouter">${ICONS.speaker}</button></span>` : mode === "wletters" && wKind === "trace" ? soundTops(it.g) : it.w !== undefined ? cellSpeaker(it) : ""}<span class="line"></span>
+  $("wStage").innerHTML = `<div class="wcard enter${wKind === "sign" && it.alt ? " two" : ""}" id="wCard">${wPrompt(it)}${mode === "wtext" ? (it.c ? `<span class="tops"><button class="spk" data-g="${it.key}" aria-label="Écouter">${ICONS.speaker}</button></span>` : "") : mode === "wletters" && wKind === "trace" ? soundTops(it.g) : it.w !== undefined ? cellSpeaker(it) : ""}<span class="line"></span>
     <button class="erase" id="wErase" aria-label="Effacer">${ICONS.erase}</button>
     ${wKind === "trace" || wKind === "sign" ? `<span class="model guide">${wModel(it, true)}</span>` : ""}
     <canvas id="wCanvas"></canvas></div>`;
