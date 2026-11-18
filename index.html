@@ -572,7 +572,7 @@
     <div class="label">Exercices</div>
     <button class="go" id="goLire"><span class="tile ar bk" lang="ar" id="lxTileR"></span><span class="t"><span id="lxLire"></span><small>Avec ou sans l’audio</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goEcrire"><span class="tile ar bk" lang="ar" id="lxTileW"></span><span class="t"><span id="lxEcrire"></span><small>Tracer</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px"><span>أَ <span style="color:var(--p-ini)">حَ</span> <span style="color:var(--p-fin)">دٌ</span></span></span><span class="t">Séparer les mots<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px" id="sepTile"></span><span class="t">Séparer les mots<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="settings randset" id="lxRand1" hidden><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randL1"></label></div>
     <div class="lessonbox" id="lxBox"></div>
   </section>
@@ -1997,9 +1997,9 @@ const SET_ASIDE = it => it.les === 11;
 for (let i = BOOK_ITEMS.length - 1; i >= 0; i--) if (SET_ASIDE(BOOK_ITEMS[i])) BOOK_ITEMS.splice(i, 1);
 const PART_NAME = { 3: "Les lettres détachées", 4: "Les voyelles", 5: "Fathatân, kasratân, dammatân", 7: "Les petits alif, wâw et yâ", 8: "Les lettres de prolongation", 10: "Le soukoun", 12: "La chedda",
   6: "Voyelles, fathatân, kasratân, dammatân", 9: "Lettres de prolongation", 11: "Soukoun" };
-const LX = { 3: { parts: [3], unit: "lettre", read: "Lettres", lire: "Lire les lettres détachées", ecrire: "Écrire les lettres détachées", tile: "الٓمٓ" },
-  4: { parts: [4, 5, 7, 8, 10, 12], unit: "syllabe", read: "Sons", lire: "Lire les sons", ecrire: "Écrire les sons", tile: "بَ" },
-  5: { parts: [6, 9], unit: "mot", read: "Mots", lire: "Lire les mots", ecrire: "Écrire les mots", tile: "أَحَدٌ" } };
+const LX = { 3: { parts: [3], unit: "lettre", read: "Lettres", lire: "Lire les lettres détachées", ecrire: "Écrire les lettres détachées", tile: "b9:0" },
+  4: { parts: [4, 5, 7, 8, 10, 12], unit: "syllabe", read: "Sons", lire: "Lire les sons", ecrire: "Écrire les sons", tile: "b11:6" },
+  5: { parts: [6, 9], unit: "mot", read: "Mots", lire: "Lire les mots", ecrire: "Écrire les mots", tile: "b12:21" } };
 let lxN = 3;
 const MARKS_RE = /[\u064b-\u0652\u0670\u06d6-\u06ed]/;
 // A card in the font closest to the book: Scheherazade, the Quran font, a mix of both, or word by word.
@@ -2014,7 +2014,8 @@ markCur();
 function openLx(n) {
   lxN = n; const L = LX[n];
   $("lxLire").textContent = L.lire; $("lxEcrire").textContent = L.ecrire;
-  $("lxTileR").innerHTML = $("lxTileW").innerHTML = `<span>${inkText(L.tile)}</span>`; $("lxTileR").style.fontSize = $("lxTileW").style.fontSize = n === 4 ? "24px" : "17px";
+  $("lxTileR").innerHTML = $("lxTileW").innerHTML = `<span>${bookInk(BOOK_KEY[L.tile])}</span>`;   // the small pictures: a card of the chapter, as the cards draw it
+  $("sepTile").innerHTML = sepBox(BOOK_KEY["b12:21"]); $("lxTileR").style.fontSize = $("lxTileW").style.fontSize = n === 4 ? "24px" : "17px";
   const pages = [...new Set(BOOK_ITEMS.filter(it => L.parts.includes(it.les)).map(it => it.pg))];
   $("lxBox").innerHTML = `<div class="label">Leçon</div>
     <div class="lrow"><span>${BOOK_ICON}Lire</span><button class="lbtn" id="lxRead">${L.read}</button></div>
@@ -2054,7 +2055,6 @@ function inkWord([w, top, bot, gl]) {
 }
 const inkWords = (ws, t) => `<span class="inkw" role="img" aria-label="${t}">${ws.map(inkWord).join(" ")}</span>`;
 // A card whose text changed since lecons-ink.js was built stays in plain text (rebuild it with build-ink.py).
-const inkText = t => INK["t:" + t] ? inkWords(INK["t:" + t][1], t) : t;
 const bookInk = it => { const e = INK[it.key], full = it.ctx || it.t; if (!e || e[0] !== full) return bookHtml(it);
   return it.ctx ? inkWords([e[1][it.wi]], it.t) : inkWords(e[1], it.t); };
 // The chips: the word's own pieces, the same letters with another vowel, and look-alike letters with the same signs.
@@ -2114,7 +2114,7 @@ function openStart(w) {
   const pick = (l, k) => { const it = l ? BOOK_ITEMS.find(x => x.les === l) : null, cnt = l ? n(l) : L.parts.reduce((a, p) => a + n(p), 0);
     const tag = `<span class="lvl part">${l ? `Partie ${k + 1}` : "Tout"}</span>`, name = l ? PART_NAME[l] : "Tout le chapitre";
     const sub = `<small>${l && l === stop ? "Reprendre ici · " : ""}${cnt} cartes</small>`;
-    return `<button class="pick${l && l === stop ? " on" : ""}" data-l="${l || 0}">${pv(l ? bookInk(it) : inkText(L.tile))}<span class="tx">${tag}<b>${name} <i>›</i></b>${sub}</span></button>`; };
+    return `<button class="pick${l && l === stop ? " on" : ""}" data-l="${l || 0}">${pv(bookInk(l ? it : BOOK_KEY[L.tile]))}<span class="tx">${tag}<b>${name} <i>›</i></b>${sub}</span></button>`; };
   $("lxsList").innerHTML = `<div class="picks row">${pick(0)}${L.parts.map((l, k) => pick(l, k)).join("")}</div>`;
   $("lxsList").querySelectorAll("button").forEach(b => b.onclick = () => go(+b.dataset.l || undefined));
   show("lxs");

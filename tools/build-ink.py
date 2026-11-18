@@ -98,8 +98,6 @@ for it in items:
     elif it.get('f')=='s': fo=lambda i,c: 1
     else: fo=lambda i,c: 0
     INK[key]=[t,text(t,fo)]   # with its text: a card changed since is drawn as plain text until rebuilt
-for t in ['الٓمٓ','بَ','أَحَدٌ','حمٓ','بَ بٍ بَٰ بَا أَبۡ أَبَّ','أَبَدًا','خَوۡفٍ','أَنۡتَ','أَ حَ دٌ']:
-    INK['t:'+t]=[t,text(t,lambda i,c: 0)]
 P=[{str(g):d for g,d in u.items()} for u in used]
 SW=[round(F[i]['upm']/32,1) for i in range(len(F))]; SW[2]=0   # Amiri has a real bold: no stroke added
 out='// Built by build-ink.py from the app\'s fonts (HarfBuzz shaping): each card of chapters 3 to 5 glyph by glyph.\n'
