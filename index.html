@@ -462,8 +462,8 @@
   .ltitle .shk { font-family:"Scheherazade New", serif; }   /* draws the kasra under the shadda, above the letter, as this banner does */
   .ltitle .sgn { display:inline-block; width:1.4em; text-align:center; }   /* a sign alone, centred in its brackets as in the book */
   .wip { display:inline-block; vertical-align:middle; margin-left:6px; padding:2px 7px; border-radius:99px; background:#f6e3b4; color:#7a5300; font:700 11px/1.4 system-ui, sans-serif; }
-  .lxwords { direction:rtl; display:flex; flex-wrap:wrap; border-top:1px solid #333; border-right:1px solid #333; }
-  .lxwords > span { flex:1 0 auto; min-width:16.6%; border-left:1px solid #333; border-bottom:1px solid #333; text-align:center; font-size:26px; line-height:2.6; padding:0 6px; }   /* the Quran font draws its signs high and low: a line this tall keeps them inside the cell */
+  .lxwords { direction:rtl; border-top:1px solid #333; border-right:1px solid #333; } .lxrow { display:flex; }
+  .lxrow > span { flex:1 1 0; min-width:0; border-left:1px solid #333; border-bottom:1px solid #333; text-align:center; font-size:26px; line-height:2.6; padding:0 6px; }   /* the Quran font draws its signs high and low: a line this tall keeps them inside the cell */
   .bookpage { margin-bottom:14px; } .bookpage .pn { display:block; font:600 12px/1.6 system-ui, sans-serif; color:#6b665c; text-align:center; }
   @media (prefers-reduced-motion: reduce) { .card.anim, .bar i { transition:none; } .enter { animation:none; } }
   /* The logo: three cards. In the top-right corner (Arabic reads from the right), hidden during a round. */
@@ -2130,6 +2130,24 @@ function openLxPage(at) {
   $("sheet").innerHTML = L.parts.map((l, k) => `<div class="bookpage" data-l="${l}"><span class="pn">${L.parts.length > 1 ? `Partie ${k + 1} · ` : ""}${PART_NAME[l]}</span>
     <div class="lxwords">${BOOK_ITEMS.filter(it => it.les === l).map(it => `<span class="bk${it.f === "s" ? " sh" : ""}" lang="ar">${bookHtml(it)}</span>`).join("")}</div></div>`).join("");
   $("page").hidden = false; zoom(true);
+  // A table as in the book: rows of 6 equal cells; a word too long for one cell takes 2, 3 or the whole row,
+  // and a row that ends short is filled with empty cells, so every line of the grid runs straight.
+  // A table as in the book: each part in rows of equal cells (6 at most, fewer when its words are long), a word too
+  // long for one cell takes several, and a short last row is filled with empty cells, so every grid line runs straight.
+  $("sheet").querySelectorAll(".lxwords").forEach(box => {
+    const cells = [...box.children], W = box.clientWidth;
+    const ws = cells.map(c => { c.style.cssText = "display:inline-block; white-space:nowrap"; const w = c.getBoundingClientRect().width + 40; /* room for strokes that reach past the letters */ c.style.cssText = ""; return w; });
+    const typical = [...ws].sort((a, b) => a - b)[Math.floor(ws.length * .8)];
+    const cols = Math.max(2, Math.min(6, Math.floor(W / typical))), unit = W / cols;
+    const spans = ws.map(w => Math.min(cols, Math.ceil(w / unit))), rows = []; let row = [], used = 0;
+    cells.forEach((c, i) => { if (used + spans[i] > cols) { rows.push([row, used]); row = []; used = 0; } row.push([c, spans[i]]); used += spans[i]; });
+    if (row.length) rows.push([row, used]);
+    box.innerHTML = "";
+    rows.forEach(([r, u]) => { const line = document.createElement("div"); line.className = "lxrow";
+      r.forEach(([c, n]) => { c.style.flexGrow = n; if (n === cols) c.style.whiteSpace = "normal"; line.append(c); });   // a verse longer than the row wraps inside its cell
+      for (let k = u; k < cols; k++) { const e = document.createElement("span"); e.style.flexGrow = 1; line.append(e); }
+      box.append(line); });
+  });
   const t = at && $("sheet").querySelector(`[data-l="${at}"]`); $("page").querySelector(".paper").scrollTop = t ? t.offsetTop - 14 : 0;
 }
 // The home samples of chapters 3 to 5 in our colours, as their cards.
