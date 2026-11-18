@@ -2137,8 +2137,10 @@ function openLxPage(at) {
   $("sheet").querySelectorAll(".lxwords").forEach(box => {
     const cells = [...box.children], W = box.clientWidth;
     const ws = cells.map(c => { c.style.cssText = "display:inline-block; white-space:nowrap"; const w = c.getBoundingClientRect().width + 40; /* room for strokes that reach past the letters */ c.style.cssText = ""; return w; });
-    const typical = [...ws].sort((a, b) => a - b)[Math.floor(ws.length * .8)];
-    const cols = Math.max(2, Math.min(6, Math.floor(W / typical))), unit = W / cols;
+    // Same columns all through a part, wide enough for its widest ordinary card; only a card far longer than the
+    // others (a verse) takes several cells, so short cards never get a cell of their own size.
+    const med = [...ws].sort((a, b) => a - b)[Math.floor(ws.length / 2)], widest = Math.max(...ws.filter(w => w <= med * 1.8));
+    const cols = Math.max(2, Math.min(6, Math.floor(W / widest))), unit = W / cols;
     const spans = ws.map(w => Math.min(cols, Math.ceil(w / unit))), rows = []; let row = [], used = 0;
     cells.forEach((c, i) => { if (used + spans[i] > cols) { rows.push([row, used]); row = []; used = 0; } row.push([c, spans[i]]); used += spans[i]; });
     if (row.length) rows.push([row, used]);
