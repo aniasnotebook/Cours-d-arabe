@@ -28,17 +28,21 @@ def path(fi,gid):
     return used[fi][gid]
 def bounds(fi,gid):
     f=F[fi]; bp=BoundsPen(f['gs']); f['gs'][f['order'][gid]].draw(bp); return bp.bounds
+def ismark(fi,gid):
+    g=F[fi]['tt']['GDEF'].table.GlyphClassDef.classDefs
+    return g.get(F[fi]['order'][gid])==3
 def word(w, fonts):
     """w: one word; fonts: font index per character."""
     units=[]; base=''
     for i,c in enumerate(w):
         if MARK.match(c) and units: units[-1].append(i)
         else: units.append([i]); base+=c
-    cls={}
+    cls={}; stroke={}
     for k,u in enumerate(units):
         c=place(base,k)
         if w[u[0]]=='ـ' and len(u)==1 and k>0: c=cls[units[k-1][0]]   # a bare joining stroke goes with the letter before
         for i in u: cls[i]=c
+        if w[u[0]]=='ـ' and k>0: stroke[u[0]]=cls[units[k-1][0]]   # the stroke itself is the letter before stretched; only its signs are this unit
     segs=[]   # (font, first char, last char) in logical order
     for i,fi in enumerate(fonts):
         if segs and segs[-1][0]==fi: segs[-1][2]=i
@@ -53,7 +57,7 @@ def word(w, fonts):
         hb.shape(f['hf'],buf,{}); s=1000/f['upm']; x=0; gl=[]
         for info,pos in zip(buf.glyph_infos,buf.glyph_positions):
             ci=info.cluster-(1 if pre else 0)+a
-            if a<=ci<=b and cps[info.cluster]!=0x200d: gl.append((info.codepoint,(x+pos.x_offset)*s,pos.y_offset*s,cls.get(ci,'s'),pos.x_advance*s))
+            if a<=ci<=b and cps[info.cluster]!=0x200d: gl.append((info.codepoint,(x+pos.x_offset)*s,pos.y_offset*s,stroke[ci] if ci in stroke and not ismark(fi,info.codepoint) else cls.get(ci,'s'),pos.x_advance*s))
             x+=pos.x_advance
         if not gl: continue
         minx=min(g[1] for g in gl); width=sum(g[4] for g in gl)
