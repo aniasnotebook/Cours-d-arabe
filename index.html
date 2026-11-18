@@ -902,7 +902,7 @@ function playSound(g, btn) {
     if (!ytFresh && kicks < 2 && waited > 1500 * (kicks + 1) && (st === 2 || st === 5)) { kicks++; ytP.playVideo(); ytNote("kick"); }
     if (!ytFresh && waited > 6000) {   // the phone wants a tap first
       const log = ytLog.join(" · "); stopSound(); const h = $("write").hidden ? $("hint") : $("wHint");
-      if (h) h.innerHTML = `Le téléphone a bloqué le son : il démarre dès que tu traces ou que tu touches le haut-parleur.<br><small style="opacity:.6">${log}</small>`; }
+      if (h) h.innerHTML = `Le téléphone a bloqué le son : il démarre dès que tu traces ou que tu touches le haut-parleur.`; }
     if (!ytFresh) { if (ct < t[0] - 0.3 || ct >= t[1] || ytP.getPlayerState() !== 1) return; ytFresh = true; if (ytP.getPlayerState() === 1) armEnd(); }
     if (ct >= t[1]) stopSound(); }, 50);
 }
@@ -2136,7 +2136,8 @@ function openLxPage(at) {
   // long for one cell takes several, and a short last row is filled with empty cells, so every grid line runs straight.
   $("sheet").querySelectorAll(".lxwords").forEach(box => {
     const cells = [...box.children], W = box.clientWidth;
-    const ws = cells.map(c => { c.style.cssText = "display:inline-block; white-space:nowrap"; const w = c.getBoundingClientRect().width + 40; /* room for strokes that reach past the letters */ c.style.cssText = ""; return w; });
+    cells.forEach(c => c.style.cssText = "display:inline-block; white-space:nowrap");   // set all, then measure all: one layout, not one per card
+    const ws = cells.map(c => c.getBoundingClientRect().width + 40); /* room for strokes that reach past the letters */ cells.forEach(c => c.style.cssText = "");
     // Same columns all through a part, wide enough for its widest ordinary card; only a card far longer than the
     // others (a verse) takes several cells, so short cards never get a cell of their own size.
     const med = [...ws].sort((a, b) => a - b)[Math.floor(ws.length / 2)], widest = Math.max(...ws.filter(w => w <= med * 1.8));
