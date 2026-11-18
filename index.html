@@ -515,7 +515,7 @@
   <div class="corner" id="corner" aria-hidden="true"></div>
 
   <!-- Code to enter -->
-  <section class="screen" id="gate" style="justify-content:center">
+  <section class="screen" id="gate" style="justify-content:center" hidden>
     <form id="gateForm" style="display:flex; flex-direction:column; gap:12px">
       <label for="code" style="font-weight:700; text-align:center">Code de la classe</label>
       <div style="position:relative">
@@ -1773,7 +1773,7 @@ function savePlace() {
   if (screen) try {
     // Chapters 3 to 5: a card is kept by its key (and its word, for a sentence cut word by word).
     const lx = mode === "lire" || mode === "sep" || mode === "wtext", P = pool(mode), id = x => lx ? x.key + (x.ctx ? "|" + x.wi : "") : P.indexOf(x), ix = a => a.map(id);
-    sessionStorage.setItem("place", JSON.stringify({ screen, mode, famQuiz, wKind, lx, lxN, lxMode, lxWKind, lxMixed, back: $("pkA").dataset.w === "choose" ? choiceOf : $("cwBack").dataset.back,
+    sessionStorage.setItem("place", JSON.stringify({ screen, mode, famQuiz, wKind, lx, lxN, lxMode, lxWKind, lxMixed, lxsW, back: $("pkA").dataset.w === "choose" ? choiceOf : $("cwBack").dataset.back,
       round: writing() ? { src: ix(wSource), deck: ix(wDeck), ans: wAnswers.map(a => [id(a.item), a.ok, a.skip]), pos: wPos }
         : { src: ix(source), deck: ix(deck), ans: answers.map(a => [id(a.item), a.ok, a.famOk, a.skip]) } }));
   } catch {}
@@ -1790,7 +1790,7 @@ function backToPlace() {
   if (!p) return false;
   mode = p.mode; famQuiz = p.famQuiz; wKind = p.wKind;
   if (p.lxN) { lxN = p.lxN; lxMode = p.lxMode || "lire"; lxWKind = p.lxWKind || "trace"; lxMixed = !!p.lxMixed; }
-  if (p.screen === "lx" || p.screen === "lxs" || (p.screen === "cw" && p.back === "sep")) { openLx(lxN); if (p.screen === "cw") { openChoice("sep"); } return true; }
+  if (p.screen === "lx" || p.screen === "lxs" || (p.screen === "cw" && p.back === "sep")) { openLx(lxN); if (p.screen === "cw") openChoice("sep"); if (p.screen === "lxs") openStart(p.lxsW || "r"); return true; }
   if (p.screen === "cw") { p.back === "words" || p.back === "forms" || p.back === "signs" ? openChoice(p.back) : openWriting(p.back === "l2" ? 2 : 1); return true; }
   if (!["play", "write", "stats"].includes(p.screen)) { show(p.screen); return true; }
   const P = pool(mode), r = p.round, at = p.lx ? i => { const [k, w] = String(i).split("|"), it = BOOK_KEY[k]; return w === undefined ? it : sepDeck([it])[+w]; } : i => P[i];
@@ -1820,8 +1820,9 @@ if ("serviceWorker" in navigator) {
     document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); })
   ).catch(() => {});
   let fresh = !navigator.serviceWorker.controller;   // the very first visit installs it: nothing to reload
-  const inRound = () => !$("play").hidden || !$("write").hidden || !$("gate").hidden || !$("page").hidden;
-  const reloadWhenFree = () => { if (!inRound()) reloadHere(); else setTimeout(reloadWhenFree, 2000); };
+  // A new version loads only on the home screen: never in the middle of choosing or playing an exercise.
+  const free = () => !$("home").hidden && $("ask").hidden && $("page").hidden;
+  const reloadWhenFree = () => { if (free()) reloadHere(); else setTimeout(reloadWhenFree, 2000); };
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!fresh) { fresh = true; reloadWhenFree(); } });
 }
 
@@ -2103,7 +2104,9 @@ const lxStopKey = w => `stop:lx${lxN}:${w}`;
 function lxKeep(l) { try { localStorage.setItem(lxStopKey(writing() ? (wKind === "split" ? "sw" : "w") : mode === "sep" ? "s" : "r"), l); } catch (e) {} }
 let lxMode = "lire", lxWKind = "trace";
 const lxBack = () => LX[lxN].parts.length > 1 || mode === "sep" || wKind === "split" ? "lxs" : "lx";
+let lxsW = "r";
 function openStart(w) {
+  lxsW = w;
   const L = LX[lxN], go = l => { try { localStorage.removeItem(lxStopKey(w)); } catch (e) {} lxMode = w === "s" ? "sep" : "lire"; lxWKind = w === "sw" ? "split" : "trace"; w === "w" || w === "sw" ? startText(null, l) : startLire(null, l); };
   if (L.parts.length < 2) return go();
   let stop = 0; try { stop = +localStorage.getItem(lxStopKey(w)) || 0; } catch (e) {}
