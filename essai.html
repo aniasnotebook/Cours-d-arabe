@@ -552,6 +552,9 @@
       <span class="ltab" lang="ar">الدُّرُوسُ ٦، ٩</span><span class="ltitle" lang="ar">تَدريبَاتٌ عَلى الحَرَكاتِ وَالتَّنۡوين · تدريبَاتٌ على التّنوينِ وأحرُفِ <span class="shk">المَدِّ</span> الثلاثة وحَرۡفَي اللين .</span>
       <span class="row"><span><b>Chapitre 5 · Les mots</b><span class="muted">Des mots du livre : voyelles, fathatân, kasratân, dammatân, prolongation (leçons 6 et 9 du livre)</span></span><span class="chev" aria-hidden="true">›</span></span>
     </button>
+    <button class="lesson" data-open="6">
+      <span class="row"><span><b>Chapitre 6 · Règles de lecture<span class="wip">Essai</span></b><span class="muted">Les lettres lunaires et solaires : le ل de ال se lit ou pas</span></span><span class="chev" aria-hidden="true">›</span></span>
+    </button>
   </section>
 
   <!-- Lesson 1 -->
@@ -572,7 +575,6 @@
     <div class="label">Exercices</div>
     <button class="go" id="goLire"><span class="tile ar bk" lang="ar" id="lxTileR"></span><span class="t"><span id="lxLire"></span><small>Avec ou sans l’audio</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goEcrire"><span class="tile ar bk" lang="ar" id="lxTileW"></span><span class="t"><span id="lxEcrire"></span><small>Tracer</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goSun" hidden><span class="tile ar" lang="ar" style="font-size:22px">☾☀</span><span class="t">Lettres lunaires et solaires <span class="wip">Essai</span><small>Le ل se lit ou pas</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goSep" hidden><span class="tile ar bk" lang="ar" style="font-size:15px" id="sepTile"></span><span class="t">Séparer les mots <span class="wip">En vérification</span><small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <div class="settings randset" id="lxRand1" hidden><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randL1"></label></div>
     <div class="lessonbox" id="lxBox"></div>
@@ -585,6 +587,15 @@
     <p class="muted center">Par où veux-tu commencer&nbsp;?</p>
     <div id="lxsList"></div>
     <div class="settings randset" id="lxsRand"><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="randLx"></label></div>
+  </section>
+
+  <!-- Chapter 6: reading rules (essai) -->
+  <section class="screen mid" id="l6" hidden>
+    <button class="ico home" aria-label="Accueil"></button>
+    <div class="bism ar" lang="ar">بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ</div>
+    <div class="label">Exercices</div>
+    <button class="go" id="goSun"><span class="tile ar" lang="ar" style="font-size:22px">☾☀</span><span class="t">Lettres lunaires et solaires<small>Le ل se lit ou pas</small></span><span aria-hidden="true">›</span></button>
+    <div class="settings randset" id="rand6box"><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="rand6" checked></label></div>
   </section>
 
   <!-- Lesson 2 -->
@@ -826,7 +837,7 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = new Set(), pick = {}, checked = false;
 
-function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","lx","lxs","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
+function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","l6","lx","lxs","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
 
 // ---------- The logo: an orange card, a green card and the ba card in blue pen, drawn so each card can move.
 const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
@@ -1012,7 +1023,7 @@ function start(cards) {
   if (mode === "lire" || mode === "sep") return startLire(cards);
   lAskSound = mode === "letters" && !famQuiz;
   source = cards || (mode === "sun" ? LETTERS.filter(l => SUN[l.g] || MOON[l.g]) : mode === "letters" || mode === "fams" ? LETTERS : mode === "forms" ? FORMS : mode === "signs" ? SIGNS : WORD_CARDS);
-  const random = mode === "sun" ? lxRand[3] : ["letters", "fams", "signs"].includes(mode) ? $("rand1").checked : $("rand2").checked;
+  const random = mode === "sun" ? $("rand6").checked : ["letters", "fams", "signs"].includes(mode) ? $("rand1").checked : $("rand2").checked;
   fromPage(source, from => {
     deck = deckOf(source, random, from);
     deck.forEach(i => delete i.choices);
@@ -1790,7 +1801,7 @@ $("ptr").innerHTML = MARK;
 const pool = m => m === "letters" || m === "fams" || m === "wletters" || m === "sun" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : m === "signs" || m === "wsigns" ? SIGNS : WORD_CARDS;
 // Where the user is, kept for a reload: the app's own, or the browser's (pull to refresh).
 function savePlace() {
-  const screen = ["home","l1","l2","lx","lxs","c1","cw","play","write","stats"].find(id => !$(id).hidden);
+  const screen = ["home","l1","l2","l6","lx","lxs","c1","cw","play","write","stats"].find(id => !$(id).hidden);
   if (screen) try {
     // Chapters 3 to 5: a card is kept by its key (and its word, for a sentence cut word by word).
     const lx = mode === "lire" || mode === "sep" || mode === "wtext", P = pool(mode), id = x => lx ? x.key + (x.ctx ? "|" + x.wi : "") : P.indexOf(x), ix = a => a.map(id);
@@ -1936,7 +1947,7 @@ bindRand(document.querySelector('.randset[data-lesson="1"]'), 1);
 // bars, or three red bars for the hardest of all (Lier les lettres · Me tester).
 function setLevel(b, n) { b.querySelector(".lvl")?.remove(); b.querySelector(".pv").insertAdjacentHTML("afterend", `<span class="lvl l${n}"><span>${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</span>Niveau ${n}</span>`); }
 document.querySelectorAll(".picks").forEach(row => row.querySelectorAll(".pick").forEach((b, i) => setLevel(b, i + 1)));
-document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { const n = +b.dataset.open; try { localStorage.setItem("lastLesson", n); } catch (e) {} markCur(); n > 2 ? openLx(n) : show("l" + n); });
+document.querySelectorAll("[data-open]").forEach(b => b.onclick = () => { const n = +b.dataset.open; try { localStorage.setItem("lastLesson", n); } catch (e) {} markCur(); n === 6 ? show("l6") : n > 2 ? openLx(n) : show("l" + n); });
 $("go1").onclick = () => show("c1");
 document.addEventListener("click", e => {
   const b = e.target.closest(".pron, .spk"); if (!b) return;
@@ -1979,7 +1990,7 @@ $("goForms").onclick = () => openChoice("forms");
 $("goWords").onclick = () => openChoice("words");
 $("restart").onclick = () => askThen("restart", () => start(source));
 $("pBack").innerHTML = $("wTopBack").innerHTML = ICONS.back;
-$("pBack").onclick = () => askThen("quit", () => show(mode === "sun" ? "lx" : mode === "lire" || mode === "sep" ? lxBack() : mode === "letters" || mode === "fams" ? "c1" : mode === "words" || mode === "forms" || mode === "signs" ? "cw" : "l2"));
+$("pBack").onclick = () => askThen("quit", () => show(mode === "sun" ? "l6" : mode === "lire" || mode === "sep" ? lxBack() : mode === "letters" || mode === "fams" ? "c1" : mode === "words" || mode === "forms" || mode === "signs" ? "cw" : "l2"));
 $("wTopBack").onclick = () => askThen("quit", () => show(mode === "wtext" ? lxBack() : "cw"));
 addEventListener("resize", () => { if (!$("write").hidden) wCanvas(); });
 $("stop").onclick = () => askThen("stop", showStats);
@@ -2052,7 +2063,7 @@ function openLx(n) {
     <div class="lrow"><span>${BOOK_ICON}Lire</span><button class="lbtn" id="lxRead">${L.read}</button></div>
     <div class="lrow"><span>${EAR_ICON}Écouter</span>${pages.map((pg, i) => `<a class="lbtn" href="https://www.youtube.com/watch?v=${BOOK_VIDEOS[pg]}" target="_blank" rel="noopener">${pages.length > 1 ? `Partie ${i + 1}` : "La leçon"}</a>`).join("")}</div>`;
   $("lxRead").onclick = () => openLxPage();
-  $("goSep").hidden = n !== 5; $("goSun").hidden = n !== 3;
+  $("goSep").hidden = n !== 5;
   $("lxRand1").hidden = L.parts.length > 1; $("randL1").checked = lxRand[n];
   show("lx");
 }
