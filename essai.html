@@ -466,7 +466,15 @@
   .cahsheet { flex:1; min-height:0; display:flex; flex-direction:column; background:#fff; color:#1d1d1b; border-radius:6px; padding:10px 10px 12px; box-shadow:0 1px 2px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08); }
   .cahhead { display:flex; justify-content:space-between; align-items:baseline; font:500 11px system-ui, sans-serif; color:#8f887a; padding:0 2px 6px; border-bottom:1px solid #d9d4ca; }
   .cahhead b { font:700 20px/1 Amiri, serif; color:#1d1d1b; }
-  .cahpage { position:relative; flex:1; min-height:0; touch-action:none; }
+  .cahbook { flex:1; min-height:0; display:flex; position:relative; perspective:1600px; }
+  .cahbook::before { content:""; position:absolute; inset:6px -4px -4px 6px; background:#fbfaf7; border-radius:6px; box-shadow:0 1px 2px rgba(0,0,0,.08); }   /* the pages under it */
+  .cahsheet { position:relative; flex:1; }
+  .cahzoom { display:flex; gap:6px; } .cahzoom button { width:30px; height:26px; border-radius:8px; border:1px solid #d9d4ca; background:#fff; color:#3d3a35; font:600 17px/1 system-ui, sans-serif; cursor:pointer; }
+  .cahview { position:relative; flex:1; min-height:0; overflow:hidden; }
+  .cahpage { position:absolute; inset:0; touch-action:none; transform-origin:0 0; }
+  .cahturn { position:absolute; inset:0; z-index:3; pointer-events:none; transform-origin:right center; backface-visibility:hidden; }
+  .cahturn.back { transform-origin:left center; }
+  @media (prefers-reduced-motion: reduce) { .cahturn { display:none; } }
   .cahpage canvas { position:absolute; inset:0; width:100%; height:100%; }
   .wip { display:inline-block; vertical-align:middle; margin-left:6px; padding:2px 7px; border-radius:99px; background:#f6e3b4; color:#7a5300; font:700 11px/1.4 system-ui, sans-serif; }
   .lxwords { direction:rtl; border-top:1px solid #333; border-right:1px solid #333; } .lxrow { display:flex; }
@@ -612,7 +620,7 @@
       <h1 id="cahCount"></h1>
       <div class="right"><button class="ico" id="cahErase" aria-label="Effacer"></button></div>
     </div>
-    <div class="cahsheet"><div class="cahhead"><span>Mon cahier d’écriture</span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div>
+    <div class="cahbook" id="cahBook"><div class="cahsheet" id="cahSheet"><div class="cahhead"><span>Mon cahier d’écriture</span><span class="cahzoom"><button type="button" id="cahOut" aria-label="Dézoomer">−</button><button type="button" id="cahIn" aria-label="Zoomer">+</button></span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahview"><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div></div></div>
     <p class="hint" id="cahHint">Écris les formes sur la 1re ligne, repasse les lettres grises, puis écris la lettre seule</p>
     <div class="actions"><button class="act u" id="cahPrev"><span></span>Précédente</button><button class="act go2" id="cahNext"><span></span>Suivante</button></div>
   </section>
@@ -2092,23 +2100,50 @@ function cahDraw() {
 function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height);
   x.strokeStyle = "#1d1d1b"; x.lineWidth = 4; x.lineCap = x.lineJoin = "round";
   cahStrokes.forEach(s => { x.beginPath(); s.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.stroke(); }); }
-function cahShow(i) {
-  cahI = Math.max(0, Math.min(CAH.length - 1, i)); cahStrokes = [];
+// Turning the page: a picture of the page that was there lifts off its spine and turns away, the new page below it
+// (Arabic notebooks open on the right: forward turns the page over to the right).
+function cahTurn(fwd) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const sheet = $("cahSheet"), t = sheet.cloneNode(true); t.removeAttribute("id"); t.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
+  const [b0, i0] = sheet.querySelectorAll("canvas"), [b1, i1] = t.querySelectorAll("canvas");
+  [[b0, b1], [i0, i1]].forEach(([a, b]) => { b.width = a.width; b.height = a.height; b.getContext("2d").drawImage(a, 0, 0); });
+  t.className = "cahsheet cahturn" + (fwd ? "" : " back"); $("cahBook").appendChild(t);
+  t.animate([{ transform: "rotateY(0deg)", filter: "brightness(1)" }, { transform: `rotateY(${fwd ? 100 : -100}deg)`, filter: "brightness(.82)" }], { duration: 520, easing: "cubic-bezier(.4,.1,.6,1)", fill: "forwards" }).onfinish = () => t.remove();
+}
+// Zoom: pinch with two fingers (or the + and − buttons), drag with two fingers to move; one finger always writes.
+let cahZ = 1, cahX = 0, cahY = 0;
+function cahZoomTo(z, cx, cy) {
+  const v = $("cahPage").parentElement, W = v.clientWidth, H = v.clientHeight;
+  z = Math.max(1, Math.min(3, z)); if (cx === undefined) { cx = W / 2; cy = H / 2; }
+  cahX = cx - (cx - cahX) * z / cahZ; cahY = cy - (cy - cahY) * z / cahZ; cahZ = z;
+  cahX = Math.min(0, Math.max(W - W * z, cahX)); cahY = Math.min(0, Math.max(H - H * z, cahY));
+  $("cahPage").style.transform = `translate(${cahX}px, ${cahY}px) scale(${cahZ})`;
+}
+function cahShow(i, turn) {
+  const to = Math.max(0, Math.min(CAH.length - 1, i)); if (turn !== undefined && to !== cahI) cahTurn(turn);
+  cahI = to; cahStrokes = []; cahZ = 1; cahX = cahY = 0; $("cahPage").style.transform = "";
   $("cahCount").textContent = `${cahI + 1} / ${CAH.length}`;
   $("cahName").textContent = CAH[cahI];
   $("cahPrev").disabled = cahI === 0; $("cahNext").querySelector("span").innerHTML = ICONS.next;
   $("cahNext").lastChild.textContent = cahI === CAH.length - 1 ? "Terminer" : "Suivante";
   requestAnimationFrame(cahDraw);
 }
-{ const c = $("cahInk"); let cur = null;
-  const at = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
-  c.onpointerdown = e => { c.setPointerCapture(e.pointerId); cur = [at(e)]; cahStrokes.push(cur); cahPaint(); };
-  c.onpointermove = e => { if (!cur) return; cur.push(at(e)); cahPaint(); };
-  c.onpointerup = c.onpointercancel = () => { cur = null; }; }
+{ const c = $("cahInk"), pts = new Map(); let cur = null, pinch = null;
+  const at = e => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * c.clientWidth / r.width, (e.clientY - r.top) * c.clientHeight / r.height]; };   // in page units, whatever the zoom
+  const two = () => { const [a, b] = [...pts.values()], v = $("cahPage").parentElement.getBoundingClientRect();
+    return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2 - v.left, y: (a.y + b.y) / 2 - v.top }; };
+  c.onpointerdown = e => { c.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size === 2) { if (cur) { cahStrokes.pop(); cur = null; cahPaint(); } pinch = { ...two(), z: cahZ, tx: cahX, ty: cahY }; return; }   // a second finger: zoom, not a stroke
+    if (pts.size === 1) { cur = [at(e)]; cahStrokes.push(cur); cahPaint(); } };
+  c.onpointermove = e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && pts.size === 2) { const n = two(); cahZ = pinch.z; cahX = pinch.tx + (n.x - pinch.x); cahY = pinch.ty + (n.y - pinch.y); cahZoomTo(pinch.z * n.d / pinch.d, n.x, n.y); return; }
+    if (cur) { cur.push(at(e)); cahPaint(); } };
+  c.onpointerup = c.onpointercancel = e => { pts.delete(e.pointerId); cur = null; if (pts.size < 2) pinch = null; }; }
+$("cahIn").onclick = () => cahZoomTo(cahZ * 1.5); $("cahOut").onclick = () => cahZoomTo(cahZ / 1.5);
 $("goCah").onclick = () => { show("cah"); cahShow(0); };
 $("cahPrev").querySelector("span").innerHTML = ICONS.undo;
-$("cahPrev").onclick = () => cahShow(cahI - 1);
-$("cahNext").onclick = () => cahI === CAH.length - 1 ? show("l2") : cahShow(cahI + 1);
+$("cahPrev").onclick = () => cahShow(cahI - 1, false);
+$("cahNext").onclick = () => cahI === CAH.length - 1 ? show("l2") : cahShow(cahI + 1, true);
 $("cahErase").innerHTML = ICONS.erase; $("cahErase").onclick = () => { cahStrokes = []; cahPaint(); };
 $("cahBack").innerHTML = ICONS.back; $("cahBack").onclick = () => show("l2");
 addEventListener("resize", () => { if (!$("cah").hidden) cahDraw(); });
