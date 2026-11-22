@@ -466,11 +466,11 @@
   /* An open school notebook: the page being written on the right, the start of the next page on the left (an Arabic
      notebook turns towards the left), the fold between them; cream paper with large Seyès squares and a red margin. */
   .cahbook { flex:1; min-height:0; display:flex; position:relative; perspective:1800px; filter:drop-shadow(0 8px 18px rgba(60,50,30,.16)); }
-  .cahnext { position:relative; flex:0 0 14%; overflow:hidden; border-radius:4px 0 0 4px; background:#fbf8ef; cursor:pointer;
-    box-shadow:inset -16px 0 18px -12px rgba(60,50,30,.32); }
+  .cahnext { position:relative; flex:0 0 5%; overflow:hidden; border-radius:4px 0 0 4px; background:#fbf8ef; cursor:pointer;
+    box-shadow:inset -6px 0 7px -5px rgba(60,50,30,.3); }
   .cahnext canvas { position:absolute; top:42px; bottom:26px; right:0; height:calc(100% - 68px); opacity:.85; }
   .cahsheet { position:relative; flex:1; min-height:0; display:flex; flex-direction:column; color:#1d1d1b; border-radius:0 4px 4px 0; padding:12px 12px 8px;
-    background:linear-gradient(90deg, #f4efe1, #fffdf7 9%); box-shadow:inset 16px 0 18px -12px rgba(60,50,30,.28); }
+    background:linear-gradient(90deg, #f6f1e4, #fffdf7 3%); box-shadow:inset 6px 0 7px -5px rgba(60,50,30,.26); }
   .cahhead { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2px 6px; }
   .cahhead b { font:700 22px/1 Amiri, serif; color:#1f2a5c; }
   .cahfoot { text-align:center; font:italic 11px Georgia, serif; color:#8f89c4; padding-top:4px; }
@@ -2076,7 +2076,7 @@ const CAH_NOJOIN = "أدذرزو";
 let cahI = 0, cahStrokes = [];
 function cahForms(g) { const t = "ـ";   // the joined forms, as on the workbook's first row: beginning, middle, end
   return CAH_NOJOIN.includes(g) ? [t + g] : [g + t, t + g + t, t + g]; }
-function cahPaper(x, W, H, i) {   // one page of the notebook, for letter i
+function cahPaper(x, W, H, i, blank) {   // one page of the notebook, for letter i (blank: its lines only)
   const g = CAH[i], rows = 4, rh = H / rows, m = Math.min(58, W * .16), cw = rh * .32;
   const line = (y, c, w) => { x.strokeStyle = c; x.lineWidth = w; x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); };
   x.fillStyle = "rgba(124,116,196,.07)"; x.fillRect(0, 0, W - m, rh * .82);   // the first row, lightly shaded: the forms
@@ -2087,9 +2087,10 @@ function cahPaper(x, W, H, i) {   // one page of the notebook, for letter i
     line(base + rh * .16, "#d3cfee", 1);
     line(base, "#8b84d6", 1.3);
     x.fillStyle = "#1f2a5c"; x.font = `700 ${rh * .5}px Amiri, serif`; x.textAlign = "center"; x.direction = "rtl";
-    x.fillText(g, W - m / 2, base);   // the letter in the margin, on every row
+    if (!blank) x.fillText(g, W - m / 2, base);   // the letter in the margin, on every row
   }
   x.strokeStyle = "#e0605c"; x.lineWidth = 1.3; x.beginPath(); x.moveTo(W - m, 0); x.lineTo(W - m, H); x.stroke();   // the red margin
+  if (blank) return;
   const base0 = rh * .66, base1 = rh + rh * .66; x.direction = "rtl"; x.textAlign = "right";
   x.font = `700 ${rh * .46}px Amiri, serif`; x.fillStyle = "#1f2a5c";   // row 1: the forms, to copy beside them
   let px = W - m - 10; cahForms(g).forEach(f => { x.fillText(f, px, base0); px -= x.measureText(f).width + rh * .28; });
@@ -2101,11 +2102,11 @@ function cahDraw() {
   const box = $("cahPage"), bg = $("cahBg"), ink = $("cahInk"), dpr = devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
   for (const c of [bg, ink]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
   cahPaper(bg.getContext("2d"), W, H, cahI);
-  // The next page, on the left: only its edge by the fold shows, with its margin and its letter.
+  // The next page, on the left: only a thin edge by the fold shows, its lines without the letter.
   const nx = $("cahNextCv"), pw = $("cahNextPg").clientWidth; nx.style.width = W + "px"; nx.width = W * dpr; nx.height = H * dpr;
   const x = nx.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
   $("cahNextPg").style.visibility = cahI < CAH.length - 1 ? "visible" : "hidden";
-  if (cahI < CAH.length - 1) cahPaper(x, W, H, cahI + 1);
+  if (cahI < CAH.length - 1) cahPaper(x, W, H, cahI + 1, true);
   cahPaint();
 }
 function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height);
