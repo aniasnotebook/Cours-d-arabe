@@ -461,9 +461,12 @@
   #home .sample.bk { padding-bottom:6px; }   /* room for the kasra under the letters */
   .ltitle .shk { font-family:"Scheherazade New", serif; }   /* draws the kasra under the shadda, above the letter, as this banner does */
   .ltitle .sgn { display:inline-block; width:1.4em; text-align:center; }   /* a sign alone, centred in its brackets as in the book */
-  #cah { gap:10px; } .cahforms { display:flex; justify-content:center; gap:22px; direction:rtl; font-size:40px; line-height:1.6; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:16px; }
-  .cahforms span:first-child { font-size:48px; }
-  .cahpage { position:relative; flex:1; min-height:0; background:#fff; border-radius:16px; overflow:hidden; touch-action:none; }
+  #cah { gap:10px; }
+  /* A page of the teacher's workbook: white paper, its header line, the ruled lines and the letter in the margin. */
+  .cahsheet { flex:1; min-height:0; display:flex; flex-direction:column; background:#fff; color:#1d1d1b; border-radius:6px; padding:10px 10px 12px; box-shadow:0 1px 2px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.08); }
+  .cahhead { display:flex; justify-content:space-between; align-items:baseline; font:500 11px system-ui, sans-serif; color:#8f887a; padding:0 2px 6px; border-bottom:1px solid #d9d4ca; }
+  .cahhead b { font:700 20px/1 Amiri, serif; color:#1d1d1b; }
+  .cahpage { position:relative; flex:1; min-height:0; touch-action:none; }
   .cahpage canvas { position:absolute; inset:0; width:100%; height:100%; }
   .wip { display:inline-block; vertical-align:middle; margin-left:6px; padding:2px 7px; border-radius:99px; background:#f6e3b4; color:#7a5300; font:700 11px/1.4 system-ui, sans-serif; }
   .lxwords { direction:rtl; border-top:1px solid #333; border-right:1px solid #333; } .lxrow { display:flex; }
@@ -569,7 +572,6 @@
     <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>M’évaluer · Les familles</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:var(--q-name); font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goS1"><span class="tile"><span class="sfont" lang="ar" style="font-size:22px; color:#d6301f">◌ُ</span></span><span class="t">Les signes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
-    <button class="go" id="goCah"><span class="tile ar" lang="ar" style="font-size:24px; color:#b9b2a3">ب</span><span class="t">Cahier d’écriture <span class="wip">Essai</span><small>Repasser · Écrire seule</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="1"></div>
   </section>
 
@@ -610,9 +612,8 @@
       <h1 id="cahCount"></h1>
       <div class="right"><button class="ico" id="cahErase" aria-label="Effacer"></button></div>
     </div>
-    <div class="cahforms ar" lang="ar" id="cahForms"></div>
-    <div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div>
-    <p class="hint" id="cahHint">Repasse sur les lettres grises, puis écris la lettre seule sur les lignes du dessous</p>
+    <div class="cahsheet"><div class="cahhead"><span>Mon cahier d’écriture</span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div>
+    <p class="hint" id="cahHint">Écris les formes sur la 1re ligne, repasse les lettres grises, puis écris la lettre seule</p>
     <div class="actions"><button class="act u" id="cahPrev"><span></span>Précédente</button><button class="act go2" id="cahNext"><span></span>Suivante</button></div>
   </section>
 
@@ -624,6 +625,7 @@
     <button class="go" id="goForms"><span class="tile ar" lang="ar" style="color:#2fa84a">ـبـ</span><span class="t">Les formes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goWords"><span class="tile ar" lang="ar" style="font-size:22px"><span><span style="color:#1f3f8f">ت</span><span style="color:#2fa84a">ح</span><span style="color:#e5603a">ت</span></span></span><span class="t">Séparer les lettres<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW2"><span class="tile ar" lang="ar" style="font-size:22px"><span><span style="color:#1f3f8f">ب</span><span style="color:#2fa84a">ل</span><span style="color:#e5603a">ب</span></span></span><span class="t">Lier les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goCah"><span class="tile ar" lang="ar" style="font-size:24px; color:#b9b2a3">ب</span><span class="t">Cahier d’écriture <span class="wip">Essai</span><small>Repasser · Écrire seule</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="2"></div>
   </section>
   <!-- The order setting of each lesson; shown on each exercise's level page. -->
@@ -1731,9 +1733,9 @@ function showStats() {
 
 // The lesson in the online Qaida (one page for lesson 1, three for lesson 2, pages 7 to 9).
 // The class's two sheets for lesson 1, shown like the book's page: the start of reading, and where each letter is pronounced.
-const SHEETS = `<button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="fiche1-articulation">Articulation</button><a class="lbtn" href="book/cahier-ecriture.pdf" target="_blank" rel="noopener">Cahier</a>`;   // the writing workbook, to print
+const SHEETS = `<button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="fiche1-articulation">Articulation</button>`;
 // Lesson 2 shows the class's Fiche 1 too.
-const FICHE1 = `<button class="lbtn" data-part="fiche1">Fiche 1</button>`;
+const FICHE1 = `<button class="lbtn" data-part="fiche1">Fiche 1</button><a class="lbtn" href="book/cahier-ecriture.pdf" target="_blank" rel="noopener">Cahier</a>`;   // with the writing workbook, to print
 const yt = p => `https://www.youtube.com/watch?v=${SOUND_VIDEOS[p]}`;   // the teacher's video of each part, opened in YouTube
 const LESSON_PAGES = { 1: [yt(6)], 2: [yt(7), yt(8), yt(9)] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
@@ -2060,23 +2062,31 @@ const sunWord = g => { const w = SUN[g] || MOON[g], sun = !!SUN[g];   // ٱ, the
 const CAH = ["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
 const CAH_NOJOIN = "أدذرزو";
 let cahI = 0, cahStrokes = [];
-function cahForms(g) { const t = "ـ";
-  return CAH_NOJOIN.includes(g) ? [g, t + g] : [g, g + t, t + g + t, t + g]; }
+function cahForms(g) { const t = "ـ";   // the joined forms, as on the workbook's first row: beginning, middle, end
+  return CAH_NOJOIN.includes(g) ? [t + g] : [g + t, t + g + t, t + g]; }
 function cahDraw() {
   const box = $("cahPage"), bg = $("cahBg"), ink = $("cahInk"), dpr = devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
   for (const c of [bg, ink]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
-  const g = CAH[cahI], x = bg.getContext("2d"), rows = 3, rh = H / rows;
-  for (let r = 0; r < rows; r++) {   // the workbook's lines: the writing line darker, three fine lines above it
-    const base = r * rh + rh * .68;
-    for (let k = 1; k <= 3; k++) { x.strokeStyle = "#e3dfd6"; x.lineWidth = 1; x.beginPath(); x.moveTo(0, base - k * rh * .14); x.lineTo(W, base - k * rh * .14); x.stroke(); }
-    x.strokeStyle = "#8f887a"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(0, base); x.lineTo(W, base); x.stroke();
-    x.strokeStyle = "#e3dfd6"; x.lineWidth = 1; x.beginPath(); x.moveTo(0, base + rh * .14); x.lineTo(W, base + rh * .14); x.stroke();
-    if (r === 0) {   // the letter in grey, right to left, to trace
-      const n = Math.max(3, Math.floor(W / (rh * .62))), step = W / n;
-      x.fillStyle = "#cfc9bd"; x.font = `400 ${rh * .5}px Amiri, serif`; x.textAlign = "center"; x.direction = "rtl";
-      for (let k = 0; k < n; k++) x.fillText(g, W - step * (k + .5), base);
-    }
+  const g = CAH[cahI], x = bg.getContext("2d"), rows = 4, rh = H / rows, m = Math.min(58, W * .16), cw = rh * .32;
+  const line = (y, c, w) => { x.strokeStyle = c; x.lineWidth = w; x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); };
+  x.fillStyle = "#efefef"; x.fillRect(0, 0, W, rh * .82);   // the first row, shaded: the forms
+  for (let v = W - m - cw; v > 0; v -= cw) { x.strokeStyle = "#e6e2da"; x.lineWidth = 1; x.beginPath(); x.moveTo(v, 0); x.lineTo(v, H); x.stroke(); }   // the columns
+  for (let r = 0; r < rows; r++) {
+    const top = r * rh, base = top + rh * .66;
+    for (let k = 1; k <= 3; k++) line(base - k * rh * .15, "#dedad1", 1);
+    line(base + rh * .16, "#dedad1", 1);
+    line(base, "#3d3a35", 1.4);
+    x.fillStyle = "#1d1d1b"; x.font = `700 ${rh * .5}px Amiri, serif`; x.textAlign = "center"; x.direction = "rtl";
+    x.fillText(g, W - m / 2, base);   // the letter in the margin, on every row
   }
+  x.strokeStyle = "#3d3a35"; x.lineWidth = 1.4; x.beginPath(); x.moveTo(W - m, 0); x.lineTo(W - m, H); x.stroke();   // the margin
+  line(0.7, "#3d3a35", 1.4); line(H - .7, "#3d3a35", 1.4);
+  const base0 = rh * .66, base1 = rh + rh * .66; x.direction = "rtl"; x.textAlign = "right";
+  x.font = `700 ${rh * .46}px Amiri, serif`; x.fillStyle = "#1d1d1b";   // row 1: the forms, to copy beside them
+  let px = W - m - 10; cahForms(g).forEach(f => { x.fillText(f, px, base0); px -= x.measureText(f).width + rh * .28; });
+  x.font = `400 ${rh * .46}px Amiri, serif`; x.fillStyle = "#c9c3b7"; x.textAlign = "center";   // row 2: the letter in grey, to trace
+  const n = Math.max(3, Math.floor((W - m) / (rh * .55))), step = (W - m) / n;
+  for (let k = 0; k < n; k++) x.fillText(g, W - m - step * (k + .5), base1);
   cahPaint();
 }
 function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height);
@@ -2085,7 +2095,7 @@ function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect
 function cahShow(i) {
   cahI = Math.max(0, Math.min(CAH.length - 1, i)); cahStrokes = [];
   $("cahCount").textContent = `${cahI + 1} / ${CAH.length}`;
-  $("cahForms").innerHTML = cahForms(CAH[cahI]).map(f => `<span>${f}</span>`).join("");
+  $("cahName").textContent = CAH[cahI];
   $("cahPrev").disabled = cahI === 0; $("cahNext").querySelector("span").innerHTML = ICONS.next;
   $("cahNext").lastChild.textContent = cahI === CAH.length - 1 ? "Terminer" : "Suivante";
   requestAnimationFrame(cahDraw);
@@ -2098,9 +2108,9 @@ function cahShow(i) {
 $("goCah").onclick = () => { show("cah"); cahShow(0); };
 $("cahPrev").querySelector("span").innerHTML = ICONS.undo;
 $("cahPrev").onclick = () => cahShow(cahI - 1);
-$("cahNext").onclick = () => cahI === CAH.length - 1 ? show("l1") : cahShow(cahI + 1);
+$("cahNext").onclick = () => cahI === CAH.length - 1 ? show("l2") : cahShow(cahI + 1);
 $("cahErase").innerHTML = ICONS.erase; $("cahErase").onclick = () => { cahStrokes = []; cahPaint(); };
-$("cahBack").innerHTML = ICONS.back; $("cahBack").onclick = () => show("l1");
+$("cahBack").innerHTML = ICONS.back; $("cahBack").onclick = () => show("l2");
 addEventListener("resize", () => { if (!$("cah").hidden) cahDraw(); });
 // Set aside for now (kept in lecons-data.js, to be checked with the teacher): the soukoun words, pages 19 to 22.
 const SET_ASIDE = it => it.les === 11;
