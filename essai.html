@@ -474,7 +474,7 @@
   .cahhead { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2px 6px; }
   .cahhead b { font:700 22px/1 Amiri, serif; color:#1f2a5c; }
   .cahfoot { text-align:center; font:italic 11px Georgia, serif; color:#8f89c4; padding-top:4px; }
-  .cahzoom { display:flex; gap:6px; } .cahzoom button { width:30px; height:26px; border-radius:8px; border:1px solid #d6d2ea; background:#fffdf7; color:#4b457f; font:600 17px/1 system-ui, sans-serif; cursor:pointer; }
+  .cahzoom { display:flex; gap:8px; } .cahzoom .erase { width:40px; height:40px; border-radius:50%; border:1px solid #e2dccf; background:#fff; color:#6b665c; display:grid; place-items:center; padding:0; } .cahzoom .erase svg { width:20px; height:20px; }   /* the round buttons of the writing card */
   .cahview { position:relative; flex:1; min-height:0; overflow:hidden; }
   .cahpage { position:absolute; inset:0; touch-action:none; transform-origin:0 0; }
   .cahturn { position:absolute; top:0; bottom:0; right:0; z-index:3; pointer-events:none; transform-origin:left center; backface-visibility:hidden; border-radius:0 4px 4px 0; }
@@ -622,11 +622,11 @@
     <div class="top">
       <div class="left"><button class="ico" id="cahBack" aria-label="Retour"></button><button class="ico home" aria-label="Accueil"></button></div>
       <h1 id="cahCount"></h1>
-      <div class="right"><button class="ico" id="cahErase" aria-label="Effacer"></button></div>
+      <div class="right"><button class="pillbtn" id="cahStop">Terminer</button></div>
     </div>
-    <div class="cahbook" id="cahBook"><div class="cahnext" id="cahNextPg" aria-label="Page suivante" role="button"><canvas id="cahNextCv"></canvas></div><div class="cahsheet" id="cahSheet"><div class="cahhead"><span class="cahzoom"><button type="button" id="cahOut" aria-label="Dézoomer">−</button><button type="button" id="cahIn" aria-label="Zoomer">+</button></span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahview"><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div><div class="cahfoot" id="cahFoot"></div></div></div>
+    <div class="cahbook" id="cahBook"><div class="cahnext" id="cahNextPg" aria-label="Page suivante" role="button"><canvas id="cahNextCv"></canvas></div><div class="cahsheet" id="cahSheet"><div class="cahhead"><span class="cahzoom"><button type="button" class="erase" id="cahErase" aria-label="Effacer"></button><button type="button" class="erase" id="cahOut" aria-label="Dézoomer"></button><button type="button" class="erase" id="cahIn" aria-label="Zoomer"></button></span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahview"><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div><div class="cahfoot" id="cahFoot"></div></div></div>
     <p class="hint" id="cahHint">Écris les formes, repasse les lettres grises, puis écris la lettre seule. Glisse vers la droite pour tourner la page</p>
-    <div class="actions"><button class="act u" id="cahPrev"><span></span>Précédente</button><button class="act go2" id="cahNext"><span></span>Suivante</button></div>
+    <div class="actions"><span></span><button class="act u" id="cahPrev"><span></span>Retour</button><button class="act go2" id="cahNext"><span></span>Suivante</button></div>
   </section>
 
   <!-- Lesson 2 -->
@@ -2176,6 +2176,9 @@ $("cahPrev").querySelector("span").innerHTML = ICONS.undo;
 $("cahPrev").onclick = () => cahShow(cahI - 1, false);
 $("cahNext").onclick = () => cahI === CAH.length - 1 ? show("l2") : cahShow(cahI + 1, true);
 $("cahErase").innerHTML = ICONS.erase; $("cahErase").onclick = () => { cahStrokes = []; cahPaint(); };
+$("cahIn").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6"/></svg>';
+$("cahOut").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M7.5 10.5h6"/></svg>';
+$("cahStop").onclick = () => show("l2");
 $("cahBack").innerHTML = ICONS.back; $("cahBack").onclick = () => show("l2");
 addEventListener("resize", () => { if (!$("cah").hidden) cahDraw(); });
 // Set aside for now (kept in lecons-data.js, to be checked with the teacher): the soukoun words, pages 19 to 22.
