@@ -1747,7 +1747,7 @@ function showStats() {
 // The class's two sheets for lesson 1, shown like the book's page: the start of reading, and where each letter is pronounced.
 const SHEETS = `<button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="fiche1-articulation">Articulation</button>`;
 // Lesson 2 shows the class's Fiche 1 too.
-const FICHE1 = `<button class="lbtn" data-part="fiche1">Fiche 1</button><a class="lbtn" href="book/cahier-ecriture.pdf" target="_blank" rel="noopener">Cahier</a>`;   // with the writing workbook, to print
+const FICHE1 = `<button class="lbtn" data-part="fiche1">Fiche 1</button><button class="lbtn" data-part="cahier">Cahier à imprimer</button>`;   // the writing workbook, to print
 const yt = p => `https://www.youtube.com/watch?v=${SOUND_VIDEOS[p]}`;   // the teacher's video of each part, opened in YouTube
 const LESSON_PAGES = { 1: [yt(6)], 2: [yt(7), yt(8), yt(9)] };
 const EXT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M19 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h5"/></svg>';
@@ -1766,6 +1766,7 @@ document.addEventListener("touchmove", e => { if (e.touches.length > 1 && $("pag
 // ---------- The book's page
 function openPage(n, part = "book") {
   $("sheet").innerHTML = part === "signs" ? `<img class="sheetpg" src="book/fiche1-signes-v2.jpg" alt="Les voyelles et les signes de lecture">`
+    : part === "cahier" ? `<h3>Cahier d’écriture · à imprimer</h3><button type="button" class="pillbtn" id="cahPrint" style="align-self:center; justify-self:center">Imprimer</button>` + [1, 2, 3, 4, 5, 6, 7].map(i => `<img class="sheetpg" src="book/cahier-${i}.jpg" alt="Cahier d’écriture, page ${i}">`).join("")
     : part.startsWith("fiche1") ? [1, 2].map(i => `<img class="sheetpg" src="book/${part}-${i}.jpg" alt="">`).join("")
     : n === 1 ? `<div class="grid">${LETTERS.map(l => l.mini).join("")}</div>`
     : part === "forms" ? `<h3>Les formes des lettres</h3><p class="muted center" style="margin:-4px 0 8px; font-size:13px">Tableau fait par l’app pour s’entraîner.</p>
@@ -2047,7 +2048,13 @@ function traceEnd() {
   $("lessonLinks").innerHTML = lessonLinks(l2 ? 2 : 1);
   $("again").className = "primary";
 }
-$("page").onclick = closePage;
+$("page").onclick = e => { if (e.target.closest("#cahPrint")) return cahPrint(); closePage(); };
+// Printing the workbook stays inside the app: the phone's share sheet (with Imprimer) gets the PDF; elsewhere the PDF opens.
+async function cahPrint() {
+  try { const f = new File([await (await fetch("book/cahier-ecriture.pdf")).blob()], "cahier-ecriture.pdf", { type: "application/pdf" });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) return await navigator.share({ files: [f], title: "Cahier d’écriture" }); } catch (e) { if (e && e.name === "AbortError") return; }
+  window.open("book/cahier-ecriture.pdf", "_blank");
+}
 
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") { closePage(); return; }
