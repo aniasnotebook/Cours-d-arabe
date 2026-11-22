@@ -461,6 +461,10 @@
   #home .sample.bk { padding-bottom:6px; }   /* room for the kasra under the letters */
   .ltitle .shk { font-family:"Scheherazade New", serif; }   /* draws the kasra under the shadda, above the letter, as this banner does */
   .ltitle .sgn { display:inline-block; width:1.4em; text-align:center; }   /* a sign alone, centred in its brackets as in the book */
+  #cah { gap:10px; } .cahforms { display:flex; justify-content:center; gap:22px; direction:rtl; font-size:40px; line-height:1.6; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:16px; }
+  .cahforms span:first-child { font-size:48px; }
+  .cahpage { position:relative; flex:1; min-height:0; background:#fff; border-radius:16px; overflow:hidden; touch-action:none; }
+  .cahpage canvas { position:absolute; inset:0; width:100%; height:100%; }
   .wip { display:inline-block; vertical-align:middle; margin-left:6px; padding:2px 7px; border-radius:99px; background:#f6e3b4; color:#7a5300; font:700 11px/1.4 system-ui, sans-serif; }
   .lxwords { direction:rtl; border-top:1px solid #333; border-right:1px solid #333; } .lxrow { display:flex; }
   .lxrow > span { flex:1 1 0; min-width:0; border-left:1px solid #333; border-bottom:1px solid #333; text-align:center; font-size:28px; font-weight:700; line-height:2.8; padding:0 6px; }   /* bold and 28px, as the sheets of lessons 1 and 2 */   /* the Quran font draws its signs high and low: a line this tall keeps them inside the cell */
@@ -565,6 +569,7 @@
     <button class="go" id="go1"><span class="tile ar" lang="ar">ب</span><span class="t">Reconnaître les lettres<small>M’évaluer · Les familles</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goW1"><span class="tile ar" lang="ar" style="color:var(--q-name); font-size:20px">جيم</span><span class="t">Écrire les lettres<small>Tracer · Me tester</small></span><span aria-hidden="true">›</span></button>
     <button class="go" id="goS1"><span class="tile"><span class="sfont" lang="ar" style="font-size:22px; color:#d6301f">◌ُ</span></span><span class="t">Les signes<small>Choisir · Écrire</small></span><span aria-hidden="true">›</span></button>
+    <button class="go" id="goCah"><span class="tile ar" lang="ar" style="font-size:24px; color:#b9b2a3">ب</span><span class="t">Cahier d’écriture <span class="wip">Essai</span><small>Repasser · Écrire seule</small></span><span aria-hidden="true">›</span></button>
     <div class="lessonbox" data-lesson="1"></div>
   </section>
 
@@ -596,6 +601,19 @@
     <div class="label">Exercices</div>
     <button class="go" id="goSun"><span class="tile ar" lang="ar" style="font-size:22px">☾☀</span><span class="t">Lettres lunaires et solaires<small>Le ل se lit ou pas</small></span><span aria-hidden="true">›</span></button>
     <div class="settings randset" id="rand6box"><label><span><b>Cartes aléatoires</b></span><input type="checkbox" id="rand6" checked></label></div>
+  </section>
+
+  <!-- Cahier d'écriture (essai): the teacher's workbook, a page per letter -->
+  <section class="screen" id="cah" hidden>
+    <div class="top">
+      <div class="left"><button class="ico" id="cahBack" aria-label="Retour"></button><button class="ico home" aria-label="Accueil"></button></div>
+      <h1 id="cahCount"></h1>
+      <div class="right"><button class="ico" id="cahErase" aria-label="Effacer"></button></div>
+    </div>
+    <div class="cahforms ar" lang="ar" id="cahForms"></div>
+    <div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div>
+    <p class="hint" id="cahHint">Repasse sur les lettres grises, puis écris la lettre seule sur les lignes du dessous</p>
+    <div class="actions"><button class="act u" id="cahPrev"><span></span>Précédente</button><button class="act go2" id="cahNext"><span></span>Suivante</button></div>
   </section>
 
   <!-- Lesson 2 -->
@@ -837,7 +855,7 @@ function choicesFor(letters, n) {
 let mode = "letters", deck = [], source = [], answers = [], pos = 0;
 let shown = false, famQuiz = false, guess = new Set(), pick = {}, checked = false;
 
-function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","l6","lx","lxs","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write"; $(id).scrollTop = 0; }
+function show(id) { if (id !== "play") stopSound(); ["gate","home","l1","l2","l6","cah","lx","lxs","c1","cw","play","write","stats"].forEach(s => $(s).hidden = s !== id); $("corner").hidden = id === "play" || id === "write" || id === "cah"; $(id).scrollTop = 0; }
 
 // ---------- The logo: an orange card, a green card and the ba card in blue pen, drawn so each card can move.
 const MARK = `<svg class="mark" viewBox="-10 -10 140 140" width="100%" height="100%" aria-hidden="true" style="overflow:visible">
@@ -1803,7 +1821,7 @@ $("ptr").innerHTML = MARK;
 const pool = m => m === "letters" || m === "fams" || m === "wletters" || m === "sun" ? LETTERS : m === "forms" || m === "wforms" ? FORMS : m === "signs" || m === "wsigns" ? SIGNS : WORD_CARDS;
 // Where the user is, kept for a reload: the app's own, or the browser's (pull to refresh).
 function savePlace() {
-  const screen = ["home","l1","l2","l6","lx","lxs","c1","cw","play","write","stats"].find(id => !$(id).hidden);
+  const screen = ["home","l1","l2","l6","cah","lx","lxs","c1","cw","play","write","stats"].find(id => !$(id).hidden);
   if (screen) try {
     // Chapters 3 to 5: a card is kept by its key (and its word, for a sentence cut word by word).
     const lx = mode === "lire" || mode === "sep" || mode === "wtext", P = pool(mode), id = x => lx ? x.key + (x.ctx ? "|" + x.wi : "") : P.indexOf(x), ix = a => a.map(id);
@@ -2036,6 +2054,54 @@ const MOON = { "ء": "ٱلۡأَرۡضُ", "ب": "ٱلۡبَيۡتِ", "ج": "ٱ
   "ف": "ٱلۡفَجۡرِ", "ق": "ٱلۡقَدۡرِ", "ك": "ٱلۡكِتَٰبِ", "م": "ٱلۡمَاعُونَ", "ه": "ٱلۡهُدَىٰ", "و": "ٱلۡوَدُودُ", "ى": "ٱلۡيَوۡمَ" };
 const sunWord = g => { const w = SUN[g] || MOON[g], sun = !!SUN[g];   // ٱ, then the ل (grey when not read), then the rest
   return `<span class="ar bk" lang="ar" style="font-size:44px; line-height:2">ٱ<span style="color:${sun ? "#a39b8b" : "var(--ok)"}">\u200dل${sun ? "" : "ۡ"}\u200d</span>${w.slice(sun ? 2 : 3)}</span>`; };
+// ---------- Cahier d'écriture (essai.html): the 28 letters of the teacher's workbook, in its order. Each page: the letter's
+// forms on top, then ruled lines as in the workbook (a guide line and three fine lines between), the first row with the
+// letter in grey to trace, the next rows empty to write it alone.
+const CAH = ["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
+const CAH_NOJOIN = "أدذرزو";
+let cahI = 0, cahStrokes = [];
+function cahForms(g) { const t = "ـ";
+  return CAH_NOJOIN.includes(g) ? [g, t + g] : [g, g + t, t + g + t, t + g]; }
+function cahDraw() {
+  const box = $("cahPage"), bg = $("cahBg"), ink = $("cahInk"), dpr = devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
+  for (const c of [bg, ink]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
+  const g = CAH[cahI], x = bg.getContext("2d"), rows = 3, rh = H / rows;
+  for (let r = 0; r < rows; r++) {   // the workbook's lines: the writing line darker, three fine lines above it
+    const base = r * rh + rh * .68;
+    for (let k = 1; k <= 3; k++) { x.strokeStyle = "#e3dfd6"; x.lineWidth = 1; x.beginPath(); x.moveTo(0, base - k * rh * .14); x.lineTo(W, base - k * rh * .14); x.stroke(); }
+    x.strokeStyle = "#8f887a"; x.lineWidth = 1.5; x.beginPath(); x.moveTo(0, base); x.lineTo(W, base); x.stroke();
+    x.strokeStyle = "#e3dfd6"; x.lineWidth = 1; x.beginPath(); x.moveTo(0, base + rh * .14); x.lineTo(W, base + rh * .14); x.stroke();
+    if (r === 0) {   // the letter in grey, right to left, to trace
+      const n = Math.max(3, Math.floor(W / (rh * .62))), step = W / n;
+      x.fillStyle = "#cfc9bd"; x.font = `400 ${rh * .5}px Amiri, serif`; x.textAlign = "center"; x.direction = "rtl";
+      for (let k = 0; k < n; k++) x.fillText(g, W - step * (k + .5), base);
+    }
+  }
+  cahPaint();
+}
+function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height);
+  x.strokeStyle = "#1d1d1b"; x.lineWidth = 4; x.lineCap = x.lineJoin = "round";
+  cahStrokes.forEach(s => { x.beginPath(); s.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.stroke(); }); }
+function cahShow(i) {
+  cahI = Math.max(0, Math.min(CAH.length - 1, i)); cahStrokes = [];
+  $("cahCount").textContent = `${cahI + 1} / ${CAH.length}`;
+  $("cahForms").innerHTML = cahForms(CAH[cahI]).map(f => `<span>${f}</span>`).join("");
+  $("cahPrev").disabled = cahI === 0; $("cahNext").querySelector("span").innerHTML = ICONS.next;
+  $("cahNext").lastChild.textContent = cahI === CAH.length - 1 ? "Terminer" : "Suivante";
+  requestAnimationFrame(cahDraw);
+}
+{ const c = $("cahInk"); let cur = null;
+  const at = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  c.onpointerdown = e => { c.setPointerCapture(e.pointerId); cur = [at(e)]; cahStrokes.push(cur); cahPaint(); };
+  c.onpointermove = e => { if (!cur) return; cur.push(at(e)); cahPaint(); };
+  c.onpointerup = c.onpointercancel = () => { cur = null; }; }
+$("goCah").onclick = () => { show("cah"); cahShow(0); };
+$("cahPrev").querySelector("span").innerHTML = ICONS.undo;
+$("cahPrev").onclick = () => cahShow(cahI - 1);
+$("cahNext").onclick = () => cahI === CAH.length - 1 ? show("l1") : cahShow(cahI + 1);
+$("cahErase").innerHTML = ICONS.erase; $("cahErase").onclick = () => { cahStrokes = []; cahPaint(); };
+$("cahBack").innerHTML = ICONS.back; $("cahBack").onclick = () => show("l1");
+addEventListener("resize", () => { if (!$("cah").hidden) cahDraw(); });
 // Set aside for now (kept in lecons-data.js, to be checked with the teacher): the soukoun words, pages 19 to 22.
 const SET_ASIDE = it => it.les === 11;
 for (let i = BOOK_ITEMS.length - 1; i >= 0; i--) if (SET_ASIDE(BOOK_ITEMS[i])) BOOK_ITEMS.splice(i, 1);
