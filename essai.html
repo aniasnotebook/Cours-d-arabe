@@ -474,7 +474,7 @@
   .cahhead { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2px 6px; }
   .cahhead b { font:700 22px/1 Amiri, serif; color:#1f2a5c; }
   .cahfoot { text-align:center; font:italic 11px Georgia, serif; color:#8f89c4; padding-top:4px; }
-  .cahzoom { display:flex; gap:8px; } .cahzoom .erase { width:40px; height:40px; border-radius:50%; border:1px solid #e2dccf; background:#fff; color:#6b665c; display:grid; place-items:center; padding:0; } .cahzoom .erase svg { width:20px; height:20px; }   /* the round buttons of the writing card */
+  .cahzoom { display:flex; gap:8px; } .cahzoom .erase { width:40px; height:40px; border-radius:50%; border:1px solid #e2dccf; background:#fff; color:#6b665c; display:grid; place-items:center; padding:0; } .cahzoom .erase svg { width:20px; height:20px; } .cahzoom .erase[aria-pressed="true"] { background:#1f2a5c; border-color:#1f2a5c; color:#fff; }   /* the eraser in hand */   /* the round buttons of the writing card */
   .cahview { position:relative; flex:1; min-height:0; overflow:hidden; }
   .cahpage { position:absolute; inset:0; touch-action:none; transform-origin:0 0; }
   .cahturn { position:absolute; top:0; bottom:0; right:0; z-index:3; pointer-events:none; transform-origin:left center; backface-visibility:hidden; border-radius:0 4px 4px 0; }
@@ -624,7 +624,7 @@
       <h1 id="cahCount"></h1>
       <div class="right"><button class="pillbtn" id="cahStop">Terminer</button></div>
     </div>
-    <div class="cahbook" id="cahBook"><div class="cahnext" id="cahNextPg" aria-label="Page suivante" role="button"><canvas id="cahNextCv"></canvas></div><div class="cahsheet" id="cahSheet"><div class="cahhead"><span class="cahzoom"><button type="button" class="erase" id="cahErase" aria-label="Effacer"></button><button type="button" class="erase" id="cahOut" aria-label="Dézoomer"></button><button type="button" class="erase" id="cahIn" aria-label="Zoomer"></button></span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahview"><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div><div class="cahfoot" id="cahFoot"></div></div></div>
+    <div class="cahbook" id="cahBook"><div class="cahnext" id="cahNextPg" aria-label="Page suivante" role="button"><canvas id="cahNextCv"></canvas></div><div class="cahsheet" id="cahSheet"><div class="cahhead"><span class="cahzoom"><button type="button" class="erase" id="cahRub" aria-label="Gomme" aria-pressed="false"></button><button type="button" class="erase" id="cahErase" aria-label="Tout effacer"></button><button type="button" class="erase" id="cahOut" aria-label="Dézoomer"></button><button type="button" class="erase" id="cahIn" aria-label="Zoomer"></button></span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahview"><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div><div class="cahfoot" id="cahFoot"></div></div></div>
     <p class="hint" id="cahHint">Écris les formes, repasse les lettres grises, puis écris la lettre seule. Glisse vers la droite pour tourner la page</p>
     <div class="actions"><span></span><button class="act u" id="cahPrev"><span></span>Retour</button><button class="act go2" id="cahNext"><span></span>Suivante</button></div>
   </section>
@@ -2073,7 +2073,7 @@ const sunWord = g => { const w = SUN[g] || MOON[g], sun = !!SUN[g];   // ٱ, the
 // letter in grey to trace, the next rows empty to write it alone.
 const CAH = ["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
 const CAH_NOJOIN = "أدذرزو";
-let cahI = 0, cahStrokes = [];
+let cahI = 0, cahStrokes = [], cahRub = false, cahCursor = null;   // cahRub: the round eraser is in hand
 function cahForms(g) { const t = "ـ";   // the joined forms, as on the workbook's first row: beginning, middle, end
   return CAH_NOJOIN.includes(g) ? [t + g] : [g + t, t + g + t, t + g]; }
 function cahPaper(x, W, H, i, blank) {   // one page of the notebook, for letter i (blank: its lines only)
@@ -2109,9 +2109,14 @@ function cahDraw() {
   if (cahI < CAH.length - 1) cahPaper(x, W, H, cahI + 1, true);
   cahPaint();
 }
-function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height);
-  x.strokeStyle = "#1f2a5c"; x.lineWidth = 3.5; x.lineCap = x.lineJoin = "round";   // blue pen
-  cahStrokes.forEach(s => { x.beginPath(); s.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.stroke(); }); }
+// The pen draws in blue; the round eraser takes off only what it passes over (its strokes are kept and replayed in order).
+const CAH_RUB = 14;
+function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height); x.lineCap = x.lineJoin = "round";
+  cahStrokes.forEach(s => { x.globalCompositeOperation = s.rub ? "destination-out" : "source-over";
+    x.strokeStyle = "#1f2a5c"; x.lineWidth = s.rub ? CAH_RUB * 2 : 3.5; x.beginPath();
+    s.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); if (s.length === 1) x.lineTo(s[0][0] + .1, s[0][1]); x.stroke(); });
+  x.globalCompositeOperation = "source-over";
+  if (cahCursor) { x.strokeStyle = "rgba(31,42,92,.55)"; x.lineWidth = 1.5; x.beginPath(); x.arc(cahCursor[0], cahCursor[1], CAH_RUB, 0, Math.PI * 2); x.stroke(); } }
 // Turning the page: a picture of the page that was there lifts off its spine and turns away, the new page below it
 // (Arabic notebooks open on the right: forward turns the page over to the right).
 // Turning a page, as in an Arabic notebook: forward, the next page comes over the fold from the left and lies down on
@@ -2153,11 +2158,11 @@ function cahShow(i, turn) {
     return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2 - v.left, y: (a.y + b.y) / 2 - v.top }; };
   c.onpointerdown = e => { c.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pts.size === 2) { if (cur) { cahStrokes.pop(); cur = null; cahPaint(); } pinch = { ...two(), z: cahZ, tx: cahX, ty: cahY }; return; }   // a second finger: zoom, not a stroke
-    if (pts.size === 1) { cur = [at(e)]; cahStrokes.push(cur); cahPaint(); } };
+    if (pts.size === 1) { cur = [at(e)]; cur.rub = cahRub; cahStrokes.push(cur); if (cahRub) cahCursor = cur[0]; cahPaint(); } };
   c.onpointermove = e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pinch && pts.size === 2) { const n = two(); cahZ = pinch.z; cahX = pinch.tx + (n.x - pinch.x); cahY = pinch.ty + (n.y - pinch.y); cahZoomTo(pinch.z * n.d / pinch.d, n.x, n.y); return; }
-    if (cur) { cur.push(at(e)); cahPaint(); } };
-  c.onpointerup = c.onpointercancel = e => { pts.delete(e.pointerId); cur = null; if (pts.size < 2) pinch = null; }; }
+    if (cur) { cur.push(at(e)); if (cur.rub) cahCursor = cur[cur.length - 1]; cahPaint(); } };
+  c.onpointerup = c.onpointercancel = e => { pts.delete(e.pointerId); cur = null; cahCursor = null; cahPaint(); if (pts.size < 2) pinch = null; }; }
 // Changing page with a swipe: from the next page on the left, or from either edge of the page (the middle of the page is
 // for writing). Swiping to the right brings the next page, to the left goes back; a tap on the next page also turns.
 { let sw = null;
@@ -2175,7 +2180,9 @@ $("goCah").onclick = () => { show("cah"); cahShow(0); };
 $("cahPrev").querySelector("span").innerHTML = ICONS.undo;
 $("cahPrev").onclick = () => cahShow(cahI - 1, false);
 $("cahNext").onclick = () => cahI === CAH.length - 1 ? show("l2") : cahShow(cahI + 1, true);
-$("cahErase").innerHTML = ICONS.erase; $("cahErase").onclick = () => { cahStrokes = []; cahPaint(); };
+$("cahRub").innerHTML = ICONS.erase; $("cahRub").onclick = () => { cahRub = !cahRub; $("cahRub").setAttribute("aria-pressed", cahRub); };
+$("cahErase").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+$("cahErase").onclick = () => { cahStrokes = []; cahPaint(); };   // tout effacer
 $("cahIn").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M10.5 7.5v6M7.5 10.5h6"/></svg>';
 $("cahOut").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M7.5 10.5h6"/></svg>';
 $("cahStop").onclick = () => show("l2");
