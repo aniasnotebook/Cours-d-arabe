@@ -2100,7 +2100,8 @@ function cahPaper(x, W, H, i, blank) {   // one page of the notebook, for letter
 }
 function cahDraw() {
   const box = $("cahPage"), bg = $("cahBg"), ink = $("cahInk"), dpr = devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
-  for (const c of [bg, ink]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
+  const k = dpr * cahZ;   // drawn at the zoom it is seen at: sharp when zoomed
+  for (const c of [bg, ink]) { c.width = W * k; c.height = H * k; c.getContext("2d").setTransform(k, 0, 0, k, 0, 0); }
   cahPaper(bg.getContext("2d"), W, H, cahI);
   // The next page, on the left: only a thin edge by the fold shows, its lines without the letter.
   const nx = $("cahNextCv"), pw = $("cahNextPg").clientWidth; nx.style.width = W + "px"; nx.width = W * dpr; nx.height = H * dpr;
@@ -2162,7 +2163,7 @@ function cahShow(i, turn) {
   c.onpointermove = e => { if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pinch && pts.size === 2) { const n = two(); cahZ = pinch.z; cahX = pinch.tx + (n.x - pinch.x); cahY = pinch.ty + (n.y - pinch.y); cahZoomTo(pinch.z * n.d / pinch.d, n.x, n.y); return; }
     if (cur) { cur.push(at(e)); if (cur.rub) cahCursor = cur[cur.length - 1]; cahPaint(); } };
-  c.onpointerup = c.onpointercancel = e => { pts.delete(e.pointerId); cur = null; cahCursor = null; cahPaint(); if (pts.size < 2) pinch = null; }; }
+  c.onpointerup = c.onpointercancel = e => { pts.delete(e.pointerId); cur = null; cahCursor = null; cahPaint(); if (pts.size < 2) { if (pinch) cahDraw(); pinch = null; } }; }
 // Changing page with a swipe: from the next page on the left, or from either edge of the page (the middle of the page is
 // for writing). Swiping to the right brings the next page, to the left goes back; a tap on the next page also turns.
 { let sw = null;
@@ -2175,7 +2176,7 @@ function cahShow(i, turn) {
   ink.addEventListener("pointerdown", e => { if (cahZ === 1 && edge(e)) { start(e); e.stopImmediatePropagation(); ink.setPointerCapture(e.pointerId); } }, true);
   ink.addEventListener("pointerup", e => { if (sw) { end(e); e.stopImmediatePropagation(); } }, true);
   ink.addEventListener("pointermove", e => { if (sw) e.stopImmediatePropagation(); }, true); }
-$("cahIn").onclick = () => cahZoomTo(cahZ * 1.5); $("cahOut").onclick = () => cahZoomTo(cahZ / 1.5);
+$("cahIn").onclick = () => { cahZoomTo(cahZ * 1.5); cahDraw(); }; $("cahOut").onclick = () => { cahZoomTo(cahZ / 1.5); cahDraw(); };
 $("goCah").onclick = () => { show("cah"); cahShow(0); };
 $("cahPrev").querySelector("span").innerHTML = ICONS.undo;
 $("cahPrev").onclick = () => cahShow(cahI - 1, false);
