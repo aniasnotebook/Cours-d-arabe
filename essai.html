@@ -463,25 +463,21 @@
   .ltitle .sgn { display:inline-block; width:1.4em; text-align:center; }   /* a sign alone, centred in its brackets as in the book */
   #cah { gap:10px; }
   /* A page of the teacher's workbook: white paper, its header line, the ruled lines and the letter in the margin. */
-  /* A school notebook: cream paper with large Seyès squares (violet lines, red margin), bound with a spiral on the right
-     (an Arabic notebook opens on the right), punched holes, a name and date line on top and the page number below. */
-  .cahsheet { flex:1; min-height:0; display:flex; flex-direction:column; color:#1d1d1b; border-radius:4px 2px 2px 4px; padding:12px 30px 8px 12px;
-    background:radial-gradient(circle at calc(100% - 13px) 50%, #d8d2c4 0 4px, transparent 4.6px) 0 4px / 100% 22px repeat-y, linear-gradient(90deg, #fbf8ef, #fffdf7 30%);
-    box-shadow:0 1px 1px rgba(0,0,0,.12), 0 10px 26px rgba(60,50,30,.16); }
-  .cahspiral { position:absolute; top:6px; bottom:6px; right:-9px; width:26px; z-index:2; pointer-events:none;
-    background:radial-gradient(ellipse 11px 4.2px at 50% 50%, transparent 52%, #5f5a52 58%, #a7a196 72%, #77726a 82%, transparent 88%) 0 4px / 26px 22px repeat-y; }
-  .cahhead { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font:italic 500 11.5px Georgia, serif; color:#6f6a9b; padding:0 2px 6px; }
-  .cahfill i { display:inline-block; width:56px; border-bottom:1px dotted #8f89c4; margin:0 8px 0 3px; }
+  /* An open school notebook: the page being written on the right, the start of the next page on the left (an Arabic
+     notebook turns towards the left), the fold between them; cream paper with large Seyès squares and a red margin. */
+  .cahbook { flex:1; min-height:0; display:flex; position:relative; perspective:1800px; filter:drop-shadow(0 8px 18px rgba(60,50,30,.16)); }
+  .cahnext { position:relative; flex:0 0 14%; overflow:hidden; border-radius:4px 0 0 4px; background:#fbf8ef; cursor:pointer;
+    box-shadow:inset -16px 0 18px -12px rgba(60,50,30,.32); }
+  .cahnext canvas { position:absolute; top:42px; bottom:26px; right:0; height:calc(100% - 68px); opacity:.85; }
+  .cahsheet { position:relative; flex:1; min-height:0; display:flex; flex-direction:column; color:#1d1d1b; border-radius:0 4px 4px 0; padding:12px 12px 8px;
+    background:linear-gradient(90deg, #f4efe1, #fffdf7 9%); box-shadow:inset 16px 0 18px -12px rgba(60,50,30,.28); }
+  .cahhead { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:0 2px 6px; }
+  .cahhead b { font:700 22px/1 Amiri, serif; color:#1f2a5c; }
   .cahfoot { text-align:center; font:italic 11px Georgia, serif; color:#8f89c4; padding-top:4px; }
-  .cahhead b { font:700 20px/1 Amiri, serif; color:#1f2a5c; }
-  .cahbook { flex:1; min-height:0; display:flex; position:relative; perspective:1600px; }
-  .cahbook::before { content:""; position:absolute; inset:5px 2px -5px 5px; background:#f4efe2; border-radius:4px; box-shadow:0 1px 2px rgba(0,0,0,.1); } .cahbook::after { content:""; position:absolute; inset:9px 4px -9px 9px; z-index:-1; background:#2f4f8a; border-radius:5px; }   /* the pages under it, and the cover */   /* the pages under it */
-  .cahsheet { position:relative; flex:1; }
   .cahzoom { display:flex; gap:6px; } .cahzoom button { width:30px; height:26px; border-radius:8px; border:1px solid #d6d2ea; background:#fffdf7; color:#4b457f; font:600 17px/1 system-ui, sans-serif; cursor:pointer; }
   .cahview { position:relative; flex:1; min-height:0; overflow:hidden; }
   .cahpage { position:absolute; inset:0; touch-action:none; transform-origin:0 0; }
-  .cahturn { position:absolute; inset:0; z-index:3; pointer-events:none; transform-origin:right center; backface-visibility:hidden; }
-  .cahturn.back { transform-origin:left center; }
+  .cahturn { position:absolute; top:0; bottom:0; right:0; z-index:3; pointer-events:none; transform-origin:left center; backface-visibility:hidden; border-radius:0 4px 4px 0; }
   @media (prefers-reduced-motion: reduce) { .cahturn { display:none; } }
   .cahpage canvas { position:absolute; inset:0; width:100%; height:100%; }
   .wip { display:inline-block; vertical-align:middle; margin-left:6px; padding:2px 7px; border-radius:99px; background:#f6e3b4; color:#7a5300; font:700 11px/1.4 system-ui, sans-serif; }
@@ -628,8 +624,8 @@
       <h1 id="cahCount"></h1>
       <div class="right"><button class="ico" id="cahErase" aria-label="Effacer"></button></div>
     </div>
-    <div class="cahbook" id="cahBook"><div class="cahsheet" id="cahSheet"><div class="cahspiral" aria-hidden="true"></div><div class="cahhead"><span class="cahfill">Prénom <i></i> Date <i></i></span><span class="cahzoom"><button type="button" id="cahOut" aria-label="Dézoomer">−</button><button type="button" id="cahIn" aria-label="Zoomer">+</button></span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahview"><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div><div class="cahfoot" id="cahFoot"></div></div></div>
-    <p class="hint" id="cahHint">Écris les formes sur la 1re ligne, repasse les lettres grises, puis écris la lettre seule</p>
+    <div class="cahbook" id="cahBook"><div class="cahnext" id="cahNextPg" aria-label="Page suivante" role="button"><canvas id="cahNextCv"></canvas></div><div class="cahsheet" id="cahSheet"><div class="cahhead"><span class="cahzoom"><button type="button" id="cahOut" aria-label="Dézoomer">−</button><button type="button" id="cahIn" aria-label="Zoomer">+</button></span><b class="ar" lang="ar" id="cahName"></b></div><div class="cahview"><div class="cahpage" id="cahPage"><canvas id="cahBg"></canvas><canvas id="cahInk"></canvas></div></div><div class="cahfoot" id="cahFoot"></div></div></div>
+    <p class="hint" id="cahHint">Écris les formes, repasse les lettres grises, puis écris la lettre seule. Glisse vers la droite pour tourner la page</p>
     <div class="actions"><button class="act u" id="cahPrev"><span></span>Précédente</button><button class="act go2" id="cahNext"><span></span>Suivante</button></div>
   </section>
 
@@ -2080,15 +2076,13 @@ const CAH_NOJOIN = "أدذرزو";
 let cahI = 0, cahStrokes = [];
 function cahForms(g) { const t = "ـ";   // the joined forms, as on the workbook's first row: beginning, middle, end
   return CAH_NOJOIN.includes(g) ? [t + g] : [g + t, t + g + t, t + g]; }
-function cahDraw() {
-  const box = $("cahPage"), bg = $("cahBg"), ink = $("cahInk"), dpr = devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
-  for (const c of [bg, ink]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
-  const g = CAH[cahI], x = bg.getContext("2d"), rows = 4, rh = H / rows, m = Math.min(58, W * .16), cw = rh * .32;
+function cahPaper(x, W, H, i) {   // one page of the notebook, for letter i
+  const g = CAH[i], rows = 4, rh = H / rows, m = Math.min(58, W * .16), cw = rh * .32;
   const line = (y, c, w) => { x.strokeStyle = c; x.lineWidth = w; x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); };
   x.fillStyle = "rgba(124,116,196,.07)"; x.fillRect(0, 0, W - m, rh * .82);   // the first row, lightly shaded: the forms
   for (let v = W - m - cw; v > 0; v -= cw) { x.strokeStyle = "#ddd9f0"; x.lineWidth = 1; x.beginPath(); x.moveTo(v, 0); x.lineTo(v, H); x.stroke(); }   // the squares' upright lines
   for (let r = 0; r < rows; r++) {
-    const top = r * rh, base = top + rh * .66;
+    const base = r * rh + rh * .66;
     for (let k = 1; k <= 3; k++) line(base - k * rh * .15, "#d3cfee", 1);
     line(base + rh * .16, "#d3cfee", 1);
     line(base, "#8b84d6", 1.3);
@@ -2102,6 +2096,16 @@ function cahDraw() {
   x.font = `400 ${rh * .46}px Amiri, serif`; x.fillStyle = "#c8c3dc"; x.textAlign = "center";   // row 2: the letter in grey, to trace
   const n = Math.max(3, Math.floor((W - m) / (rh * .55))), step = (W - m) / n;
   for (let k = 0; k < n; k++) x.fillText(g, W - m - step * (k + .5), base1);
+}
+function cahDraw() {
+  const box = $("cahPage"), bg = $("cahBg"), ink = $("cahInk"), dpr = devicePixelRatio || 1, W = box.clientWidth, H = box.clientHeight;
+  for (const c of [bg, ink]) { c.width = W * dpr; c.height = H * dpr; c.getContext("2d").setTransform(dpr, 0, 0, dpr, 0, 0); }
+  cahPaper(bg.getContext("2d"), W, H, cahI);
+  // The next page, on the left: only its edge by the fold shows, with its margin and its letter.
+  const nx = $("cahNextCv"), pw = $("cahNextPg").clientWidth; nx.style.width = W + "px"; nx.width = W * dpr; nx.height = H * dpr;
+  const x = nx.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0); x.clearRect(0, 0, W, H);
+  $("cahNextPg").style.visibility = cahI < CAH.length - 1 ? "visible" : "hidden";
+  if (cahI < CAH.length - 1) cahPaper(x, W, H, cahI + 1);
   cahPaint();
 }
 function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect(0, 0, c.width, c.height);
@@ -2109,13 +2113,19 @@ function cahPaint() { const c = $("cahInk"), x = c.getContext("2d"); x.clearRect
   cahStrokes.forEach(s => { x.beginPath(); s.forEach(([a, b], i) => i ? x.lineTo(a, b) : x.moveTo(a, b)); x.stroke(); }); }
 // Turning the page: a picture of the page that was there lifts off its spine and turns away, the new page below it
 // (Arabic notebooks open on the right: forward turns the page over to the right).
+// Turning a page, as in an Arabic notebook: forward, the next page comes over the fold from the left and lies down on
+// the right; back, the page lifts off the fold and goes back to the left.
 function cahTurn(fwd) {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const sheet = $("cahSheet"), t = sheet.cloneNode(true); t.removeAttribute("id"); t.querySelectorAll("[id]").forEach(e => e.removeAttribute("id"));
   const [b0, i0] = sheet.querySelectorAll("canvas"), [b1, i1] = t.querySelectorAll("canvas");
   [[b0, b1], [i0, i1]].forEach(([a, b]) => { b.width = a.width; b.height = a.height; b.getContext("2d").drawImage(a, 0, 0); });
-  t.className = "cahsheet cahturn" + (fwd ? "" : " back"); $("cahBook").appendChild(t);
-  t.animate([{ transform: "rotateY(0deg)", filter: "brightness(1)" }, { transform: `rotateY(${fwd ? 100 : -100}deg)`, filter: "brightness(.82)" }], { duration: 520, easing: "cubic-bezier(.4,.1,.6,1)", fill: "forwards" }).onfinish = () => t.remove();
+  t.classList.add("cahturn"); t.style.width = sheet.offsetWidth + "px"; $("cahBook").appendChild(t);
+  const k = fwd ? [{ transform: "rotateY(-150deg)", filter: "brightness(.8)" }, { transform: "rotateY(0deg)", filter: "brightness(1)" }]
+               : [{ transform: "rotateY(0deg)", filter: "brightness(1)" }, { transform: "rotateY(-150deg)", filter: "brightness(.8)" }];
+  if (!fwd) t.style.zIndex = 3;
+  t.animate(k, { duration: 560, easing: "cubic-bezier(.4,.1,.5,1)", fill: "forwards" }).onfinish = () => t.remove();
+  return t;
 }
 // Zoom: pinch with two fingers (or the + and − buttons), drag with two fingers to move; one finger always writes.
 let cahZ = 1, cahX = 0, cahY = 0;
@@ -2127,13 +2137,14 @@ function cahZoomTo(z, cx, cy) {
   $("cahPage").style.transform = `translate(${cahX}px, ${cahY}px) scale(${cahZ})`;
 }
 function cahShow(i, turn) {
-  const to = Math.max(0, Math.min(CAH.length - 1, i)); if (turn !== undefined && to !== cahI) cahTurn(turn);
+  const to = Math.max(0, Math.min(CAH.length - 1, i)), animate = turn !== undefined && to !== cahI;
+  if (animate && !turn) cahTurn(false);   // back: the page that was there goes away
   cahI = to; cahStrokes = []; cahZ = 1; cahX = cahY = 0; $("cahPage").style.transform = "";
   $("cahCount").textContent = `${cahI + 1} / ${CAH.length}`;
   $("cahName").textContent = CAH[cahI]; $("cahFoot").textContent = `page ${cahI + 1} / ${CAH.length}`;
   $("cahPrev").disabled = cahI === 0; $("cahNext").querySelector("span").innerHTML = ICONS.next;
   $("cahNext").lastChild.textContent = cahI === CAH.length - 1 ? "Terminer" : "Suivante";
-  requestAnimationFrame(cahDraw);
+  requestAnimationFrame(() => { cahDraw(); if (animate && turn) cahTurn(true); });   // forward: the new page comes over
 }
 { const c = $("cahInk"), pts = new Map(); let cur = null, pinch = null;
   const at = e => { const r = c.getBoundingClientRect(); return [(e.clientX - r.left) * c.clientWidth / r.width, (e.clientY - r.top) * c.clientHeight / r.height]; };   // in page units, whatever the zoom
@@ -2146,6 +2157,18 @@ function cahShow(i, turn) {
     if (pinch && pts.size === 2) { const n = two(); cahZ = pinch.z; cahX = pinch.tx + (n.x - pinch.x); cahY = pinch.ty + (n.y - pinch.y); cahZoomTo(pinch.z * n.d / pinch.d, n.x, n.y); return; }
     if (cur) { cur.push(at(e)); cahPaint(); } };
   c.onpointerup = c.onpointercancel = e => { pts.delete(e.pointerId); cur = null; if (pts.size < 2) pinch = null; }; }
+// Changing page with a swipe: from the next page on the left, or from either edge of the page (the middle of the page is
+// for writing). Swiping to the right brings the next page, to the left goes back; a tap on the next page also turns.
+{ let sw = null;
+  const start = e => { sw = { x: e.clientX, y: e.clientY }; };
+  const end = e => { if (!sw) return; const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { if (dx > 0 && cahI < CAH.length - 1) cahShow(cahI + 1, true); else if (dx < 0 && cahI > 0) cahShow(cahI - 1, false); }
+    else if (e.currentTarget === $("cahNextPg") && Math.abs(dx) < 10 && cahI < CAH.length - 1) cahShow(cahI + 1, true); };
+  const np = $("cahNextPg"); np.onpointerdown = e => { np.setPointerCapture(e.pointerId); start(e); }; np.onpointerup = end;
+  const ink = $("cahInk"), edge = e => { const r = ink.getBoundingClientRect(); return e.clientX - r.left < 26 || r.right - e.clientX < 26; };
+  ink.addEventListener("pointerdown", e => { if (cahZ === 1 && edge(e)) { start(e); e.stopImmediatePropagation(); ink.setPointerCapture(e.pointerId); } }, true);
+  ink.addEventListener("pointerup", e => { if (sw) { end(e); e.stopImmediatePropagation(); } }, true);
+  ink.addEventListener("pointermove", e => { if (sw) e.stopImmediatePropagation(); }, true); }
 $("cahIn").onclick = () => cahZoomTo(cahZ * 1.5); $("cahOut").onclick = () => cahZoomTo(cahZ / 1.5);
 $("goCah").onclick = () => { show("cah"); cahShow(0); };
 $("cahPrev").querySelector("span").innerHTML = ICONS.undo;
